@@ -36,6 +36,7 @@ from qe_common import (  # noqa: E402
     load_defaults,
     resolve_bin_dir,
     resolve_pseudo_dir,
+    validate_config,
 )
 from qe_pp import check_pseudo, element_pp_map, build_pseudopotential_manifest  # noqa: E402
 from qe_struct import (  # noqa: E402
@@ -95,6 +96,8 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--symprec", type=float, default=1e-3, help="spglib symmetry tolerance")
     pr.add_argument("--no-refine", action="store_true", help="skip spglib.refine_cell")
     pr.add_argument("--relax", action="store_true", help="also write relax.in (vc-relax)")
+    pr.add_argument("--lo", nargs="*", type=float, default=None,
+                    help="LO directions 'x y z [x y z ...]'")
 
     rn = sub.add_parser("run", help="execute pw.x/ph.x/dynmat.x in a prepared outdir [Step 3]")
     rn.add_argument("--outdir", default=None, help="prepared run directory")
@@ -220,12 +223,15 @@ def _check_pseudos(pseudo_dir: Path, elements: list[str]) -> list[tuple[str, str
     if not pseudo_dir.is_dir():
         return [("FAIL", "pseudo_dir", "pseudopotential directory not found: %s" % pseudo_dir)]
     mapping = element_pp_map(pseudo_dir, elements)
-    missing = [el for el in elements if el not in mapping]
     for el in sorted(set(elements)):
-        if el in mapping:
-            msgs.extend(check_pseudo(mapping[el]))
-        else:
+        cands = mapping.get(el) or []
+        if not cands:
             msgs.append(("FAIL", "pseudo", "no UPF for element %s in %s" % (el, pseudo_dir)))
+        elif len(cands) > 1:
+            msgs.append(("FAIL", "pseudo", "ambiguous UPF for %s: %d candidates (%s)"
+                         % (el, len(cands), ", ".join(cands))))
+        else:
+            msgs.extend(check_pseudo(cands[0], expected_element=el))
     return msgs
 
 
@@ -366,11 +372,20 @@ def _load_config(path: str | None) -> dict:
 
 def _run_prepare(args: argparse.Namespace) -> int:
     cfg = _load_config(args.config)
-    pseudo_dir = resolve_pseudo_dir(args.pseudo_dir)
-    bin_dir = resolve_bin_dir(cfg.get("bin_dir") or getattr(args, "bin_dir", None))
+    for level, key, text in validate_config(cfg):
+        print("[%s] %-14s %s" % (level, key, text))
+        if level == "FAIL":
+            print("\nprepare: FAIL (invalid config; see above)")
+            return 1
+    pseudo_dir = resolve_pseudo_dir(args.pseudo_dir or cfg.get("pseudo_dir"))
+    bin_dir = resolve_bin_dir(getattr(args, "bin_dir", None) or cfg.get("bin_dir"))
     outdir = Path(args.outdir or cfg.get("outdir", "runs"))
     prefix = args.prefix or cfg.get("prefix", "raman")
-    lo_dirs = [tuple(q) for q in (cfg.get("lo_to_directions") or [])]
+    lo_vals = getattr(args, "lo", None)
+    if lo_vals is not None:
+        lo_dirs = [tuple(lo_vals[i:i + 3]) for i in range(0, len(lo_vals), 3)]
+    else:
+        lo_dirs = [tuple(q) for q in (cfg.get("lo_to_directions") or [])]
 
     atoms = read_structure(args.structure)
     res = check_structure(args.structure)
@@ -423,6 +438,11 @@ def _stub(command: str) -> int:
 
 def _run_run(args: argparse.Namespace) -> int:
     cfg = _load_config(args.config)
+    for level, key, text in validate_config(cfg):
+        print("[%s] %-14s %s" % (level, key, text))
+        if level == "FAIL":
+            print("\nrun: FAIL (invalid config; see above)")
+            return 1
     outdir = Path(args.outdir or cfg.get("outdir", "runs"))
     if not outdir.is_dir() or not (outdir / "scf.in").exists():
         print("run: FAIL (no prepared inputs in %s; run `prepare` first)" % outdir,

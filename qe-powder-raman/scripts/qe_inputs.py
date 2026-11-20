@@ -16,6 +16,7 @@ using the `q` (3-vector) namelist variable (NOT q(3)).
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -126,7 +127,7 @@ def _scf_vars(cfg, atoms, species, pp_map, prefix, pseudo_dir):
     grid = kpoint_grid(atoms.get_cell(), float(cfg.get("kpt_density", 30.0)), shift)
     return {
         "prefix": prefix,
-        "outdir": cfg.get("outdir", "./tmp"),
+        "outdir": cfg.get("qe_outdir", "./tmp"),
         "pseudo_dir": str(pseudo_dir),
         "verbosity": cfg.get("verbosity", "high"),
         "nat": len(atoms),
@@ -159,7 +160,7 @@ def generate_ph(cfg, species, prefix) -> str:
     tpl = (TEMPLATE_DIR / "ph.in.tmpl").read_text()
     return render(tpl, {
         "prefix": prefix,
-        "outdir": cfg.get("outdir", "./tmp"),
+        "outdir": cfg.get("qe_outdir", "./tmp"),
         "amass": amass_block(species),
         "tr2_ph": fmt_num(cfg.get("tr2_ph", 1.0e-14)),
         "fildyn": prefix + ".dyn",
@@ -206,15 +207,34 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
 
     species = species_order(atoms)
     pp_map = element_pp_map(pseudo_dir, species)
-    missing = [s for s in species if s not in pp_map]
-    if missing:
-        raise FileNotFoundError(
-            "no UPF for elements %s in %s" % (", ".join(missing), pseudo_dir)
-        )
+    pp_single: dict[str, str] = {}
+    for s in species:
+        cands = pp_map.get(s) or []
+        if not cands:
+            raise FileNotFoundError(
+                "no UPF for element %s in %s" % (s, pseudo_dir)
+            )
+        if len(cands) > 1:
+            raise ValueError(
+                "ambiguous UPF for %s: %d candidates (%s)"
+                % (s, len(cands), ", ".join(cands))
+            )
+        pp_single[s] = cands[0]
 
     lo_dirs = lo_dirs or []
     shift = tuple(cfg.get("kpt_shift", [0, 0, 0]))
     grid = kpoint_grid(atoms.get_cell(), float(cfg.get("kpt_density", 30.0)), shift)
+
+    # clean stale LO artifacts from a previous prepare (P0-05)
+    for stale in outdir.glob("dynmat_lo*.in"):
+        stale.unlink()
+    for stale in outdir.glob("dynmat_lo*.dat"):
+        stale.unlink()
+    for stale in outdir.glob("dynmat_lo*.out"):
+        stale.unlink()
+    dt = outdir / "dynmat_table.dat"
+    if dt.exists():
+        dt.unlink()
 
     written: list[str] = []
 
@@ -223,8 +243,8 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
         written.append(name)
 
     if with_relax:
-        _write("relax.in", generate_relax(cfg, atoms, species, pp_map, prefix, pseudo_dir))
-    _write("scf.in", generate_scf(cfg, atoms, species, pp_map, prefix, pseudo_dir))
+        _write("relax.in", generate_relax(cfg, atoms, species, pp_single, prefix, pseudo_dir))
+    _write("scf.in", generate_scf(cfg, atoms, species, pp_single, prefix, pseudo_dir))
     _write("ph.in", generate_ph(cfg, species, prefix))
     _write("dynmat.in", generate_dynmat(prefix, "dynmat_table.dat"))
 
@@ -234,6 +254,19 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
 
     _write("run.sh", generate_runsh(cfg, bin_dir, pseudo_dir))
     (outdir / "run.sh").chmod(0o755)
+
+    manifest = {
+        "generator": "qe-powder-raman",
+        "prefix": prefix,
+        "species": species,
+        "kpoints": list(grid),
+        "qe_outdir": cfg.get("qe_outdir", "./tmp"),
+        "lo_dirs": [list(q) for q in lo_dirs],
+        "files": written,
+    }
+    (outdir / "inputs_manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n"
+    )
 
     return {
         "prefix": prefix,

@@ -56,6 +56,37 @@ class TestParseOutdir(unittest.TestCase):
         rec = parse_outdir(self.tmp)
         self.assertEqual(rec["status"], "failed")
 
+    def test_delete_scf_failed(self):
+        self._copy("LiF_mp-1138")
+        (self.tmp / "scf.out").unlink()
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+
+    def test_missing_job_done_dynmat_failed(self):
+        self._copy("AlAs_mp-2172")
+        txt = (self.tmp / "dynmat.out").read_text()
+        (self.tmp / "dynmat.out").write_text(txt.replace("JOB DONE.", ""))
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+
+    def test_truncated_modes_manifest_mismatch_failed(self):
+        self._copy("AlAs_mp-2172")
+        header = "# mode   [cm-1]    [THz]      IR          Raman   depol.fact\n"
+        rows = (
+            "    1    332.33   9.9631   6.1453  354.9075   0.7500\n"
+            "    2    332.38   9.9645   6.1453  354.7720   0.7500\n"
+        )
+        (self.tmp / "dynmat.out").write_text(header + rows + "\nJOB DONE.\n")
+        (self.tmp / "pseudopotential_manifest.json").write_text('{"n_atoms": 2}')
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+
+    def test_manifest_n_atoms_mismatch_failed(self):
+        self._copy("LiF_mp-1138")
+        (self.tmp / "pseudopotential_manifest.json").write_text('{"n_atoms": 3}')
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+
 
 if __name__ == "__main__":
     unittest.main()

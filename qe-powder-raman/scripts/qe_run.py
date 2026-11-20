@@ -29,13 +29,14 @@ def _run_stage(
     cwd: Path,
     skip_existing: bool,
     verbose: bool,
+    env: dict | None = None,
 ) -> bool:
     stages = state["stages"]
     if name not in stages:
         stages[name] = {}
     rec = stages[name]
 
-    if skip_existing and log.exists() and rec.get("status") == "success":
+    if skip_existing and log.exists() and rec.get("status") in ("success", "skipped"):
         rec["status"] = "skipped"
         rec["reason"] = "log exists"
         if verbose:
@@ -50,7 +51,7 @@ def _run_stage(
     start = time.time()
     try:
         with open(log, "w") as fh:
-            proc = subprocess.run(cmd, cwd=cwd, stdout=fh, stderr=subprocess.STDOUT)
+            proc = subprocess.run(cmd, cwd=cwd, stdout=fh, stderr=subprocess.STDOUT, env=env)
         rec["exit_code"] = proc.returncode
         rec["seconds"] = round(time.time() - start, 3)
         rec["status"] = "success" if proc.returncode == 0 else "failed"
@@ -145,7 +146,7 @@ def run_workflow(
                 ok = False
                 break
             cmd = launcher(pw, ["-in", "scf.in"])
-            if not _run_stage(state, "scf", cmd, outdir / "scf.out", outdir, skip_existing, verbose):
+            if not _run_stage(state, "scf", cmd, outdir / "scf.out", outdir, skip_existing, verbose, env):
                 ok = False
                 break
         elif name == "ph":
@@ -154,7 +155,7 @@ def run_workflow(
                 ok = False
                 break
             cmd = launcher(ph, ["-in", "ph.in"])
-            if not _run_stage(state, "ph", cmd, outdir / "ph.out", outdir, skip_existing, verbose):
+            if not _run_stage(state, "ph", cmd, outdir / "ph.out", outdir, skip_existing, verbose, env):
                 ok = False
                 break
         elif name == "dynmat":
@@ -163,7 +164,7 @@ def run_workflow(
                 ok = False
                 break
             cmd = [str(dyn), "-in", "dynmat.in"]
-            if not _run_stage(state, "dynmat", cmd, outdir / "dynmat.out", outdir, skip_existing, verbose):
+            if not _run_stage(state, "dynmat", cmd, outdir / "dynmat.out", outdir, skip_existing, verbose, env):
                 ok = False
                 break
         elif name == "lo":
@@ -179,7 +180,7 @@ def run_workflow(
                 cmd = [str(dyn), "-in", loin.name]
                 # reuse _run_stage but with nested dict
                 rec = lo_stages.setdefault(key, {})
-                if skip_existing and loout.exists() and rec.get("status") == "success":
+                if skip_existing and loout.exists() and rec.get("status") in ("success", "skipped"):
                     rec["status"] = "skipped"
                     rec["reason"] = "log exists"
                     if verbose:
@@ -192,7 +193,7 @@ def run_workflow(
                 start = time.time()
                 try:
                     with open(loout, "w") as fh:
-                        proc = subprocess.run(cmd, cwd=outdir, stdout=fh, stderr=subprocess.STDOUT)
+                        proc = subprocess.run(cmd, cwd=outdir, stdout=fh, stderr=subprocess.STDOUT, env=env)
                     rec["exit_code"] = proc.returncode
                     rec["seconds"] = round(time.time() - start, 3)
                     rec["status"] = "success" if proc.returncode == 0 else "failed"
@@ -207,7 +208,9 @@ def run_workflow(
                     print("  [done] %-10s %.1fs -> %s" % (key, rec.get("seconds", 0.0), loout.name))
 
     state["overall_status"] = "success" if ok else "failed"
-    state_path.write_text(json.dumps(state, indent=2, default=str) + "\n")
+    tmp_path = state_path.with_suffix(".json.tmp")
+    tmp_path.write_text(json.dumps(state, indent=2, default=str) + "\n")
+    tmp_path.replace(state_path)
     return state, ok
 
 

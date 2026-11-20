@@ -113,6 +113,7 @@ def parse_dynmat(txt: str) -> dict:
     # mode table
     d["has_raman"] = False
     d["modes"] = []
+    d["bad_rows"] = 0
     started = False
     for ln in lines:
         if ln.lstrip().startswith("# mode"):
@@ -125,6 +126,9 @@ def parse_dynmat(txt: str) -> dict:
         if not s:
             continue
         if re.fullmatch(r"-?\d+", s[0]) and len(s) in (4, 5, 6):
+            if any("*" in x for x in s[1:]):
+                d["bad_rows"] += 1
+                continue
             try:
                 mode = int(s[0])
                 freq = float(s[1])
@@ -133,6 +137,7 @@ def parse_dynmat(txt: str) -> dict:
                 raman = float(s[4]) if len(s) >= 6 else 0.0
                 depol = float(s[5]) if len(s) >= 6 else None
             except ValueError:
+                d["bad_rows"] += 1
                 continue
             d["modes"].append(
                 {"mode": mode, "freq": freq, "thz": thz, "ir": ir,
@@ -223,6 +228,7 @@ def parse_outdir(outdir: str | Path) -> dict:
     }
     rec["modes"] = dyn["modes"]
     rec["stats"] = _stats(dyn["modes"])
+    rec["raman_columns_present"] = dyn["has_raman"]
 
     lo: dict = {}
     for p in sorted(outdir.glob("dynmat_lo*.out")):
@@ -234,13 +240,63 @@ def parse_outdir(outdir: str | Path) -> dict:
                    "stats": _stats(lod["modes"])}
     rec["lo"] = lo
 
-    # status
-    if not rec["ph_job_done"] or not dyn["modes"]:
+    # completion + artifact checks (P0-04)
+    problems: list[str] = []
+    warnings: list[str] = []
+
+    if not (outdir / "scf.out").exists():
+        problems.append("scf.out missing")
+    else:
+        if "JOB DONE." not in scf_txt:
+            problems.append("scf.out missing 'JOB DONE.'")
+        elif rec["scf"].get("scf_iter") is None:
+            problems.append("scf.out not converged")
+
+    if not (outdir / "ph.out").exists():
+        problems.append("ph.out missing")
+    else:
+        if "JOB DONE." not in ph_txt:
+            problems.append("ph.out missing 'JOB DONE.'")
+        if "Convergence has been achieved" not in ph_txt:
+            problems.append("ph.out not converged")
+
+    if not (outdir / "dynmat.out").exists():
+        problems.append("dynmat.out missing")
+    elif "JOB DONE." not in dyn_txt:
+        problems.append("dynmat.out missing 'JOB DONE.'")
+
+    if dyn.get("bad_rows", 0) > 0:
+        problems.append("non-numeric mode values (%d row(s))" % dyn["bad_rows"])
+
+    manifest_path = outdir / "pseudopotential_manifest.json"
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text())
+            n_atoms = manifest.get("n_atoms")
+            if n_atoms:
+                expected = 3 * int(n_atoms)
+                nums = [m["mode"] for m in rec["modes"]]
+                if len(rec["modes"]) != expected:
+                    problems.append(
+                        "mode count %d != 3*N = %d" % (len(rec["modes"]), expected)
+                    )
+                elif nums != list(range(1, expected + 1)):
+                    problems.append("mode numbering not contiguous 1..%d" % expected)
+        except Exception:  # noqa: BLE001
+            warnings.append("pseudopotential_manifest.json unreadable")
+    else:
+        warnings.append("n_atoms 未知 (no pseudopotential_manifest.json; 3N check skipped)")
+
+    rec["warnings"] = warnings
+    if problems:
         rec["status"] = "failed"
+        rec["status_reason"] = "; ".join(problems)
     elif rec["stats"]["soft_modes"]:
         rec["status"] = "warning"
+        rec["status_reason"] = "soft (imaginary) optical modes present"
     else:
         rec["status"] = "success"
+        rec["status_reason"] = ""
     return rec
 
 
@@ -287,6 +343,10 @@ def print_summary(rec: dict) -> None:
     if rec["lo"]:
         print("  LO tables: %s" % ", ".join(sorted(rec["lo"])))
     print("  status: %s" % rec["status"])
+    if rec.get("status_reason"):
+        print("  reason: %s" % rec["status_reason"])
+    for w in rec.get("warnings", []):
+        print("  [WARN] %s" % w)
 
 
 def main(argv: list[str] | None = None) -> int:

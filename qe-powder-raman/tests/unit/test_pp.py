@@ -1,5 +1,7 @@
 """Unit tests for qe_pp (UPF header parsing + validation + mapping)."""
+import shutil
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -42,12 +44,44 @@ class TestElementPpMap(unittest.TestCase):
         m = element_pp_map(PSEUDO, ["Li", "F"])
         self.assertIn("Li", m)
         self.assertIn("F", m)
-        self.assertIn("Li.pz-hgh.UPF", m["Li"])
-        self.assertIn("F.pz-hgh.UPF", m["F"])
+        self.assertEqual(len(m["Li"]), 1)
+        self.assertEqual(len(m["F"]), 1)
+        self.assertEqual(Path(m["Li"][0]).name, "Li.pz-hgh.UPF")
+        self.assertEqual(Path(m["F"][0]).name, "F.pz-hgh.UPF")
 
     def test_missing(self):
         m = element_pp_map(PSEUDO, ["Uuo"])
-        self.assertEqual(m, {})
+        self.assertEqual(m, {"Uuo": []})
+
+    def test_ambiguous(self):
+        tmp = Path(tempfile.mkdtemp(prefix="qer_pp_"))
+        try:
+            shutil.copy(PSEUDO / "Li.pz-hgh.UPF", tmp / "Li_a.UPF")
+            shutil.copy(PSEUDO / "Li.pz-hgh.UPF", tmp / "Li_b.UPF")
+            m = element_pp_map(tmp, ["Li"])
+            self.assertEqual(len(m["Li"]), 2)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestCheckPseudoElementMatch(unittest.TestCase):
+    def test_element_mismatch(self):
+        tmp = Path(tempfile.mkdtemp(prefix="qer_pp_"))
+        try:
+            dst = tmp / "Li.fake.UPF"
+            shutil.copy(PSEUDO / "F.pz-hgh.UPF", dst)
+            msgs = check_pseudo(dst, expected_element="Li")
+            self.assertTrue(
+                any(lvl == "FAIL" and key == "element_mismatch" for lvl, key, _ in msgs)
+            )
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_element_match_ok(self):
+        msgs = check_pseudo(PSEUDO / "Li.pz-hgh.UPF", expected_element="Li")
+        self.assertFalse(
+            any(lvl == "FAIL" and key == "element_mismatch" for lvl, key, _ in msgs)
+        )
 
 
 if __name__ == "__main__":

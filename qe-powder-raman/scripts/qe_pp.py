@@ -72,8 +72,14 @@ def parse_upf(path: str | Path) -> UPFInfo:
     return info
 
 
-def check_pseudo(path: str | Path) -> list[tuple[str, str, str]]:
-    """Validate a single UPF for Raman compatibility. Returns (level,key,text)."""
+def check_pseudo(
+    path: str | Path, expected_element: str | None = None
+) -> list[tuple[str, str, str]]:
+    """Validate a single UPF for Raman compatibility. Returns (level,key,text).
+
+    If `expected_element` is given, the UPF header element must match it
+    (case-insensitive) or a FAIL ``element_mismatch`` is emitted.
+    """
     msgs: list[tuple[str, str, str]] = []
     try:
         upf = parse_upf(path)
@@ -81,6 +87,20 @@ def check_pseudo(path: str | Path) -> list[tuple[str, str, str]]:
         return [("FAIL", "read", "cannot read pseudopotential %s: %s" % (path, exc))]
 
     tag = "%s (%s)" % (upf.element or "?", Path(path).name)
+
+    if (
+        expected_element
+        and upf.element
+        and upf.element.lower() != expected_element.lower()
+    ):
+        msgs.append(
+            (
+                "FAIL",
+                "element_mismatch",
+                "%s: UPF header element=%s does not match requested %s"
+                % (Path(path).name, upf.element, expected_element),
+            )
+        )
 
     if upf.is_paw:
         msgs.append(("FAIL", "paw", "%s is PAW; lraman requires norm-conserving (NC)" % tag))
@@ -110,17 +130,29 @@ def check_pseudo(path: str | Path) -> list[tuple[str, str, str]]:
     return msgs
 
 
-def element_pp_map(pseudo_dir: str | Path, elements: list[str]) -> dict[str, str]:
-    """Map element symbols to UPF files in pseudo_dir (name <El>.*.UPF)."""
+def element_pp_map(pseudo_dir: str | Path, elements: list[str]) -> dict[str, list[str]]:
+    """Map requested elements to candidate UPF paths by UPF *content* (header
+    ``element``), not filename.
+
+    Returns ``{element: [path, ...]}``: an empty list means the element has no
+    UPF, and more than one candidate means the mapping is ambiguous (callers
+    must surface an actionable error rather than silently pick one).
+    """
     d = Path(pseudo_dir)
-    mapping: dict[str, str] = {}
+    mapping: dict[str, list[str]] = {el: [] for el in elements}
     if not d.is_dir():
         return mapping
-    files = sorted(p.name for p in d.glob("*.UPF")) + sorted(p.name for p in d.glob("*.upf"))
+    indexed: dict[str, list[str]] = {}
+    for p in sorted(list(d.glob("*.UPF")) + list(d.glob("*.upf"))):
+        try:
+            info = parse_upf(p)
+        except Exception:  # noqa: BLE001 - skip unreadable files; caller surfaces missing
+            continue
+        el = (info.element or "").strip().lower()
+        if el:
+            indexed.setdefault(el, []).append(str(p))
     for el in elements:
-        cand = [f for f in files if f.split(".")[0].lower() == el.lower()]
-        if cand:
-            mapping[el] = str(d / cand[0])
+        mapping[el] = indexed.get(el.lower(), [])
     return mapping
 
 
@@ -148,10 +180,17 @@ def build_pseudopotential_manifest(
     zsum = 0.0
     for el in sorted(set(elements)):
         count = elements.count(el)
-        if el not in mapping:
+        cands = mapping.get(el, [])
+        if not cands:
             manifest["errors"].append("no UPF for element %s in %s" % (el, pseudo_dir))
             continue
-        path = mapping[el]
+        if len(cands) > 1:
+            manifest["errors"].append(
+                "ambiguous UPF for element %s: %d candidates (%s)"
+                % (el, len(cands), ", ".join(sorted(cands)))
+            )
+            continue
+        path = cands[0]
         upf = parse_upf(path)
         entry = {
             "file": Path(path).name,
@@ -166,7 +205,7 @@ def build_pseudopotential_manifest(
         manifest["pseudopotentials"][el] = entry
         if upf.z_valence is not None:
             zsum += float(upf.z_valence) * count
-        for level, key, text in check_pseudo(path):
+        for level, key, text in check_pseudo(path, expected_element=el):
             if level == "FAIL":
                 manifest["errors"].append("%s: %s" % (el, text))
             elif level == "WARN":

@@ -52,7 +52,10 @@ DEFAULT_CONFIG: dict = {
     "omp_num_threads": 1,
     # Prefix / outdir defaults
     "prefix": "raman",
-    "outdir": "./tmp",
+    # Project run directory (where inputs/logs/CSV/plots are written).
+    "outdir": "runs",
+    # QE scratch directory (the &CONTROL outdir written into pw.x/ph.x inputs).
+    "qe_outdir": "./tmp",
     "pseudo_dir": "auto",     # "auto" -> bundled pseudo/ or --pseudo-dir
     "verbosity": "high",
 }
@@ -130,6 +133,49 @@ def resolve_pseudo_dir(pseudo_dir: str | Path | None) -> Path:
     if pseudo_dir and str(pseudo_dir).strip() not in ("", "auto"):
         return Path(pseudo_dir).expanduser()
     return PSEUDO_DIR
+
+
+def validate_config(cfg: dict) -> list[tuple[str, str, str]]:
+    """Validate a config dict; returns [(level, key, text), ...] messages.
+
+    FAIL is emitted for invalid values that would produce a broken/invalid QE
+    run (non-'fixed' occupations, non-finite numerics, np/omp < 1, etc.).
+    """
+    msgs: list[tuple[str, str, str]] = []
+    occ = cfg.get("occupations", "fixed")
+    if occ != "fixed":
+        msgs.append(("FAIL", "occupations",
+                     "occupations must be 'fixed' for the Raman MVP (got %r)" % occ))
+
+    float_keys = [
+        "ecutwfc", "ecutrho", "conv_thr", "tr2_ph", "mixing_beta",
+        "fwhm", "temperature", "laser_wavelength", "kpt_density",
+    ]
+    for key in float_keys:
+        if key not in cfg:
+            continue
+        try:
+            v = float(cfg[key])
+            if not (v == v) or v in (float("inf"), float("-inf")):  # NaN/Inf
+                raise ValueError
+        except (TypeError, ValueError):
+            msgs.append(("FAIL", key, "config value must be a finite number: %r" % cfg[key]))
+        else:
+            if key in ("ecutwfc", "ecutrho", "fwhm", "kpt_density") and v <= 0:
+                msgs.append(("FAIL", key, "must be > 0: %r" % cfg[key]))
+            if key in ("conv_thr", "tr2_ph") and not (0 < v < 1):
+                msgs.append(("FAIL", key, "must be in (0, 1): %r" % cfg[key]))
+            if key in ("mixing_beta",) and not (0 < v <= 1):
+                msgs.append(("FAIL", key, "must be in (0, 1]: %r" % cfg[key]))
+
+    for key in ("np", "omp_num_threads"):
+        try:
+            v = int(cfg[key])
+            if v < 1:
+                raise ValueError
+        except (TypeError, ValueError, KeyError):
+            msgs.append(("FAIL", key, "must be an integer >= 1: %r" % cfg.get(key)))
+    return msgs
 
 
 def atomic_number(symbol: str) -> int:

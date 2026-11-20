@@ -85,6 +85,9 @@ def check_structure(path: str | Path) -> StructureCheckResult:
     except Exception:  # noqa: BLE001
         res.angles = None
 
+    # ---- basic structural validity ----------------------------------------
+    validate_structure(atoms, res)
+
     # ---- partial occupancy -------------------------------------------------
     _check_partial_occupancy(atoms, res)
 
@@ -109,23 +112,82 @@ def check_structure(path: str | Path) -> StructureCheckResult:
     return res
 
 
+def validate_structure(atoms, res: StructureCheckResult) -> None:
+    """Check that the structure is a valid 3D periodic crystal with finite,
+    non-degenerate cell and recognizable elements. Appends FAIL/WARN to `res`."""
+    import numpy as np
+
+    if not atoms.get_pbc().all():
+        res.add(
+            "FAIL",
+            "non_3d",
+            "structure is not 3D periodic (pbc must be True on all axes)",
+        )
+
+    try:
+        cell = atoms.get_cell()
+        pos = atoms.get_positions()
+    except Exception as exc:  # noqa: BLE001
+        res.add("FAIL", "non_finite", "cannot read cell/positions: %s" % exc)
+        return
+    if not (np.isfinite(cell).all() and np.isfinite(pos).all()):
+        res.add("FAIL", "non_finite", "cell or coordinates contain NaN/Inf")
+
+    try:
+        vol = float(atoms.get_volume())
+    except Exception:  # noqa: BLE001
+        vol = 0.0
+    if not np.isfinite(vol) or vol <= 0.0:
+        res.add("FAIL", "cell_volume", "cell volume is zero, negative, or undefined")
+
+    if not atoms.get_chemical_symbols():
+        res.add("FAIL", "no_elements", "structure has no recognizable elements")
+
+
 def _check_partial_occupancy(atoms, res: StructureCheckResult) -> None:
-    # ASE CIF reader stores occupancies in atoms.info["occupancy"] (per-site).
+    # ASE CIF reader stores occupancies in atoms.info["occupancy"] as either a
+    # flat {site: occ} or nested {site: {element: occ}}. Iterate the VALUES
+    # (never the dict keys) so partial occupancies are actually detected.
     occ = atoms.info.get("occupancy")
     if occ is None:
         res.add("PASS", "occupancy", "no partial occupancies detected")
         return
-    try:
-        frac = [float(o) for o in occ if float(o) > 0 and float(o) < 1.0 - 1e-8]
-    except Exception:  # noqa: BLE001
-        frac = []
-    if frac:
+
+    values = list(occ.values()) if isinstance(occ, dict) else list(occ)
+    partial = 0
+    mixed = 0
+    for v in values:
+        if isinstance(v, dict):
+            if len(v) > 1:
+                mixed += 1
+            for o in v.values():
+                try:
+                    f = float(o)
+                except (TypeError, ValueError):
+                    f = 1.0
+                if 0.0 < f < 1.0 - 1e-8:
+                    partial += 1
+        else:
+            try:
+                f = float(v)
+            except (TypeError, ValueError):
+                f = 1.0
+            if 0.0 < f < 1.0 - 1e-8:
+                partial += 1
+
+    if mixed:
+        res.add(
+            "FAIL",
+            "mixed_occupancy",
+            "%d site(s) have mixed-species occupancy (not supported)" % mixed,
+        )
+    if partial:
         res.add(
             "FAIL",
             "occupancy",
-            "%d site(s) have partial occupancy (site occupancy must be 1.0)" % len(frac),
+            "%d site(s) have partial occupancy (site occupancy must be 1.0)" % partial,
         )
-    else:
+    if not mixed and not partial:
         res.add("PASS", "occupancy", "all sites fully occupied")
 
 
