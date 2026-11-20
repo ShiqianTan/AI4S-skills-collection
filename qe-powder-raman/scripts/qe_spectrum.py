@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import sys
@@ -307,12 +308,32 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
     validate_spectrum_params(fwhm=fwhm, temperature=temperature,
                              laser_wavelength=laser_wavelength, threshold=threshold,
                              npoints=4000, formats=formats)
+    summary = outdir / "summary.json"
+    if summary.is_file():
+        parsed = json.loads(summary.read_text())
+        if not isinstance(parsed, dict) or parsed.get("status") == "failed":
+            raise ValueError("invalid or failed mode summary; check summary.json before plotting")
+    mode_file = outdir / "raman_modes.csv"
+    manifest = outdir / "spectrum_manifest.json"
+    settings = {
+        "spectrum_type": spectrum_type,
+        "spectrum_broadening": broadening,
+        "fwhm": fwhm,
+        "temperature": temperature,
+        "laser_wavelength": laser_wavelength,
+        "threshold": threshold,
+        "formats": list(formats),
+        "include_ir": include_ir,
+        "include_lo": include_lo,
+    }
+    source_sha256 = hashlib.sha256(mode_file.read_bytes()).hexdigest()
     tables = load_modes(outdir)
     to_modes = tables.get("to", [])
     peaks = select_peaks(to_modes, threshold=threshold)
 
     types = ["activity", "stokes"] if spectrum_type == "both" else [spectrum_type]
     written: list[Path] = []
+    manifest.write_text(json.dumps({"status": "incomplete"}) + "\n")
     for t in types:
         use_peaks = peaks
         if t == "stokes":
@@ -383,6 +404,12 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
                     label=labels.get(key, ""), outpath=cmp_path, dpi=dpi,
                 )
                 written.append(cmp_path)
+    manifest.write_text(json.dumps({
+        "status": "complete",
+        "modes_sha256": source_sha256,
+        "settings": settings,
+        "files": [p.name for p in written],
+    }, indent=2) + "\n")
     return written
 
 

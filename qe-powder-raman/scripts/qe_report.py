@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -258,8 +259,6 @@ def render_report(outdir: Path) -> str:
         lines.append("## 5. LO-TO 分裂（纵向光学 LO）")
         lines.append("")
         lines.append("默认 TO 谱来自 Γ 点、未加非解析修正；下列 LO 表按指定方向单独计算。")
-        lines.append("每个方向另有 `spectrum_lo*.{csv,png}` 谱图；IR 活性见 "
-                     "`spectrum_ir.*` 与 `spectrum_raman_ir.png`。")
         lines.append("")
         lo_dirs = _load_json(outdir, "inputs_manifest.json").get("lo_dirs") or []
         for k in lo_keys:
@@ -279,12 +278,19 @@ def render_report(outdir: Path) -> str:
 
     files = [
         "raman_modes.csv", "summary.json", "relax_manifest.json",
-        "spectrum_activity.png", "spectrum_stokes.png",
-        "spectrum_ir.png", "spectrum_raman_ir.png",
     ]
-    lo_spectra = sorted(p.name for p in outdir.glob("spectrum_lo*.png"))
-    lo_spectra += sorted(p.name for p in outdir.glob("spectrum_to_vs_lo*.png"))
-    files.extend(lo_spectra)
+    spectrum = _load_json(outdir, "spectrum_manifest.json")
+    spectrum = spectrum if isinstance(spectrum, dict) else {}
+    mode_file = outdir / "raman_modes.csv"
+    settings = spectrum.get("settings")
+    spectrum_files = spectrum.get("files")
+    spectrum_current = (s.get("status") != "failed" and spectrum.get("status") == "complete"
+                        and isinstance(settings, dict) and isinstance(spectrum_files, list)
+                        and all(isinstance(name, str) for name in spectrum_files)
+                        and mode_file.is_file() and spectrum.get("modes_sha256")
+                        == hashlib.sha256(mode_file.read_bytes()).hexdigest())
+    if spectrum_current:
+        files.extend(["spectrum_manifest.json", *spectrum_files])
     if (outdir / "convergence" / "convergence.json").exists():
         files.extend(["convergence/convergence.json",
                       "convergence/convergence.csv",
@@ -297,6 +303,8 @@ def render_report(outdir: Path) -> str:
     for f in files:
         mark = "（存在）" if (outdir / f).exists() else "（未生成）"
         lines.append("- `%s` %s" % (f, mark))
+    if not spectrum_current and any(outdir.glob("spectrum_*")):
+        lines.append("- 当前模式表没有可核验的谱图生成记录，请重新运行 `spectrum`。")
     lines.append("")
 
     struct = _load_json(outdir, "structure_manifest.json")
@@ -320,10 +328,14 @@ def render_report(outdir: Path) -> str:
         if cp and len(cp) >= 6:
             lines.append("| 晶胞参数 | a=%.4f b=%.4f c=%.4f α=%.3f β=%.3f γ=%.3f |"
                          % (cp[0], cp[1], cp[2], cp[3], cp[4], cp[5]))
-    for k in ("ecutwfc", "ecutrho", "conv_thr", "tr2_ph", "kpt_density",
-              "fwhm", "temperature", "laser_wavelength", "spectrum_broadening"):
+    for k in ("ecutwfc", "ecutrho", "conv_thr", "tr2_ph", "kpt_density"):
         if k in effcfg:
             lines.append("| %s | %s |" % (k, effcfg[k]))
+    if spectrum_current:
+        for k in ("spectrum_type", "spectrum_broadening", "fwhm", "temperature",
+                  "laser_wavelength", "threshold"):
+            if k in settings:
+                lines.append("| %s | %s |" % (k, settings[k]))
     lines.append("| Raman (lraman) | %s |"
                  % ("开启" if effcfg.get("raman", s.get("lraman", True)) else "关闭（仅声子/IR）"))
     if ppman.get("xc_families"):

@@ -94,6 +94,36 @@ class TestParseOutdir(unittest.TestCase):
         self.assertGreater(len((self.tmp / "spectrum_ir.csv")
                                .read_text().splitlines()), 2)
 
+    def test_report_uses_current_spectrum_settings_and_file_list(self):
+        self._copy("AlAs_mp-2172")
+        write_outputs(parse_outdir(self.tmp))
+        (self.tmp / "effective_config.json").write_text('{"fwhm": 8.0}')
+        generate_spectra(self.tmp, formats=("csv",))
+        self.assertTrue((self.tmp / "spectrum_activity.csv").is_file())
+        generate_spectra(self.tmp, spectrum_type="stokes", broadening="gaussian",
+                         fwhm=13.0, temperature=250.0, laser_wavelength=785.0,
+                         formats=("csv",), include_ir=False, include_lo=False)
+        text = render_report(self.tmp)
+        self.assertIn("| fwhm | 13.0 |", text)
+        self.assertIn("| laser_wavelength | 785.0 |", text)
+        self.assertIn("`spectrum_stokes.csv` （存在）", text)
+        self.assertNotIn("`spectrum_activity.csv` （存在）", text)
+
+        modes = self.tmp / "raman_modes.csv"
+        modes.write_text(modes.read_text() + "\n")
+        text = render_report(self.tmp)
+        self.assertIn("当前模式表没有可核验的谱图生成记录", text)
+        self.assertNotIn("| fwhm | 13.0 |", text)
+
+    def test_plot_rejects_failed_parse(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "ph.out").unlink()
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+        write_outputs(rec)
+        with self.assertRaisesRegex(ValueError, "failed mode summary"):
+            generate_spectra(self.tmp, formats=("csv",))
+
     def test_mos2_warning_soft_mode(self):
         self._copy("MoS2_mp-2815")
         rec = parse_outdir(self.tmp)
