@@ -1,14 +1,22 @@
 """Unit tests for qe_inputs (template rendering + helpers)."""
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
+PSEUDO = Path(__file__).resolve().parents[2] / "pseudo"
 sys.path.insert(0, str(SCRIPTS))
 
 from ase import Atoms  # noqa: E402
 
-from qe_inputs import fmt_num, kpoint_grid, render, species_order  # noqa: E402
+from qe_inputs import (  # noqa: E402
+    fmt_num,
+    generate_inputs,
+    kpoint_grid,
+    render,
+    species_order,
+)
 
 
 class TestFmtNum(unittest.TestCase):
@@ -65,6 +73,35 @@ class TestKpointGrid(unittest.TestCase):
         cell = [[20.0, 0, 0], [0, 20.0, 0], [0, 0, 20.0]]
         k = kpoint_grid(cell, density=30.0)
         self.assertEqual(k, (2, 2, 2))
+
+
+class TestLoValidation(unittest.TestCase):
+    def _cfg(self):
+        from qe_common import load_defaults
+        return load_defaults()
+
+    def _atoms(self):
+        return Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.74]],
+                     cell=[5, 5, 5], pbc=True)
+
+    def test_zero_direction_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            with self.assertRaises(ValueError):
+                generate_inputs(self._atoms(), self._cfg(), d, PSEUDO, "t",
+                                lo_dirs=[(0.0, 0.0, 0.0)])
+
+    def test_non_finite_direction_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            with self.assertRaises(ValueError):
+                generate_inputs(self._atoms(), self._cfg(), d, PSEUDO, "t",
+                                lo_dirs=[(float("nan"), 0.0, 1.0)])
+
+    def test_valid_direction_written(self):
+        with tempfile.TemporaryDirectory() as d:
+            generate_inputs(self._atoms(), self._cfg(), d, PSEUDO, "t",
+                            lo_dirs=[(0.0, 0.0, 1.0)])
+            text = (Path(d) / "dynmat_lo.in").read_text()
+            self.assertIn("= 0 0 1", text)
 
 
 if __name__ == "__main__":

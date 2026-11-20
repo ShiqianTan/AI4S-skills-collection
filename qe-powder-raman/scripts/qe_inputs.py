@@ -222,6 +222,15 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
         pp_single[s] = cands[0]
 
     lo_dirs = lo_dirs or []
+    clean_lo = []
+    for q in lo_dirs:
+        q = tuple(float(x) for x in q)
+        if len(q) != 3 or not np.isfinite(q).all():
+            raise ValueError("LO direction must be 3 finite numbers: %r" % (q,))
+        if float(np.linalg.norm(q)) == 0.0:
+            raise ValueError("LO direction must be non-zero: %r" % (q,))
+        clean_lo.append(q)
+    lo_dirs = clean_lo
     shift = tuple(cfg.get("kpt_shift", [0, 0, 0]))
     grid = kpoint_grid(atoms.get_cell(), float(cfg.get("kpt_density", 30.0)), shift)
 

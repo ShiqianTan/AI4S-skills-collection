@@ -2,9 +2,13 @@
 #
 # Copy to config.yaml and edit. Every key is optional; missing keys fall back
 # to data/defaults.yaml (merged in scripts/qe_common.py).
+#
+# Priority (highest first): CLI flag > this YAML > environment variable > default.
 
 # --- QE binaries -----------------------------------------------------------
-bin_dir: /Users/shiqian/Desktop/HefeiAILab/quantum_espresso/q-e/install_cpu/bin
+# Portable option: leave commented and set QE_BIN in the environment, or pass
+# --bin-dir on the command line. The example below points at a local build.
+# bin_dir: /Users/shiqian/Desktop/HefeiAILab/quantum_espresso/q-e/install_cpu/bin
 
 # --- Pseudopotentials (default: bundled pseudo/ directory) -----------------
 # pseudo_dir: /path/to/my/pseudopotentials
@@ -20,21 +24,26 @@ occupations: fixed     # Raman MVP requires an insulating (gapped) system
 tr2_ph: 1.0e-14
 
 # --- Spectrum --------------------------------------------------------------
-fwhm: 8.0              # cm^-1 Lorentzian/Gaussian broadening
-temperature: 300.0     # K (optional Stokes spectrum)
-laser_wavelength: 532.0  # nm (optional Stokes spectrum)
+fwhm: 8.0              # cm^-1 broadening (must be > 0)
+temperature: 300.0     # K (optional Stokes spectrum; must be >= 0)
+laser_wavelength: 532.0  # nm (optional Stokes spectrum; must be > 0)
 spectrum_broadening: lorentzian   # lorentzian | gaussian
 
 # --- k-point mesh (automatic; density in units of reciprocal Angstrom) -----
 kpt_density: 30.0
 
 # --- LO-TO directions (optional). Empty = TO-only powder Raman. ------------
+# Each entry is a 3-component Cartesian vector, finite and non-zero.
 # lo_to_directions:
-#   - [1, 0, 0]       # e.g. zincblende / cubic
-#   - [0, 0, 1]       # e.g. wurtzite q||c
-#   - [1, 0, 0]       # e.g. wurtzite q⊥c
+#   - [1, 0, 0]       # e.g. zincblende (cubic, any direction)
+#   - [0, 0, 1]       # e.g. wurtzite q || c
+#   - [1, 0, 0]       # e.g. wurtzite q perpendicular to c
 
 # --- Run control -----------------------------------------------------------
 np: 4                  # MPI ranks for pw.x / ph.x
 omp_num_threads: 1
 mpi_command: mpirun
+
+# --- Directories -----------------------------------------------------------
+outdir: runs           # project run dir (inputs, logs, CSV, plots, report)
+qe_outdir: ./tmp       # QE scratch dir written into pw.x/ph.x &CONTROL

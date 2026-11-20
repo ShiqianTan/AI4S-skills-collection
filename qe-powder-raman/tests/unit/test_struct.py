@@ -47,6 +47,7 @@ class TestRefineStructure(unittest.TestCase):
         g = info["cellpar"][5]
         self.assertAlmostEqual(g, 120.0, places=5)
         self.assertEqual(info["refined"]["spacegroup_number"], 186)
+        self.assertIn("fallback_reason", info)
 
     def test_lif_no_change(self):
         from qe_struct import read_structure

@@ -9,6 +9,8 @@ sys.path.insert(0, str(SCRIPTS))
 
 from qe_parse import (  # noqa: E402
     _stats,
+    assess_electronic_structure,
+    classify_modes,
     parse_asr,
     parse_dielectric,
     parse_dynmat,
@@ -107,6 +109,54 @@ class TestStats(unittest.TestCase):
         s = _stats(modes)
         self.assertEqual(s["raman_active"], [])
         self.assertEqual(s["sum_raman"], 0.0)
+
+
+class TestElectronicStructure(unittest.TestCase):
+    def test_gapped(self):
+        r = assess_electronic_structure({"homo_ev": 0.0, "lumo_ev": 5.0})
+        self.assertEqual(r["classification"], "gapped")
+        self.assertAlmostEqual(r["gap_ev"], 5.0)
+
+    def test_metallic(self):
+        r = assess_electronic_structure({"homo_ev": 1.0, "lumo_ev": 0.5})
+        self.assertEqual(r["classification"], "metallic")
+
+    def test_undeterminable(self):
+        r = assess_electronic_structure({"homo_ev": 0.1, "lumo_ev": None})
+        self.assertEqual(r["classification"], "undeterminable")
+        self.assertIsNone(r["gap_ev"])
+
+    def test_parse_combined_levels(self):
+        d = parse_scf("highest occupied, lowest unoccupied level (ev): 1.0 3.0\n")
+        self.assertEqual(d["homo_ev"], 1.0)
+        self.assertEqual(d["lumo_ev"], 3.0)
+        self.assertEqual(d["qe_version"], None)
+
+
+class TestClassifyModes(unittest.TestCase):
+    @staticmethod
+    def _m(i, f):
+        return {"mode": i, "freq": f, "thz": f / 33.356, "ir": 0.0,
+                "raman": 0.0, "depol": None}
+
+    def test_acoustic_is_three_smallest(self):
+        modes = [self._m(i + 1, f)
+                 for i, f in enumerate([0.0, 0.1, -0.1, 400.0, 500.0, 600.0])]
+        c = classify_modes(modes)
+        self.assertEqual(sorted(c["acoustic_idx"]), [0, 1, 2])
+        self.assertTrue(c["acoustic_clean"])
+        self.assertEqual(len(c["optical"]), 3)
+
+    def test_noise_vs_significant_soft(self):
+        # one small numerical imaginary (-0.3) + one real soft mode (-17.3)
+        modes = [self._m(i + 1, f)
+                 for i, f in enumerate([0.0, 0.0, 0.0, -0.3, -17.3, 400.0])]
+        c = classify_modes(modes)
+        self.assertEqual([m["freq"] for m in c["noise"]], [-0.3])
+        self.assertEqual([m["freq"] for m in c["significant_soft"]], [-17.3])
+        s = _stats(modes)
+        self.assertEqual(s["soft_modes"], [5])      # significant only
+        self.assertEqual(s["noise_modes"], [4])
 
 
 if __name__ == "__main__":

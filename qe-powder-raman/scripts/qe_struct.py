@@ -318,10 +318,18 @@ def refine_structure(atoms, symprec: float = 1e-3):
     refined = atoms
     refined_info = original
     changed = False
+    fallback_reason = None
     cp0 = list(atoms.cell.cellpar())
 
     try:
         lat, pos, nums = spglib.refine_cell(cell, symprec=symprec)
+        if lat is None:
+            fallback_reason = "spglib.refine_cell returned no lattice"
+        elif len(nums) != len(atoms):
+            fallback_reason = (
+                "refine_cell changed atom count (%d -> %d); kept original"
+                % (len(atoms), len(nums))
+            )
         if lat is not None and len(nums) == len(atoms):
             refined = Atoms(numbers=nums, scaled_positions=pos, cell=lat, pbc=True)
             ds1 = _ds((lat, pos, nums))
@@ -339,11 +347,13 @@ def refine_structure(atoms, symprec: float = 1e-3):
     except Exception as exc:  # noqa: BLE001
         refined_info = dict(original)
         refined_info["refine_error"] = str(exc)
+        fallback_reason = "refine_cell raised: %s" % exc
 
     info = {
         "original": original,
         "refined": refined_info,
         "standardized": bool(changed),
+        "fallback_reason": fallback_reason,
         "cellpar": [round(float(x), 8) for x in cp0],
         "n_atoms": len(refined),
         "elements": list(refined.get_chemical_symbols()),

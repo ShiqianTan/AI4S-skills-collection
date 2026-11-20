@@ -12,11 +12,20 @@ bundled `pseudo/` directory mapping.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
 
 from qe_common import ACCEPTED_XC_LDA
+
+
+def _sha256(path: str | Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 class UPFInfo:
@@ -201,6 +210,7 @@ def build_pseudopotential_manifest(
             "is_paw": upf.is_paw,
             "is_ultrasoft": upf.is_ultrasoft,
             "count": count,
+            "sha256": _sha256(path),
         }
         manifest["pseudopotentials"][el] = entry
         if upf.z_valence is not None:

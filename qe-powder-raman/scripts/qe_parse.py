@@ -12,6 +12,9 @@ import re
 from pathlib import Path
 
 _OPTICAL_EPS = 1e-4  # activity threshold for "IR/Raman active"
+GAP_MIN_EV = 0.05        # below this the system is treated as metallic/zero-gap
+ACOUSTIC_CLEAN_CM1 = 10.0  # acoustic modes above this |freq| are flagged
+SOFT_SIGNIFICANT_CM1 = -5.0  # optical soft modes below this are "significant"
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +51,19 @@ def parse_scf(txt: str) -> dict:
 
     m = re.search(r"highest occupied level \(ev\):\s*([-\d.]+)", txt)
     d["homo_ev"] = float(m.group(1)) if m else None
+    m = re.search(r"lowest unoccupied level \(ev\):\s*([-\d.]+)", txt)
+    d["lumo_ev"] = float(m.group(1)) if m else None
+    if d["homo_ev"] is None:
+        m = re.search(
+            r"highest occupied, lowest unoccupied level \(ev\):\s*([-\d.]+)\s+([-\d.]+)",
+            txt,
+        )
+        if m:
+            d["homo_ev"] = float(m.group(1))
+            d["lumo_ev"] = float(m.group(2))
+
+    m = re.search(r"Program PWSCF\s+v\.([0-9][\w.\-]*)", txt)
+    d["qe_version"] = m.group(1) if m else None
 
     return d
 
@@ -151,25 +167,101 @@ def parse_dynmat(txt: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# applicability (P1-01) and shared mode classification (P1-02)
+# ---------------------------------------------------------------------------
+
+def assess_electronic_structure(scf: dict) -> dict:
+    """Classify the electronic structure from SCF levels (P1-01).
+
+    - both occupied and unoccupied levels present -> 'gapped' or 'metallic'
+    - only the highest occupied level -> 'undeterminable' (e.g. old logs)
+    """
+    homo = scf.get("homo_ev")
+    lumo = scf.get("lumo_ev")
+    gap = None
+    if homo is not None and lumo is not None:
+        gap = round(float(lumo) - float(homo), 6)
+    if gap is not None:
+        if gap > GAP_MIN_EV:
+            cls = "gapped"
+            reason = "gap %.3f eV > %.2f eV" % (gap, GAP_MIN_EV)
+        else:
+            cls = "metallic"
+            reason = (
+                "gap %.3f eV <= %.2f eV: Raman MVP requires an insulator"
+                % (gap, GAP_MIN_EV)
+            )
+    else:
+        cls = "undeterminable"
+        reason = (
+            "band gap undeterminable: scf.out has no unoccupied level; "
+            "applicability unverified"
+        )
+    return {
+        "homo_ev": homo,
+        "lumo_ev": lumo,
+        "gap_ev": gap,
+        "classification": cls,
+        "reason": reason,
+    }
+
+
+def classify_modes(modes: list[dict]) -> dict:
+    """Shared acoustic/optical/soft classification (P1-02).
+
+    Gamma has exactly three acoustic branches; without eigenvectors these are
+    approximated by the three modes with the smallest |freq|.  Optical modes
+    below zero are split into numerical noise (>= SOFT_SIGNIFICANT_CM1) and
+    significant soft modes.  Every consumer (stats, spectrum, report) uses this
+    so peak selection is consistent.
+    """
+    if not modes:
+        return {
+            "acoustic_idx": [], "optical_idx": [], "acoustic": [], "optical": [],
+            "soft": [], "noise": [], "significant_soft": [],
+            "acoustic_max_abs": 0.0, "acoustic_clean": True, "approximate": True,
+        }
+    idx = sorted(range(len(modes)), key=lambda i: abs(modes[i]["freq"]))[:3]
+    aset = set(idx)
+    acoustic = [modes[i] for i in idx]
+    optical = [m for i, m in enumerate(modes) if i not in aset]
+    soft = [m for m in optical if m["freq"] < 0.0]
+    noise = [m for m in soft if m["freq"] >= SOFT_SIGNIFICANT_CM1]
+    significant = [m for m in soft if m["freq"] < SOFT_SIGNIFICANT_CM1]
+    amax = round(max((abs(m["freq"]) for m in acoustic), default=0.0), 6)
+    return {
+        "acoustic_idx": idx,
+        "optical_idx": [i for i in range(len(modes)) if i not in aset],
+        "acoustic": acoustic,
+        "optical": optical,
+        "soft": soft,
+        "noise": noise,
+        "significant_soft": significant,
+        "acoustic_max_abs": amax,
+        "acoustic_clean": amax <= ACOUSTIC_CLEAN_CM1,
+        "approximate": True,
+    }
+
+
+# ---------------------------------------------------------------------------
 # statistics
 # ---------------------------------------------------------------------------
 
 def _stats(modes: list[dict]) -> dict:
+    cls = classify_modes(modes)
+    optical = cls["optical"]
     if not modes:
         return {
             "total": 0, "acoustic": [], "optical": [], "raman_active": [],
             "ir_active": [], "sum_raman": 0.0, "max_raman": None,
             "max_raman_freq": None, "acoustic_max_abs": 0.0,
-            "optic_min": None, "optic_max": None, "soft_modes": [],
+            "acoustic_clean": True, "optic_min": None, "optic_max": None,
+            "soft_modes": [], "noise_modes": [],
         }
-    idx = sorted(range(len(modes)), key=lambda i: abs(modes[i]["freq"]))[:3]
-    acoustic_idx = set(idx)
-    acoustic = [modes[i] for i in idx]
-    optical = [m for i, m in enumerate(modes) if i not in acoustic_idx]
+    acoustic = cls["acoustic"]
 
     raman_active = [m for m in optical if m["raman"] > _OPTICAL_EPS]
     ir_active = [m for m in optical if m["ir"] > _OPTICAL_EPS]
-    soft_modes = [m for m in optical if m["freq"] < 0.0]
 
     sum_raman = round(sum(m["raman"] for m in optical), 4)
     max_raman = max((m for m in optical if m["raman"] > _OPTICAL_EPS),
@@ -185,10 +277,12 @@ def _stats(modes: list[dict]) -> dict:
         "sum_raman": sum_raman,
         "max_raman": None if max_raman is None else round(max_raman["raman"], 4),
         "max_raman_freq": None if max_raman is None else max_raman["freq"],
-        "acoustic_max_abs": round(max(abs(m["freq"]) for m in acoustic), 6),
+        "acoustic_max_abs": cls["acoustic_max_abs"],
+        "acoustic_clean": cls["acoustic_clean"],
         "optic_min": None if not optic_freqs else min(optic_freqs),
         "optic_max": None if not optic_freqs else max(optic_freqs),
-        "soft_modes": [m["mode"] for m in soft_modes],
+        "soft_modes": [m["mode"] for m in cls["significant_soft"]],
+        "noise_modes": [m["mode"] for m in cls["noise"]],
     }
 
 
@@ -214,6 +308,7 @@ def parse_outdir(outdir: str | Path) -> dict:
     dyn_txt = (outdir / "dynmat.out").read_text(errors="replace") if (outdir / "dynmat.out").exists() else ""
 
     rec["scf"] = parse_scf(scf_txt)
+    rec["electronic"] = assess_electronic_structure(rec["scf"])
     rec["ph_converged"] = "Convergence has been achieved" in ph_txt
     rec["ph_job_done"] = "JOB DONE" in ph_txt
     rec["dielectric"] = parse_dielectric(ph_txt)
@@ -287,6 +382,22 @@ def parse_outdir(outdir: str | Path) -> dict:
     else:
         warnings.append("n_atoms 未知 (no pseudopotential_manifest.json; 3N check skipped)")
 
+    el = rec["electronic"]
+    if el["classification"] == "metallic":
+        problems.append(el["reason"])
+    elif el["classification"] == "undeterminable":
+        warnings.append(el["reason"])
+    if not rec["stats"].get("acoustic_clean", True):
+        warnings.append(
+            "acoustic modes deviate from zero (max |freq| = %.2f cm-1); "
+            "check convergence" % rec["stats"]["acoustic_max_abs"]
+        )
+    if rec["stats"].get("noise_modes"):
+        warnings.append(
+            "small imaginary (numerical) optical modes: %s"
+            % ", ".join(str(x) for x in rec["stats"]["noise_modes"])
+        )
+
     rec["warnings"] = warnings
     if problems:
         rec["status"] = "failed"
@@ -327,6 +438,10 @@ def print_summary(rec: dict) -> None:
              s.get("sym_ops"), s.get("scf_iter"), s.get("etot_ry")))
     print("  ph : converged=%s job_done=%s asr=%s"
           % (rec["ph_converged"], rec["ph_job_done"], rec["asr_metric"]))
+    el = rec.get("electronic") or {}
+    print("  elec: %s gap=%s eV (homo=%s lumo=%s)"
+          % (el.get("classification"), el.get("gap_ev"),
+             el.get("homo_ev"), el.get("lumo_ev")))
     if rec["dielectric"]:
         d = rec["dielectric"]
         diag = [d[i][i] for i in range(3)]

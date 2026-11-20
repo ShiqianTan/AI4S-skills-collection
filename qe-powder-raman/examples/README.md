@@ -15,9 +15,8 @@
 
 > **注意**：`CdS_mp-672.cif` 与 `MoS2_mp-2815.cif` 是 MP-20 的**原始** CIF，
 > 其六方角 γ 含 ~1e-5° 数值噪声（如 119.99998586°），会触发 `ph.x` 的
-> `divide_class` 对称性分析错误或崩溃。运行前请先 `prepare`（内部会调用
-> `spglib.refine_cell` 自动清洗并写出 `validated.cif`），或改用对应的
-> `*_sym.cif`。
+> `divide_class` 对称性分析错误或崩溃。`prepare` 会调用 `spglib.refine_cell`
+> 自动清洗并写出 `validated.cif`，请始终通过 `prepare` 生成计算输入。
 
 ## 一键生成全部输入
 
@@ -31,6 +30,14 @@ bash examples/run_examples.sh /path/to/output_dir
 ```bash
 python3 scripts/qe_raman.py prepare examples/LiF_mp-1138.cif \
     --outdir out/LiF_mp-1138 --prefix LiF
+```
+
+需要 LO-TO（闪锌矿/纤锌矿等）时，用 `--lo` 指定方向（每 3 个数一个方向），
+或在 config 的 `lo_to_directions` 中列出：
+
+```bash
+python3 scripts/qe_raman.py prepare examples/CdS_mp-672.cif \
+    --outdir out/CdS --prefix CdS --lo 0 0 1 1 0 0
 ```
 
 ## 端到端计算（可选）

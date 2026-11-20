@@ -15,6 +15,7 @@ from qe_spectrum import (  # noqa: E402
     lorentz,
     select_peaks,
     stokes_prefactor,
+    validate_spectrum_params,
 )
 
 
@@ -89,6 +90,44 @@ class TestBuildSpectrum(unittest.TestCase):
         self.assertIsNone(x)
         self.assertIsNone(y)
         self.assertEqual(scaled, [])
+
+
+class TestParameterValidation(unittest.TestCase):
+    def test_fwhm_zero_raises(self):
+        with self.assertRaises(ValueError):
+            build_spectrum([(300.0, 1.0)], fwhm=0.0)
+
+    def test_bad_params(self):
+        with self.assertRaises(ValueError):
+            validate_spectrum_params(fwhm=8.0, temperature=-1.0,
+                                     laser_wavelength=532.0, threshold=1e-4,
+                                     npoints=4000, formats=("png",))
+        with self.assertRaises(ValueError):
+            validate_spectrum_params(fwhm=8.0, temperature=300.0,
+                                     laser_wavelength=0.0, threshold=1e-4,
+                                     npoints=4000, formats=("png",))
+        with self.assertRaises(ValueError):
+            validate_spectrum_params(fwhm=8.0, temperature=300.0,
+                                     laser_wavelength=532.0, threshold=1e-4,
+                                     npoints=4000, formats=("pdf",))
+
+    def test_ok(self):
+        validate_spectrum_params(fwhm=8.0, temperature=300.0,
+                                 laser_wavelength=532.0, threshold=1e-4,
+                                 npoints=4000, formats=("png", "csv"))
+
+
+class TestSelectPeaksClassification(unittest.TestCase):
+    def test_low_frequency_optical_kept(self):
+        modes = [
+            {"mode": 1, "freq": 0.0, "raman": 0.0},
+            {"mode": 2, "freq": 0.0, "raman": 0.0},
+            {"mode": 3, "freq": 0.0, "raman": 0.0},
+            {"mode": 4, "freq": 2.0, "raman": 5.0},   # low-freq optical
+            {"mode": 5, "freq": 100.0, "raman": 6.0},
+        ]
+        peaks = select_peaks(modes, threshold=1e-4, min_freq=1.0)
+        self.assertEqual([f for f, _ in peaks], [2.0, 100.0])
 
 
 if __name__ == "__main__":

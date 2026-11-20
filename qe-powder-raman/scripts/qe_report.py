@@ -43,6 +43,16 @@ def _load_mode_tables(outdir: Path) -> dict[str, list[dict]]:
     return tables
 
 
+def _load_json(outdir: Path, name: str) -> dict:
+    path = outdir / name
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _fmt(v, nd: int = 4) -> str:
     if v is None:
         return "—"
@@ -93,6 +103,19 @@ def render_report(outdir: Path) -> str:
         lines.append("| %s | %s |" % (k, _fmt(v, 6) if isinstance(v, float) else (v if v is not None else "—")))
     lines.append("")
 
+    el = s.get("electronic") or {}
+    lines.append("### 电子结构适用性")
+    lines.append("")
+    lines.append("| 项目 | 值 |")
+    lines.append("|------|----|")
+    lines.append("| 最高占据能级 (eV) | %s |" % _fmt(el.get("homo_ev")))
+    lines.append("| 最低未占据能级 (eV) | %s |" % _fmt(el.get("lumo_ev")))
+    lines.append("| 带隙 (eV) | %s |" % _fmt(el.get("gap_ev")))
+    lines.append("| 判定 | %s |" % (el.get("classification") or "unknown"))
+    if el.get("reason"):
+        lines.append("| 依据 | %s |" % el["reason"])
+    lines.append("")
+
     lines.append("## 2. 介电性质与声子")
     lines.append("")
     ph = [
@@ -111,6 +134,8 @@ def render_report(outdir: Path) -> str:
         lines.append("- Clausius-Mossotti 因子：%s" % _fmt(dyn["cm_factor"]))
     if dyn.get("raman_cm_factor") is not None:
         lines.append("- Raman CM 因子：%s" % _fmt(dyn["raman_cm_factor"]))
+        lines.append("  - 备注：表中 Raman 列为 QE 原始值，未乘该因子；若启用局域场"
+                     "修正，需将 Raman 乘以该因子的平方，且仅应用一次。")
     if dyn.get("polarizability"):
         p = dyn["polarizability"]
         lines.append("- 极化率 (Å³) 对角元：%s" % ", ".join(_fmt(p[i][i]) for i in range(3)))
@@ -136,7 +161,15 @@ def render_report(outdir: Path) -> str:
         lines.append("| %s | %s |" % (k, v if v is not None else "—"))
     if st.get("soft_modes"):
         lines.append("")
-        lines.append("**警告：存在虚频（软模）**，结构未充分弛豫。")
+        lines.append("**警告：存在显著虚频（软模）**，结构可能未充分弛豫。")
+    if st.get("noise_modes"):
+        lines.append("")
+        lines.append("- 小型数值虚频（视为噪声，不入谱）：%s"
+                     % ", ".join(str(x) for x in st["noise_modes"]))
+    if st.get("acoustic_clean") is False:
+        lines.append("")
+        lines.append("- 注意：声学模偏离零（max |freq| = %s cm⁻¹），建议检查收敛。"
+                     % _fmt(st.get("acoustic_max_abs"), 2))
     lines.append("")
 
     to_modes = tables.get("to", [])
@@ -152,8 +185,23 @@ def render_report(outdir: Path) -> str:
     if lo_keys:
         lines.append("## 5. LO-TO 分裂（纵向光学 LO）")
         lines.append("")
+        lines.append("默认 TO 谱来自 Γ 点、未加非解析修正；下列 LO 表按指定方向单独计算。")
+        lines.append("")
+        lo_dirs = _load_json(outdir, "inputs_manifest.json").get("lo_dirs") or []
         for k in lo_keys:
-            lines.extend(_mode_table("LO 表 `%s`" % k, tables[k]))
+            label = k
+            idx = None
+            if lo_dirs:
+                if k == "lo":
+                    idx = 0
+                elif k.startswith("lo_"):
+                    try:
+                        idx = int(k.split("_")[-1]) - 1
+                    except ValueError:
+                        idx = None
+            if idx is not None and 0 <= idx < len(lo_dirs):
+                label = "%s  q=(%s)" % (k, ", ".join(_fmt(x, 3) for x in lo_dirs[idx]))
+            lines.extend(_mode_table("LO 表 `%s`" % label, tables[k]))
 
     files = [
         "raman_modes.csv", "summary.json",
@@ -164,6 +212,49 @@ def render_report(outdir: Path) -> str:
     for f in files:
         mark = "（存在）" if (outdir / f).exists() else "（未生成）"
         lines.append("- `%s` %s" % (f, mark))
+    lines.append("")
+
+    struct = _load_json(outdir, "structure_manifest.json")
+    effcfg = _load_json(outdir, "effective_config.json")
+    ppman = _load_json(outdir, "pseudopotential_manifest.json")
+    run_state = s.get("run_state") or {}
+
+    lines.append("## 7. 可复现信息")
+    lines.append("")
+    lines.append("| 项目 | 值 |")
+    lines.append("|------|----|")
+    lines.append("| QE 版本 | %s |" % (scf.get("qe_version") or "未知"))
+    if struct:
+        orig = struct.get("original") or {}
+        ref = struct.get("refined") or {}
+        lines.append("| 原始空间群 | #%s %s |" % (orig.get("spacegroup_number"), orig.get("spacegroup_symbol")))
+        lines.append("| 精化空间群 | #%s %s |" % (ref.get("spacegroup_number"), ref.get("spacegroup_symbol")))
+        lines.append("| 是否标准化 | %s |" % ("是" if struct.get("standardized") else "否"))
+        if struct.get("fallback_reason"):
+            lines.append("| 精化回退原因 | %s |" % struct["fallback_reason"])
+        cp = struct.get("cellpar")
+        if cp and len(cp) >= 6:
+            lines.append("| 晶胞参数 | a=%.4f b=%.4f c=%.4f α=%.3f β=%.3f γ=%.3f |"
+                         % (cp[0], cp[1], cp[2], cp[3], cp[4], cp[5]))
+    for k in ("ecutwfc", "ecutrho", "conv_thr", "tr2_ph", "kpt_density",
+              "fwhm", "temperature", "laser_wavelength", "spectrum_broadening"):
+        if k in effcfg:
+            lines.append("| %s | %s |" % (k, effcfg[k]))
+    pps = ppman.get("pseudopotentials") or {}
+    for elx in sorted(pps):
+        e = pps[elx]
+        lines.append("| UPF %s | %s (sha256 %s…) |"
+                     % (elx, e.get("file"), (e.get("sha256") or "?")[:12]))
+    stages = run_state.get("stages") or {}
+    cmds = []
+    for nm, rc in stages.items():
+        if isinstance(rc, dict) and rc.get("command"):
+            cmds.append("%s: %s" % (nm, " ".join(map(str, rc["command"]))))
+    if cmds:
+        lines.append("")
+        lines.append("命令：")
+        for c in cmds:
+            lines.append("- `%s`" % c)
     lines.append("")
 
     lines.append("> 本报告由 `qe_report.py` 自动生成。")

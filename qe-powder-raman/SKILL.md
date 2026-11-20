@@ -1,6 +1,6 @@
 ---
 name: qe-powder-raman
-description: Compute solid-state (crystal) powder Raman spectra with Quantum ESPRESSO. Run the pw.x SCF -> ph.x (epsil + lraman, Gamma) -> dynmat.x workflow, then broaden modes into a powder Raman spectrum and a report. Use when the user wants a first-order, non-resonant, harmonic powder Raman spectrum for a periodic insulating crystal. Handles structure reading (CIF/POSCAR), pseudopotential validation (NC + LDA only), input generation, execution, output parsing, spectrum plotting, and reporting.
+description: Compute solid-state (crystal) powder Raman spectra with Quantum ESPRESSO. Run the pw.x SCF, then ph.x (epsil + lraman, Gamma), then dynmat.x, then broaden modes into a powder Raman spectrum and a report. Use when the user wants a first-order, non-resonant, harmonic powder Raman spectrum for a periodic insulating crystal. Handles structure reading (CIF or POSCAR), pseudopotential validation (NC + LDA only), input generation, execution, output parsing, spectrum plotting, and reporting.
 metadata:
   runtime: local
   execution_mode: cli
@@ -25,6 +25,16 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
 - 只支持 **LDA（PZ）** 泛函 + `occupations='fixed'`。
 - 不支持：非共线磁性、Hubbard U、meta-GGA/杂化泛函、TS-vdW。
 - 只算 **Γ 点** 一级非共振谐波拉曼；无温度/峰宽/绝对强度标定（除非显式开启 Stokes）。
+- 运行前会检查电子结构：由 SCF 的占据/未占据能级给出 `gapped` / `metallic` /
+  `undeterminable` 判定；`metallic` 记为失败，缺少未占据能级（旧日志）记为警告。
+
+## 环境与依赖
+
+- Python 3.9+，并安装 numpy / PyYAML / ASE / spglib / matplotlib
+  （`pip install -r requirements.txt`）。部分系统自带 `python3` 缺少 ASE，
+  请使用已安装依赖的解释器（例如 Conda 环境）。
+- QE 可执行文件 `pw.x` / `ph.x` / `dynmat.x`：默认从配置 `bin_dir` 读取，
+  可用 `--bin-dir` 或环境变量 `QE_BIN` 覆盖。
 
 ## 快速开始
 

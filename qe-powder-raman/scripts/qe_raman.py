@@ -411,6 +411,16 @@ def _run_prepare(args: argparse.Namespace) -> int:
     cif_path = write_validated_cif(refined, outdir)
     print("wrote %s" % cif_path)
 
+    # persist reproducibility metadata (P1-05)
+    import json as _json
+
+    if info.get("fallback_reason"):
+        print("refinement fallback: %s" % info["fallback_reason"])
+    (Path(outdir) / "structure_manifest.json").write_text(
+        _json.dumps(info, indent=2, ensure_ascii=False) + "\n")
+    (Path(outdir) / "effective_config.json").write_text(
+        _json.dumps(cfg, indent=2, ensure_ascii=False, default=str) + "\n")
+
     manifest = build_pseudopotential_manifest(info["elements"], pseudo_dir, outdir)
     if manifest["errors"]:
         for err in manifest["errors"]:
@@ -500,11 +510,15 @@ def _run_spectrum(args: argparse.Namespace) -> int:
         for f, a in sorted(peaks, key=lambda t: t[0]):
             print("  peak %8.2f cm-1  activity %.6f" % (f, a))
 
-    written = generate_spectra(
-        outdir, spectrum_type=spectrum_type, broadening=broadening, fwhm=fwhm,
-        temperature=temperature, laser_wavelength=laser, threshold=threshold,
-        formats=formats,
-    )
+    try:
+        written = generate_spectra(
+            outdir, spectrum_type=spectrum_type, broadening=broadening, fwhm=fwhm,
+            temperature=temperature, laser_wavelength=laser, threshold=threshold,
+            formats=formats,
+        )
+    except ValueError as exc:
+        print("spectrum: FAIL (invalid parameters: %s)" % exc, file=sys.stderr)
+        return 1
     for w in written:
         print("  wrote %s" % w)
     return 0

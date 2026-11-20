@@ -10,6 +10,7 @@ PSEUDO = Path(__file__).resolve().parents[2] / "pseudo"
 sys.path.insert(0, str(SCRIPTS))
 
 from qe_pp import (  # noqa: E402
+    build_pseudopotential_manifest,
     check_pseudo,
     element_pp_map,
     parse_upf,
@@ -82,6 +83,17 @@ class TestCheckPseudoElementMatch(unittest.TestCase):
         self.assertFalse(
             any(lvl == "FAIL" and key == "element_mismatch" for lvl, key, _ in msgs)
         )
+
+
+class TestManifest(unittest.TestCase):
+    def test_manifest_records_sha256(self):
+        m = build_pseudopotential_manifest(["Li", "F"], PSEUDO, None)
+        self.assertFalse(m["errors"])
+        self.assertEqual(m["n_atoms"], 2)
+        for el in ("Li", "F"):
+            entry = m["pseudopotentials"][el]
+            self.assertEqual(len(entry["sha256"]), 64)
+        self.assertEqual(m["n_valence_electrons"], 8.0)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 sys.path.insert(0, str(SCRIPTS))
 
 from qe_parse import parse_outdir, write_outputs  # noqa: E402
+from qe_report import render_report  # noqa: E402
 
 
 class TestParseOutdir(unittest.TestCase):
@@ -86,6 +87,42 @@ class TestParseOutdir(unittest.TestCase):
         (self.tmp / "pseudopotential_manifest.json").write_text('{"n_atoms": 3}')
         rec = parse_outdir(self.tmp)
         self.assertEqual(rec["status"], "failed")
+
+    def test_metallic_failed(self):
+        self._copy("LiF_mp-1138")
+        txt = (self.tmp / "scf.out").read_text()
+        (self.tmp / "scf.out").write_text(
+            txt + "\n     lowest unoccupied level (ev):    -1.0000\n")
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["electronic"]["classification"], "metallic")
+        self.assertEqual(rec["status"], "failed")
+
+    def test_undeterminable_is_warning_not_failure(self):
+        self._copy("AlAs_mp-2172")
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["electronic"]["classification"], "undeterminable")
+        self.assertEqual(rec["status"], "success")
+        self.assertTrue(any("undeterminable" in w for w in rec["warnings"]))
+
+    def test_report_sections(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "inputs_manifest.json").write_text(
+            '{"lo_dirs": [[1.0, 0.0, 0.0]]}')
+        (self.tmp / "effective_config.json").write_text('{"fwhm": 8.0}')
+        (self.tmp / "structure_manifest.json").write_text(
+            '{"original": {"spacegroup_number": 216, "spacegroup_symbol": "F-43m"},'
+            ' "refined": {"spacegroup_number": 216, "spacegroup_symbol": "F-43m"},'
+            ' "standardized": false, "cellpar": [4.05, 4.05, 4.05, 60, 60, 60]}')
+        (self.tmp / "pseudopotential_manifest.json").write_text(
+            '{"n_atoms": 2, "pseudopotentials": {"Al": {"file": "Al.pz-hgh.UPF",'
+            ' "sha256": "%s"}}}' % ("a" * 64))
+        rec = parse_outdir(self.tmp)
+        write_outputs(rec)
+        text = render_report(self.tmp)
+        self.assertIn("电子结构适用性", text)
+        self.assertIn("## 7. 可复现信息", text)
+        self.assertIn("Raman CM 因子", text)
+        self.assertIn("q=(1.000", text)
 
 
 if __name__ == "__main__":

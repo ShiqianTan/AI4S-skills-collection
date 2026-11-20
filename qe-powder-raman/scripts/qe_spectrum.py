@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -24,6 +25,8 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+from qe_parse import classify_modes
 
 plt.rcParams["font.sans-serif"] = [
     "Songti SC", "PingFang HK", "Hiragino Sans GB",
@@ -91,10 +94,37 @@ def gauss(x, x0: float, amp: float, fwhm: float):
 # spectrum construction
 # ---------------------------------------------------------------------------
 
+def validate_spectrum_params(*, fwhm: float, temperature: float,
+                             laser_wavelength: float, threshold: float,
+                             npoints: int, formats) -> None:
+    """Raise ValueError on invalid broadening/Stokes parameters (P1-04)."""
+    problems: list[str] = []
+    if not (isinstance(fwhm, (int, float)) and math.isfinite(fwhm) and fwhm > 0):
+        problems.append("fwhm must be > 0 (got %r)" % (fwhm,))
+    if not (math.isfinite(temperature) and temperature >= 0):
+        problems.append("temperature must be >= 0 K (got %r)" % (temperature,))
+    if not (math.isfinite(laser_wavelength) and laser_wavelength > 0):
+        problems.append("laser_wavelength must be > 0 nm (got %r)" % (laser_wavelength,))
+    if not (math.isfinite(threshold) and threshold >= 0):
+        problems.append("threshold must be >= 0 (got %r)" % (threshold,))
+    if int(npoints) < 2:
+        problems.append("npoints must be >= 2")
+    bad = [f for f in formats if f not in ("png", "svg", "csv")]
+    if bad:
+        problems.append("unsupported formats: %s" % ", ".join(map(str, bad)))
+    if problems:
+        raise ValueError("; ".join(problems))
+
+
 def select_peaks(modes: list[dict], threshold: float = 1e-4,
                  min_freq: float = 1.0) -> list[tuple[float, float]]:
-    """Return (freq, raman_activity) for Raman-active optical modes."""
-    return [(m["freq"], m["raman"]) for m in modes
+    """Return (freq, raman_activity) for Raman-active optical modes.
+
+    Uses the shared classifier so the same acoustic modes are excluded here as
+    in the CSV/report; genuinely low-frequency optical modes are retained.
+    """
+    cls = classify_modes(modes)
+    return [(m["freq"], m["raman"]) for m in cls["optical"]
             if m["freq"] > min_freq and m["raman"] > threshold]
 
 
@@ -103,6 +133,8 @@ def build_spectrum(peaks, *, broadening: str = "lorentzian", fwhm: float = 8.0,
                    laser_wavelength: float = 532.0, npoints: int = 4000,
                    pad: float = 4.0):
     """Return (x, y, scaled_peaks); x/y are None when there are no peaks."""
+    if not (isinstance(fwhm, (int, float)) and math.isfinite(fwhm) and fwhm > 0):
+        raise ValueError("fwhm must be > 0 for broadening (got %r)" % (fwhm,))
     scaled: list[tuple[float, float]] = []
     for f, a in peaks:
         if spectrum_type == "stokes":
@@ -150,6 +182,9 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
                      threshold: float = 1e-4, formats=("png", "csv"),
                      dpi: int = 160) -> list[Path]:
     outdir = Path(outdir)
+    validate_spectrum_params(fwhm=fwhm, temperature=temperature,
+                             laser_wavelength=laser_wavelength, threshold=threshold,
+                             npoints=4000, formats=formats)
     tables = load_modes(outdir)
     to_modes = tables.get("to", [])
     peaks = select_peaks(to_modes, threshold=threshold)
@@ -157,8 +192,17 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
     types = ["activity", "stokes"] if spectrum_type == "both" else [spectrum_type]
     written: list[Path] = []
     for t in types:
+        use_peaks = peaks
+        if t == "stokes":
+            laser_cm1 = 1.0e7 / laser_wavelength
+            kept = [p for p in peaks if 0.0 < p[0] < laser_cm1]
+            dropped = len(peaks) - len(kept)
+            if dropped:
+                print("spectrum: WARN excluded %d peak(s) outside Stokes window "
+                      "0 < shift < %.1f cm-1" % (dropped, laser_cm1), file=sys.stderr)
+            use_peaks = kept
         x, y, scaled = build_spectrum(
-            peaks, broadening=broadening, fwhm=fwhm, spectrum_type=t,
+            use_peaks, broadening=broadening, fwhm=fwhm, spectrum_type=t,
             temperature=temperature, laser_wavelength=laser_wavelength,
         )
         base = outdir / ("spectrum_" + t)

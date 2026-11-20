@@ -176,6 +176,7 @@ def run_workflow(
             lo_stages = state["stages"].setdefault("lo", {})
             for loin in lo_inputs:
                 key = loin.stem  # e.g. dynmat_lo_1
+                tag = key[len("dynmat_"):] if key.startswith("dynmat_") else key
                 loout = outdir / (loin.stem + ".out")
                 cmd = [str(dyn), "-in", loin.name]
                 # reuse _run_stage but with nested dict
@@ -206,6 +207,12 @@ def run_workflow(
                     ok = False
                 elif verbose:
                     print("  [done] %-10s %.1fs -> %s" % (key, rec.get("seconds", 0.0), loout.name))
+                # keep per-direction eigenvector artifacts (dynmat.mold/axsf are
+                # overwritten by every LO run)
+                for src_name, ext in (("dynmat.mold", ".mold"), ("dynmat.axsf", ".axsf")):
+                    src = outdir / src_name
+                    if src.exists():
+                        (outdir / ("dynmat_%s%s" % (tag, ext))).write_bytes(src.read_bytes())
 
     state["overall_status"] = "success" if ok else "failed"
     tmp_path = state_path.with_suffix(".json.tmp")

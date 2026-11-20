@@ -42,6 +42,12 @@ pip install -r requirements.txt
 需要本机可用的 QE 可执行文件 `pw.x` / `ph.x` / `dynmat.x`（默认读取
 `config.example.yaml` 中的 `bin_dir`，可用 `--bin-dir` 或环境变量 `QE_BIN` 覆盖）。
 
+Python 依赖（numpy / PyYAML / ASE / spglib / matplotlib）请安装在运行所用解释器中；
+部分系统自带 `python3` 缺少 ASE，建议使用 Conda 等已就绪环境。
+
+配置中 `outdir`（项目运行目录：输入、日志、CSV、图、报告）与 `qe_outdir`
+（QE 的 scratch 目录，写入 pw.x/ph.x 的 `&CONTROL outdir`）相互独立，请勿混用。
+
 ## 使用
 
 ```bash
