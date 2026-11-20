@@ -1,0 +1,6 @@
+# Requirements for the qe-powder-raman skill.
+numpy>=1.24
+PyYAML>=6.0
+ase>=3.22
+spglib>=2.0
+matplotlib>=3.7

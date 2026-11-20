@@ -1,0 +1,68 @@
+
+     Program DYNMAT v.8.0dev starts on 20Nov2026 at 11:21:10 
+        Git branch: develop
+        Last git commit: 215ff8a23b112bb52372148e7ca55189528331b2
+        Last git commit date: Wed Nov 18 10:43:29 2026 +0000
+        Last git commit subject: Merge branch 'fix/d3-phase-images' into 'develop'
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+         "P. Giannozzi et al., J. Chem. Phys. 152 154105 (2020);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on     1 processors
+
+     MPI processes distributed on     1 nodes
+     0 MiB available memory on the printing compute node when the environment starts
+
+
+     Reading Dynamical Matrix from file MoS2.dyn
+     ...Force constants read
+     ...epsilon and Z* read
+     ...Raman cross sections read
+     Acoustic Sum Rule: || Z*(ASR) - Z*(orig)|| =    4.927713E-01
+     Acoustic Sum Rule: ||dyn(ASR) - dyn(orig)||=    4.643652E-04
+     A direction for q was not specified:TO-LO splitting will be absent
+
+     Polarizability (A^3 units)
+     multiply by 0.298503 for Clausius-Mossotti correction
+        98.197757   -0.000000    0.000000
+         0.000000   98.197757    0.000000
+         0.000000    0.000000   24.345013
+
+     IR activities are in (D/A)^2/amu units
+     Raman activities are in A^4/amu units
+     multiply Raman by 0.089104 for Clausius-Mossotti correction
+
+# mode   [cm-1]    [THz]      IR          Raman   depol.fact
+    1    -17.29   -0.5183    0.0000         0.0000    0.0581
+    2     -0.00   -0.0000    0.0000         0.0000    0.7500
+    3     -0.00   -0.0000    0.0000         0.0000    0.7484
+    4     -0.00   -0.0000    0.0000         0.0000    0.7460
+    5      8.98    0.2692    0.0000         0.2869    0.7500
+    6      8.98    0.2692    0.0000         0.2869    0.7500
+    7    270.97    8.1234    0.0000         0.5886    0.7500
+    8    270.97    8.1234    0.0000         0.5886    0.7500
+    9    270.98    8.1236    0.0000         0.0000    0.7500
+   10    270.98    8.1236    0.0000         0.0000    0.7500
+   11    369.06   11.0643    2.3316         0.0000    0.7500
+   12    369.06   11.0643    2.3316         0.0000    0.7500
+   13    369.18   11.0676    0.0000       706.0500    0.7500
+   14    369.18   11.0676    0.0000       706.0500    0.7500
+   15    391.16   11.7267    0.0000       590.2114    0.0061
+   16    392.15   11.7564    0.0000         0.0000    0.0060
+   17    442.95   13.2792    0.1003         0.0000    0.2904
+   18    442.99   13.2805    0.0000         0.0000    0.3084
+
+     DYNMAT       :      0.00s CPU      0.00s WALL
+
+
+   This run was terminated on:  11:21:10  20Nov2026            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

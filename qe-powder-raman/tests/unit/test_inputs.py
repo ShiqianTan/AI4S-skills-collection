@@ -1,0 +1,71 @@
+"""Unit tests for qe_inputs (template rendering + helpers)."""
+import sys
+import unittest
+from pathlib import Path
+
+SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+
+from ase import Atoms  # noqa: E402
+
+from qe_inputs import fmt_num, kpoint_grid, render, species_order  # noqa: E402
+
+
+class TestFmtNum(unittest.TestCase):
+    def test_bool(self):
+        self.assertEqual(fmt_num(True), ".true.")
+        self.assertEqual(fmt_num(False), ".false.")
+
+    def test_int(self):
+        self.assertEqual(fmt_num(3), "3")
+
+    def test_float_integer(self):
+        self.assertEqual(fmt_num(60.0), "60")
+        self.assertEqual(fmt_num(1.0), "1")
+        self.assertEqual(fmt_num(0.0), "0")
+
+    def test_sci_notation(self):
+        self.assertEqual(fmt_num(1e-10), "1.0e-10")
+        self.assertEqual(fmt_num(1e-14), "1.0e-14")
+
+    def test_regular_float(self):
+        self.assertEqual(fmt_num(0.5), "0.5")
+
+
+class TestRender(unittest.TestCase):
+    def test_basic(self):
+        self.assertEqual(render("prefix = {prefix}", {"prefix": "abc"}), "prefix = abc")
+
+    def test_missing(self):
+        self.assertEqual(render("a {x} b", {}), "a  b")
+
+    def test_untouched_braces(self):
+        # bash ${...} must not be touched
+        self.assertEqual(render("x ${VAR} y", {"VAR": "ignored"}), "x ${VAR} y")
+
+
+class TestSpeciesOrder(unittest.TestCase):
+    def test_first_appearance(self):
+        atoms = Atoms("HOH", positions=[[0, 0, 0], [0, 0, 1], [1, 1, 1]])
+        self.assertEqual(species_order(atoms), ["H", "O"])
+
+
+class TestKpointGrid(unittest.TestCase):
+    def test_cubic(self):
+        cell = [[5.0, 0, 0], [0, 5.0, 0], [0, 0, 5.0]]
+        k = kpoint_grid(cell, density=30.0)
+        self.assertEqual(k, (6, 6, 6))
+
+    def test_anisotropic(self):
+        cell = [[3.0, 0, 0], [0, 3.0, 0], [0, 0, 15.0]]
+        k = kpoint_grid(cell, density=30.0)
+        self.assertEqual(k, (10, 10, 2))
+
+    def test_min_one(self):
+        cell = [[20.0, 0, 0], [0, 20.0, 0], [0, 0, 20.0]]
+        k = kpoint_grid(cell, density=30.0)
+        self.assertEqual(k, (2, 2, 2))
+
+
+if __name__ == "__main__":
+    unittest.main()

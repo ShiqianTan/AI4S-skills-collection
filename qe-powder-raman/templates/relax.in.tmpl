@@ -1,0 +1,29 @@
+&CONTROL
+  calculation  = 'vc-relax'
+  prefix       = '{prefix}'
+  outdir       = '{outdir}'
+  pseudo_dir   = '{pseudo_dir}'
+  tprnfor      = .true.
+  tstress      = .true.
+  verbosity    = '{verbosity}'
+/
+&SYSTEM
+  ibrav        = 0
+  nat          = {nat}
+  ntyp         = {ntyp}
+  ecutwfc      = {ecutwfc}
+  ecutrho      = {ecutrho}
+  occupations  = '{occupations}'
+/
+&ELECTRONS
+  conv_thr     = {conv_thr}
+  mixing_beta  = {mixing_beta}
+/
+&IONS
+/
+&CELL
+/
+{atomic_species}
+{cell}
+{positions}
+{kgrid}

@@ -1,0 +1,8 @@
+{
+  "lraman_requirements": "lraman=.true. requires norm-conserving (NC) pseudopotentials (US-PP and PAW are NOT supported), Gamma point only, nonmagnetic, no Hubbard U, no meta-GGA/hybrid, no TS-vdW.",
+  "workflow": "pw.x (SCF) -> ph.x (epsil=.true., trans=.true., lraman=.true., asr=.true., q=0 0 0) -> dynmat.x (asr='crystal')",
+  "dynmat_lo_to": "dynmat.x namelist variable is `q` (3-vector), NOT q(3). Default q=(0,0,0) gives TO only; set `q = x y z` for LO-TO (requires Z* and epsilon from ph.x).",
+  "units": "IR activity in (D/A)^2/amu; Raman activity in A^4/amu; depolarization factor 0..0.75 (0.75 = depolarized).",
+  "powder_average": "dynmat.x prints powder-averaged Raman activity = 45*alpha^2 + 7*beta^2 and depolarization = 3*beta^2/(45*alpha^2+4*beta^2); multiply Raman by cm_factor^2 for Clausius-Mossotti correction.",
+  "rejection_rules": "Reject: US/PAW pseudopotentials, PBE/meta-GGA/hybrid XC, Hubbard U, noncollinear magnetism, partial occupancy, metals/partial occupations."
+}

@@ -1,0 +1,54 @@
+
+     Program DYNMAT v.8.0dev starts on 20Nov2026 at 11:22:26 
+        Git branch: develop
+        Last git commit: 215ff8a23b112bb52372148e7ca55189528331b2
+        Last git commit date: Wed Nov 18 10:43:29 2026 +0000
+        Last git commit subject: Merge branch 'fix/d3-phase-images' into 'develop'
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+         "P. Giannozzi et al., J. Chem. Phys. 152 154105 (2020);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on     1 processors
+
+     MPI processes distributed on     1 nodes
+     0 MiB available memory on the printing compute node when the environment starts
+
+
+     Reading Dynamical Matrix from file LiF.dyn
+     ...Force constants read
+     ...epsilon and Z* read
+     ...Raman cross sections read
+     Acoustic Sum Rule: || Z*(ASR) - Z*(orig)|| =    5.870563E-02
+     Acoustic Sum Rule: ||dyn(ASR) - dyn(orig)||=    1.301689E-02
+     A direction for q was not specified:TO-LO splitting will be absent
+
+     Polarizability (A^3 units)
+     multiply by 0.710122 for Clausius-Mossotti correction
+         1.658849   -0.000000   -0.000000
+        -0.000000    1.658849    0.000000
+        -0.000000    0.000000    1.658859
+
+     IR activities are in (D/A)^2/amu units
+
+# mode   [cm-1]    [THz]      IR
+    1      0.00    0.0000    0.0000
+    2      0.00    0.0000    0.0000
+    3      0.00    0.0000    0.0000
+    4    280.38    8.4055    5.0361
+    5    280.73    8.4161    5.0361
+    6    280.73    8.4161    5.0361
+
+     DYNMAT       :      0.00s CPU      0.00s WALL
+
+
+   This run was terminated on:  11:22:26  20Nov2026            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

@@ -1,0 +1,40 @@
+# Example configuration for qe-powder-raman.
+#
+# Copy to config.yaml and edit. Every key is optional; missing keys fall back
+# to data/defaults.yaml (merged in scripts/qe_common.py).
+
+# --- QE binaries -----------------------------------------------------------
+bin_dir: /Users/shiqian/Desktop/HefeiAILab/quantum_espresso/q-e/install_cpu/bin
+
+# --- Pseudopotentials (default: bundled pseudo/ directory) -----------------
+# pseudo_dir: /path/to/my/pseudopotentials
+
+# --- SCF -------------------------------------------------------------------
+ecutwfc: 60.0          # Ry (wavefunction cutoff)
+ecutrho: 240.0         # Ry (charge-density cutoff; 4 x ecutwfc for NC)
+conv_thr: 1.0e-10
+mixing_beta: 0.5
+occupations: fixed     # Raman MVP requires an insulating (gapped) system
+
+# --- ph.x ------------------------------------------------------------------
+tr2_ph: 1.0e-14
+
+# --- Spectrum --------------------------------------------------------------
+fwhm: 8.0              # cm^-1 Lorentzian/Gaussian broadening
+temperature: 300.0     # K (optional Stokes spectrum)
+laser_wavelength: 532.0  # nm (optional Stokes spectrum)
+spectrum_broadening: lorentzian   # lorentzian | gaussian
+
+# --- k-point mesh (automatic; density in units of reciprocal Angstrom) -----
+kpt_density: 30.0
+
+# --- LO-TO directions (optional). Empty = TO-only powder Raman. ------------
+# lo_to_directions:
+#   - [1, 0, 0]       # e.g. zincblende / cubic
+#   - [0, 0, 1]       # e.g. wurtzite q||c
+#   - [1, 0, 0]       # e.g. wurtzite q⊥c
+
+# --- Run control -----------------------------------------------------------
+np: 4                  # MPI ranks for pw.x / ph.x
+omp_num_threads: 1
+mpi_command: mpirun

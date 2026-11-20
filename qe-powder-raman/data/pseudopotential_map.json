@@ -1,0 +1,6 @@
+{
+  "_comment": "Bundled HGH LDA norm-conserving pseudopotentials (X.pz-hgh.UPF). z_valence is read from the UPF header at runtime; values listed here are informational.",
+  "bundled_elements": ["Li", "F", "Mg", "H", "Al", "O", "As", "Cd", "S", "Mo"],
+  "source": "HGH analytical NC pseudopotentials, cpmd2upf v.5.0.1",
+  "z_valence": {"H": 1, "Li": 1, "O": 6, "F": 7, "Mg": 2, "Al": 3, "S": 6, "As": 5, "Cd": 2, "Mo": 6}
+}

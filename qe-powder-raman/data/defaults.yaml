@@ -1,0 +1,15 @@
+# Canonical defaults for qe-powder-raman (merged under DEFAULT_CONFIG in
+# scripts/qe_common.py). Override per-run via config.yaml or CLI flags.
+ecutwfc: 60.0
+ecutrho: 240.0
+conv_thr: 1.0e-10
+mixing_beta: 0.5
+occupations: fixed
+tr2_ph: 1.0e-14
+fwhm: 8.0
+temperature: 300.0
+laser_wavelength: 532.0
+spectrum_broadening: lorentzian
+kpt_density: 30.0
+np: 4
+omp_num_threads: 1
