@@ -76,6 +76,13 @@
 
 ## 完成记录
 
+### 2026-11-20 · QE 子程序参数与 Raman 知识库
+
+- 参考 ORCA skill 的参数速查和知识库结构，新增 [QE 子程序与调用参数](references/qe-command-line.md)，扩充 [结构化 Raman 知识库](data/raman_knowledge.json) 与 [理论及结果判读](references/raman_theory.md)。记录 QE 7.5 官方手册、原始论文和本机 8.0dev 源码的出处。
+- 本机 LiF 验证 `pw.x -nk 1 -i`、`ph.x -npool 1 -in`、`dynmat.x -input` 和 `-inp`。LiH 的真实 Γ 动力学矩阵验证 `q = 0, 0, 1` 与 `q(3) = 1` 的振型输出逐字节一致。源码核对了 Raman 路线的 ASR 和局域场因子。
+- 知识库通过 JSON、来源索引和内部引用校验。含真实 QE 用例的 `QE_REAL_TESTS=1 python tests/run_tests.py` 共 171 项通过。
+
+
 ### 2026-11-20 · MP-20 第五轮谱图与报告回归
 
 - 沿用前几轮筛选规则，排除已抽取的 12 个结构和 6 个内置示例，剩 37 条。按 CSV 原顺序使用 `random.Random(20261124).sample(rows, 3)`。实跑采用 QE 8.0dev、HGH NC/LDA、3 MPI ranks、40/160 Ry、`tr2_ph=1e-10`、`kpt_density: 6.0`。

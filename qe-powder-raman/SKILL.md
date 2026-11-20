@@ -35,6 +35,9 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
 
 请求含无序、金属、非默认方法或不明确参数时，先查 [输入预检与回复指南](references/input-triage.md)。
 
+- 手动调用 `pw.x`、`ph.x`、`dynmat.x` 或设置 MPI 参数时，见 [QE 子程序与调用参数](references/qe-command-line.md)。
+- 查 Raman 参数、物理定义、兼容性与来源时，见 [结构化 Raman 知识库](data/raman_knowledge.json)。判读输出时见 [Raman 理论与结果判读](references/raman_theory.md)。
+
 ## 环境与依赖
 
 - Python 3.9+，并安装 numpy / PyYAML / ASE / spglib / matplotlib
@@ -75,7 +78,7 @@ qe-powder-raman/
 ├── requirements.txt
 ├── config.example.yaml      # 可编辑配置模板
 ├── data/                    # defaults.yaml / pseudopotential_map.json / raman_knowledge.json
-├── references/              # qe_compatibility.md / raman_theory.md / failure_modes.md
+├── references/              # QE 子程序参数、兼容性、理论与诊断
 ├── pseudo/                  # 内置 HGH LDA NC 赝势（10 个元素）
 ├── templates/               # QE 输入模板（relax/scf/ph/dynmat）
 ├── scripts/                 # qe_raman.py 及模块
@@ -84,8 +87,9 @@ qe-powder-raman/
 
 ## 关键约定
 
-- `dynmat.x` 的 LO-TO 方向变量名是 **`q`（3 分量）**，不是 `q(3)`。
-  默认 `q=(0,0,0)` 只出 TO；设置 `q = x y z` 才加入非解析项（需 `ph.x` 已输出 Z* 和 ε∞）。
+- `dynmat.x` 的 LO-TO 方向 `q` 有三个笛卡尔分量。整向量可写作 `q = 0, 0, 1`，也可用 `q(3) = 1` 设置单个分量。
+  零向量给出未加非解析项的 Γ 结果，非零向量需 `ph.x` 已输出 Born 有效电荷和 ε∞。
+- Raman 流程在 `dynmat.x` 使用 `asr='crystal'`。本机 QE 在 `lraman=.true.` 时关闭 `ph.x` 的 Γ 快速算法及其布尔 ASR。
 - 启用 `lo_to_directions` 时，每个方向生成独立的模式表和振型文件。`parse` 会检查
   所请求方向的完成标志和模式编号，缺失或截断的 LO 输出会使解析失败。旧的 LO 输入可用 `prepare` 重新生成。
 - 用 `run --skip-existing` 续跑已准备好的目录，或用相同参数重新运行 `all --execute --skip-existing`。

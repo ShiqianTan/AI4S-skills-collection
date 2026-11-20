@@ -1,8 +1,143 @@
 {
-  "lraman_requirements": "lraman=.true. requires norm-conserving (NC) pseudopotentials (US-PP and PAW are NOT supported), Gamma point only, nonmagnetic, no Hubbard U, no meta-GGA/hybrid, no TS-vdW.",
-  "workflow": "pw.x (SCF) -> ph.x (epsil=.true., trans=.true., lraman=.true., asr=.true., q=0 0 0) -> dynmat.x (asr='crystal')",
-  "dynmat_lo_to": "dynmat.x namelist variable is `q` (3-vector), NOT q(3). Default q=(0,0,0) gives TO only; set `q = x y z` for LO-TO (requires Z* and epsilon from ph.x).",
-  "units": "IR activity in (D/A)^2/amu; Raman activity in A^4/amu; depolarization factor 0..0.75 (0.75 = depolarized).",
-  "powder_average": "dynmat.x prints powder-averaged Raman activity = 45*alpha^2 + 7*beta^2 and depolarization = 3*beta^2/(45*alpha^2+4*beta^2); multiply Raman by cm_factor^2 for Clausius-Mossotti correction.",
-  "rejection_rules": "Reject: US/PAW pseudopotentials, PBE/meta-GGA/hybrid XC, Hubbard U, noncollinear magnetism, partial occupancy, metals/partial occupations."
+  "schema_version": 2,
+  "description": "固体粉末 Raman 知识库。范围为 Quantum ESPRESSO 三维绝缘晶体的 Γ 点一级、非共振、谐波 Raman。供输入生成、预检、日志诊断和谱图判读。",
+  "reference_context": {
+    "online_manual_version": "7.5",
+    "verified_cpu_build": "8.0dev",
+    "verified_qe_commit": "215ff8a23b112bb52372148e7ca55189528331b2",
+    "reference_files": ["../references/qe-command-line.md", "../references/raman_theory.md", "../references/input-triage.md"]
+  },
+  "lraman_requirements": "本技能的 Raman 路线使用 CPU、NC + LDA(PZ)、Γ 点、非磁绝缘晶体及固定占据。PBE NC 仅可在关闭 Raman 后用于本技能支持的声子/IR 路线。",
+  "workflow": "可选 pw.x vc-relax（收敛后采用末态）→ pw.x scf → ph.x（Γ，trans、epsil、lraman）→ dynmat.x（asr='crystal'，默认无非解析项，可选逐方向 LO）→ parse → spectrum → report。",
+  "dynmat_lo_to": "q 是三个笛卡尔分量。q=0,0,1 与默认其余分量为零时的 q(3)=1 等价。省略 q 或设零向量给出未加非解析项的 Γ 结果。非零 q 需要动力学矩阵包含 ε∞ 与 Born 有效电荷。",
+  "units": "频率 cm^-1 或 THz。IR 活性 (D/Å)^2/amu。Raman 活性 Å^4/amu。非零 Raman 活性时退偏比无量纲，理论范围 0–0.75。Stokes 谱为任意单位。",
+  "powder_average": "dynmat.x 用 R 的各向同性和各向异性不变量输出 A=45α²+7β² 与 ρ=3β²/(45α²+4β²)。需要 Clausius–Mossotti 修正时对原始 Raman 活性乘 QE 已打印的 Raman 因子一次。",
+  "rejection_rules": "拒绝在本 Raman 路线中使用 USPP/PAW、GGA/meta-GGA/杂化泛函、Hubbard U、非共线或需磁序的体系、TS-vdW、金属、分数占据和统计无序输入。分子、低维和共振 Raman 需其他方法。",
+  "sources": {
+    "pw_input": {"title": "QE pw.x input description", "url": "https://www.quantum-espresso.org/Doc/INPUT_PW.html"},
+    "ph_input": {"title": "QE ph.x input description", "url": "https://www.quantum-espresso.org/Doc/INPUT_PH.html"},
+    "dynmat_input": {"title": "QE dynmat.x input description", "url": "https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html"},
+    "single_q": {"title": "QE PHonon guide, single-q calculation", "url": "https://www.quantum-espresso.org/Doc/ph_user_guide/node8.html"},
+    "qe_parallel": {"title": "QE user guide, parallelization levels", "url": "https://www.quantum-espresso.org/Doc/user_guide/node20.html"},
+    "ph_parallel": {"title": "QE PHonon guide, parallelism and recovery", "url": "https://www.quantum-espresso.org/Doc/ph_user_guide/node17.html"},
+    "q2r_input": {"title": "QE q2r.x input description", "url": "https://www.quantum-espresso.org/Doc/INPUT_Q2R.html"},
+    "matdyn_input": {"title": "QE matdyn.x input description", "url": "https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html"},
+    "lazzeri_mauri_2003": {"title": "Lazzeri and Mauri, Phys. Rev. Lett. 90, 036401", "url": "https://doi.org/10.1103/PhysRevLett.90.036401"},
+    "porezag_pederson_1996": {"title": "Porezag and Pederson, Phys. Rev. B 54, 7830", "url": "https://doi.org/10.1103/PhysRevB.54.7830"},
+    "local_qe_source": {
+      "title": "本机 QE 8.0dev 源码，见 reference_context.verified_qe_commit",
+      "paths": ["Modules/command_line_options.f90", "PHonon/PH/phq_readin.f90", "PHonon/PH/phq_setup.f90", "PHonon/PH/dynmat.f90", "LR_Modules/dynmat_sub.f90"]
+    }
+  },
+  "executables": {
+    "pw.x": {
+      "example": "mpirun -np 4 pw.x -nk 1 -in scf.in > scf.out 2>&1",
+      "purpose": "以同一结构与赝势得到基态密度和波函数。也用于可选弛豫。",
+      "output": "<outdir>/<prefix>.save/",
+      "source_ids": ["pw_input", "qe_parallel"]
+    },
+    "ph.x": {
+      "example": "mpirun -np 4 ph.x -nk 1 -in ph.in > ph.out 2>&1",
+      "purpose": "计算 Γ 点动力学矩阵、ε∞、Born 有效电荷和非共振 Raman 响应。",
+      "output": "fildyn，以及用于诊断与续算的日志和 QE scratch",
+      "source_ids": ["ph_input", "single_q", "ph_parallel"]
+    },
+    "dynmat.x": {
+      "example": "dynmat.x -in dynmat.in > dynmat.out 2>&1",
+      "purpose": "处理 Γ 动力学矩阵和 ASR，输出模频率、IR/Raman 活性、退偏和振型，可按 q 方向加入非解析项。",
+      "output": "stdout 模表、filout 位移、可选 fileig 正交本征矢、filmol/filxsf 可视化文件",
+      "source_ids": ["dynmat_input", "local_qe_source"]
+    },
+    "q2r.x": {
+      "example": "q2r.x -in q2r.in > q2r.out 2>&1",
+      "purpose": "将完整 q 网格动力学矩阵变换为实空间力常数，属于声子色散流程。",
+      "source_ids": ["q2r_input"]
+    },
+    "matdyn.x": {
+      "example": "matdyn.x -in matdyn.in > matdyn.out 2>&1",
+      "purpose": "从实空间力常数插值得到色散或声子态密度。该结果不能代替 Γ Raman 张量和活性。",
+      "source_ids": ["matdyn_input"]
+    }
+  },
+  "execution_parameters": {
+    "qe_input_aliases": ["-in", "-i", "-inp", "-input"],
+    "qe_kpoint_pools": ["-nk", "-npool", "-npools"],
+    "qe_pw_fft_task_groups": ["-nt", "-ntg"],
+    "qe_pw_diagonalization_group": ["-nd", "-ndiag", "-northo"],
+    "qe_images": ["-ni", "-nimage"],
+    "mpi_launcher_example": "mpirun -np N",
+    "thread_environment": "OMP_NUM_THREADS",
+    "skill_options": ["--np", "--mpi-command", "--omp-num-threads", "--bin-dir", "--skip-existing"],
+    "recovery": "skill --skip-existing 复用已经验证的完整阶段。QE recover=.true. 恢复同一 ph.x 计算的兼容中间产物。多 image 工作流还需按官方说明组装动态矩阵。",
+    "source_ids": ["qe_parallel", "ph_parallel", "local_qe_source"]
+  },
+  "input_parameters": {
+    "pw.x": {
+      "prefix_outdir": "与下游 ph.x 一致。skill 的 qe_outdir 与项目 --outdir 分开。",
+      "ecutwfc_ecutrho": "单位 Ry。内置 HGH NC 路线的生成器下限为 ecutrho >= 4 * ecutwfc。",
+      "occupations_nbnd": "中性闭壳层有隙体系用 fixed。生成器加一个空带并设 diago_full_acc=.true. 以检测采样网格带隙。",
+      "kpoints": "电子 k 网格，显式 kpt_grid 覆盖 kpt_density。",
+      "source_ids": ["pw_input"]
+    },
+    "ph.x": {
+      "lraman": {"qe_default": false, "skill_default": true, "purpose": "按 Lazzeri–Mauri 方法计算非共振 Raman 响应系数。"},
+      "epsil_trans": "Γ 路线两者为真，分别求电场响应和振动。对应 ε∞、Born 有效电荷和 Γ 模。",
+      "q_point": {"ldisp": false, "after_namelist": [0, 0, 0]},
+      "tr2_ph": {"qe_default": 1e-12, "skill_default": 1e-14, "purpose": "DFPT 自洽收敛阈值。"},
+      "eth_rps": {"qe_default": 1e-9, "purpose": "求解投影算符 Pc R |ψ〉的阈值。"},
+      "eth_ns": {"qe_default": 1e-12, "purpose": "非自洽波函数求解阈值。"},
+      "dek": {"qe_default": 0.001, "purpose": "波函数对 k 求导的差分步长。"},
+      "search_sym": {"qe_default": true, "skill_key": "ph_search_sym", "purpose": "QE 模式对称性分析开关。false 用于特定表示错误的复验。"},
+      "asr": "ph.x 中的布尔 ASR 针对 Γ 快速算法。本机版本 lraman 会关闭快速算法及此开关。Raman 链路用 dynmat.x 的 asr='crystal'。",
+      "source_ids": ["ph_input", "lazzeri_mauri_2003", "local_qe_source"]
+    },
+    "dynmat.x": {
+      "asr": {"qe_default": "no", "skill_default": "crystal", "purpose": "用投影施加三平移约束。"},
+      "q": {"qe_default": [0, 0, 0], "example_direction": [0, 0, 1], "basis": "Cartesian", "purpose": "指定 Γ 极限非解析修正的传播方向。"},
+      "filout": "归一化原子位移。避免与 stdout 日志同名。",
+      "fileig": "可选正交本征矢。用于简并子空间、模式混合和 TO/LO 对照。",
+      "filmol_filxsf": "各方向输出独立的 Molden/AXSF 振型文件。",
+      "source_ids": ["dynmat_input", "local_qe_source"]
+    }
+  },
+  "physics_and_observables": {
+    "raman_tensor": {
+      "definition": "对 Γ 正常坐标 Q_m 的电子极化响应导数。在 QE 中，dynmat.x 将 ph.x 的原子位移响应 dchi_dtau 投影到模本征矢。",
+      "alpha": "trace(R)/3",
+      "beta_squared": "((Rxx-Ryy)^2+(Ryy-Rzz)^2+(Rzz-Rxx)^2+6*(Rxy^2+Ryz^2+Rzx^2))/2",
+      "activity": "45*alpha^2 + 7*beta_squared",
+      "depolarization": "3*beta_squared/(45*alpha^2 + 4*beta_squared); 分母为零时无定义",
+      "source_ids": ["lazzeri_mauri_2003", "porezag_pederson_1996", "local_qe_source"]
+    },
+    "ir_activity": "由 Born 有效电荷在本征矢上的投影决定，和 Raman 张量是不同物理量。按模输出。简并模的实际合并由谱生成或后续分析处理。",
+    "selection_rules": "电偶极 IR 需有模有效电荷，一级 Raman 需非零极化响应导数。有反演中心时，偶宇称可 Raman 活性、奇宇称可 IR 活性，并受完整对称性选择定则约束。",
+    "clausius_mossotti": {
+      "base_factor": "f = 3/(2 + trace(epsilon_infinity)/3)",
+      "printed_raman_factor": "f^2",
+      "default_applied_by_skill": false,
+      "interpretation": "QE 的迹平均局域场约定。按一致的物理模型进行比较时才采用，并乘已打印的 Raman 因子一次。",
+      "source_ids": ["local_qe_source"]
+    },
+    "lo_to": "非解析项取决于传播方向、ε∞ 与 Born 有效电荷，可改变多支模式及其本征矢。逐方向 LO 模表和 TO 表需要按振型或简并子空间匹配。默认谱不做极性方向积分。"
+  },
+  "spectrum_processing": {
+    "activity": "默认以 QE 原始活性为峰高展开 Γ TO 模。",
+    "stokes": "I_m ∝ A_m * (nu_L - nu_m)^4 / nu_m * [1 - exp(-hc*nu_m/(k_B*T))]^-1。nu_m 是 cm^-1 波数。nu_L = 1e7/lambda_nm。T=0 时 Bose 因子为 1。输出为相对强度。",
+    "hc_over_kB_cm_K": 1.438776877,
+    "stokes_window": "0 < nu_m < nu_L。",
+    "profile_normalization": "Gaussian/Lorentzian 以峰高缩放。FWHM 改变峰面积和重叠，不等同于声子寿命或计算内禀线宽。",
+    "skill_defaults": {"fwhm_cm-1": 8, "temperature_K": 300, "laser_wavelength_nm": 532, "profile": "lorentzian", "activity_cutoff": 0.0001},
+    "peak_filtering": "排除近似识别的声学支，并保留高于活性阈值且频率 > 1 cm^-1 的模式。显著光学虚频保留在诊断中。",
+    "relative_intensity_limits": ["无绝对强度标定", "无共振增强模型", "无温度导致的频移和非谐寿命", "无极性粉末 LO 方向积分"],
+    "provenance": "spectrum_manifest.json 记录实际绘图参数、当次文件清单和模式表哈希。"
+  },
+  "validation_and_diagnostics": {
+    "scf_gap": "当前 skill 以测得带隙 <= 0.05 eV 停在 ph.x 前。旧日志缺最低空带时为未判定。正带隙是当前 k 网格的指标。",
+    "completion": "逐阶段检查收敛、JOB DONE、SCF 保存数据与 fildyn。每个请求的方向应有 3N 支连续模式，N 是实际计算晶胞原子数。",
+    "zero_raman": "先区分 lraman 关闭、张量未生成/读入、张量投影为零、表格打印精度和绘谱阈值。QE 可在全零响应时省略 Raman 列。例如按已验证流程计算的岩盐 LiF。",
+    "imaginary_modes": "负频率表示动力学矩阵本征值为负。用 ASR 分离平移误差，检查真实振型、几何、k 网格、截断能和响应收敛。当前 skill 用三个最小绝对频率近似识别声学模，低频光学支接近时应人工核对。",
+    "convergence": "以同一结构和方法分别检查截断能、k 网格和 DFPT 阈值。比较峰位、活性与介电张量。简并或交叉附近使用子空间或振型比较。",
+    "mode_assignment": "活性、近简并和频率匹配可用于候选指认。不可约表示与定量实验强度需要对称性信息和实验几何。",
+    "source_ids": ["single_q", "ph_input", "dynmat_input", "local_qe_source"]
+  }
 }

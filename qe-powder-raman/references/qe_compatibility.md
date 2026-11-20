@@ -15,11 +15,11 @@ QE 的 `lraman` 只在满足以下条件时才可用（源码 `PHonon/PH/phq_rea
 | **LDA（PZ 族）+ 整数占据** | `occupations='fixed'`，不接受分数占据 |
 | **CPU 构建** | GPU 拉曼未实现；本 skill 假设 CPU 版本 |
 
-本 skill 的 `preflight` 会逐项检查，对不满足的体系给出 `FAIL` 并拒绝生成输入。
+`preflight` 检查环境、结构和赝势。带隙需要 SCF 能级判断，非磁性也应根据结构来源与电子态核实。实际调用与版本定位见 [QE 子程序与调用参数](qe-command-line.md)。
 
 ## dynmat.x 的 LO-TO 方向变量名是 `q`
 
-`dynmat.x` 读取 `&input` namelist 中的 `q`（一个 3 分量实数向量），**不是** `q(3)`：
+`dynmat.x` 读取 `&input` namelist 中的 `q`（三个笛卡尔分量）。整向量用 `q = x, y, z` 赋值，也可用 `q(1)`、`q(2)` 或 `q(3)` 分别设置一个分量。见 [QE `dynmat.x` 输入手册](https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html)。
 
 ```fortran
 &input

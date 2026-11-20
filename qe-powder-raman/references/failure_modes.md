@@ -55,12 +55,10 @@
 
 **症状**：`preflight` 对含 Mo、Fe、Co、Ni 等元素报 `WARN magnetic_hint`。
 
-**处理**：MVP 假设非磁。若体系实为磁性，需自旋极化 SCF 且 `lraman` 不支持非共线，
-应改为共线自旋极化并人工核对拉曼是否仍适用。
+**处理**：MVP 假设非磁。磁性元素提示需结合已知磁序或独立电子结构结果核对。必须显式描述磁序时，选择已验证支持该磁态的 Raman 方法。
 
 ## 8. LO-TO 缺失 / 变量名写错
 
 **症状**：`dynmat.out` 打印 `A direction for q was not specified: TO-LO splitting will be absent`。
 
-**处理**：LO-TO 方向变量是 `q`（3 分量），不是 `q(3)`。各向异性晶体分别沿
-`q∥c` 与 `q⊥c` 各跑一次。
+**处理**：给 `dynmat.x` 的 `q` 设置非零笛卡尔向量。例如 `q = 0, 0, 1`，或只设置第三分量 `q(3) = 1`。各向异性晶体可沿实际晶胞的 `q∥c` 与 `q⊥c` 分别对照，并保留各方向振型。见 [QE 子程序与调用参数](qe-command-line.md)。

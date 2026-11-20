@@ -5,15 +5,15 @@ solid-state powder-Raman workflow.
 
 Generated inputs implement the validated recipe:
 
-    pw.x scf (LDA/PBE + NC, occupations='fixed')
-      -> ph.x (epsil=.true. trans=.true. lraman=.true. asr=.true., q=Gamma)
+    pw.x scf (LDA + NC, occupations='fixed')
+      -> ph.x (epsil=.true. trans=.true. lraman=.true., q=Gamma)
       -> dynmat.x (asr='crystal') -> IR/Raman activities + depolarization factors
 
 Only norm-conserving pseudopotentials are supported (lraman forbids US/PAW).
 QE's lraman supports LDA only; for GGA/PBE NC set ``raman: false`` (or pass
 ``--no-lraman``) to run phonon/IR without the Raman response.
 Optional non-analytic LO-TO runs are written as separate dynmat_lo*.in inputs
-using the `q` (3-vector) namelist variable (NOT q(3)).
+using the whole-array assignment for the three-component `q` namelist variable.
 """
 
 from __future__ import annotations

@@ -112,6 +112,11 @@ python scripts/qe_raman.py all <structure> --pseudo-dir pseudo/pbe \
 输入文件轻量校验：`python scripts/qe_raman.py validate-input runs/MySys/scf.in`。
 列出模板：`python scripts/qe_raman.py list-templates`。
 
+## 参考资料
+
+- [QE 子程序与调用参数](references/qe-command-line.md)涵盖启动选项、输入字段和 `pw.x → ph.x → dynmat.x` 的文件接口。
+- [Raman 理论与结果判读](references/raman_theory.md)说明活性、Stokes 强度、LO–TO 与虚频校验。[结构化知识库](data/raman_knowledge.json)收录适用条件、参数值和来源。
+
 ## 测试
 
 ```bash
