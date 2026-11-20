@@ -45,8 +45,15 @@ def _artifacts(name: str, input_text: str, cwd: Path) -> dict | None:
     files = []
     if name == "scf" and (prefix := setting("prefix")) and (scratch := setting("outdir")):
         save = cwd / scratch / (prefix + ".save")
-        files = [save / "data-file-schema.xml", save / "charge-density.dat"]
-        files.extend(sorted(save.glob("wfc*.dat")))
+        files = [save / "data-file-schema.xml"]
+        # QE may be built with or without HDF5: accept either storage suffix.
+        charge = (sorted(save.glob("charge-density.dat"))
+                  + sorted(save.glob("charge-density.hdf5")))
+        if not charge:
+            return None
+        files.append(charge[0])
+        files.extend(sorted(set(save.glob("wfc*.dat"))
+                            | set(save.glob("wfc*.hdf5"))))
     elif name == "ph" and (matrix := setting("fildyn")):
         files = [cwd / matrix]
     elif name.startswith("dynmat"):

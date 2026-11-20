@@ -11,7 +11,7 @@ SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 PSEUDO = Path(__file__).resolve().parents[2] / "pseudo"
 sys.path.insert(0, str(SCRIPTS))
 
-from qe_run import run_workflow  # noqa: E402
+from qe_run import _artifacts, run_workflow  # noqa: E402
 
 
 class TestRunWorkflowEnvAndSkip(unittest.TestCase):
@@ -204,3 +204,80 @@ class TestRelaxStage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestScfArtifacts(unittest.TestCase):
+    """QE may store the save directory as .dat (classic) or .hdf5."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qer_art_"))
+        self.text = "&CONTROL\n prefix = 'LiF', outdir = './tmp'\n/\n"
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _save(self, names):
+        save = self.tmp / "tmp" / "LiF.save"
+        save.mkdir(parents=True)
+        for name in names:
+            (save / name).write_bytes(b"x")
+        return save
+
+    def test_classic_dat_build(self):
+        self._save(["data-file-schema.xml", "charge-density.dat",
+                    "wfc1.dat", "wfc2.dat"])
+        art = _artifacts("scf", self.text, self.tmp)
+        self.assertIsNotNone(art)
+        self.assertTrue(any(k.endswith("charge-density.dat") for k in art))
+        self.assertTrue(any(k.endswith("wfc2.dat") for k in art))
+
+    def test_hdf5_build(self):
+        self._save(["data-file-schema.xml", "charge-density.hdf5",
+                    "wfc1.hdf5", "wfc2.hdf5"])
+        art = _artifacts("scf", self.text, self.tmp)
+        self.assertIsNotNone(art)
+        self.assertEqual(len(art), 4)
+        self.assertTrue(any(k.endswith("charge-density.hdf5") for k in art))
+        self.assertTrue(any(k.endswith("wfc2.hdf5") for k in art))
+
+    def test_missing_charge_density_returns_none(self):
+        self._save(["data-file-schema.xml", "wfc1.dat"])
+        self.assertIsNone(_artifacts("scf", self.text, self.tmp))
+
+
+class TestHdf5UpstreamArtifacts(unittest.TestCase):
+    """Regression: HDF5 save files must satisfy the scf->ph artifact gate."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qer_h5_"))
+        self.outdir = self.tmp / "run"
+        self.outdir.mkdir()
+        (self.outdir / "scf.in").write_text(
+            "&CONTROL\n prefix = 'LiF', outdir = './tmp'\n/\n")
+        (self.outdir / "ph.in").write_text(
+            "&inputph\n prefix = 'LiF', outdir = './tmp', fildyn = 'LiF.dyn'\n/\n")
+        self.bin_dir = self.tmp / "bin"
+        self.bin_dir.mkdir()
+        (self.bin_dir / "pw.x").write_text(
+            "#!/bin/sh\n"
+            "mkdir -p tmp/LiF.save\n"
+            "printf x > tmp/LiF.save/data-file-schema.xml\n"
+            "printf x > tmp/LiF.save/charge-density.hdf5\n"
+            "printf x > tmp/LiF.save/wfc1.hdf5\n"
+            "echo JOB DONE.\n")
+        (self.bin_dir / "ph.x").write_text(
+            "#!/bin/sh\nprintf x > LiF.dyn\necho JOB DONE.\n")
+        for name in ("pw.x", "ph.x"):
+            (self.bin_dir / name).chmod(0o755)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_ph_runs_after_hdf5_scf(self):
+        _, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, stage="scf")
+        self.assertTrue(ok)
+        _, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, stage="ph")
+        self.assertTrue(ok)
+        state = json.loads((self.outdir / "state.json").read_text())
+        self.assertEqual(state["stages"]["scf"]["status"], "success")
+        self.assertEqual(state["stages"]["ph"]["status"], "success")

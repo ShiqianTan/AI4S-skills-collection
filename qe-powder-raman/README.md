@@ -18,7 +18,7 @@ qe-powder-raman/
 ├── pseudo/                      # 内置赝势：HGH LDA NC（10 元素）+ pbe/（PBE NC，仅声子/IR）
 ├── templates/                   # QE 输入模板（Step 2 填充）
 ├── scripts/                     # 主程序与模块
-│   ├── qe_raman.py              # CLI：preflight / prepare / run / parse / spectrum / report / all
+│   ├── qe_raman.py              # CLI：preflight / prepare / run / parse / spectrum / report / converge / all
 │   ├── qe_common.py             # 常量与默认值
 │   ├── qe_struct.py             # 结构读取与预检（ASE + spglib）
 │   ├── qe_pp.py                 # UPF 头解析与 NC/LDA 校验
@@ -27,6 +27,7 @@ qe-powder-raman/
 │   ├── qe_parse.py              # 输出解析（Step 3）
 │   ├── qe_spectrum.py           # 光谱绘制（Step 4）
 │   ├── qe_report.py             # 报告（Step 4）
+│   ├── qe_converge.py           # 收敛扫描（E-01）
 │   ├── list_templates.py
 │   └── validate_input.py
 ├── examples/                    # 6 个 MP-20 示例结构（Step 5）
@@ -71,7 +72,16 @@ python scripts/qe_raman.py report   --outdir runs/MySys
 
 # 一步到位（--execute 触发计算，否则只生成输入）
 python scripts/qe_raman.py all <structure> --outdir runs/MySys --np 4 [--execute]
+
+# 收敛扫描（默认扫描 ecutwfc / kpt_density / tr2_ph / FWHM；--execute 才真正算）
+python scripts/qe_raman.py converge <structure> --outdir runs/MySys/convergence --np 4 \
+    [--groups ecutwfc,kpt_density,tr2_ph,fwhm] [--ecutwfc 50 60 70] [--execute]
 ```
+
+`converge` 在每个参数点单独建目录跑完整链路，输出 `convergence.json`、
+`convergence.csv`、`convergence.md`；判据为峰位 ≤ 2 cm⁻¹、Raman 活性相对变化
+≤ 5%、总能 ≤ 1e-4 Ry/atom、介电常数相对变化 ≤ 1%。参考变体取最密/最严一侧，
+并给出推荐最小可用参数。FWHM 只做后处理展宽，不参与 DFT 收敛判据。
 
 `spectrum` 输出：`spectrum_activity.*`（默认）、`spectrum_stokes.*`（`--type stokes|both`）、
 `spectrum_ir.*` 与 `spectrum_raman_ir.png`（IR 活性 + 双轴联合图）、
@@ -96,7 +106,7 @@ python scripts/qe_raman.py all <structure> --pseudo-dir pseudo/pbe \
 ## 测试
 
 ```bash
-python tests/run_tests.py     # 122 项单元 + 集成测试（2 项真 QE 测试默认跳过）
+python tests/run_tests.py     # 153 项单元 + 集成测试（2 项真 QE 测试默认跳过）
 ```
 
 示例结构见 `examples/`（6 个 MP-20 体系，含负对照 LiF 与层状/纤锌矿/闪锌矿等

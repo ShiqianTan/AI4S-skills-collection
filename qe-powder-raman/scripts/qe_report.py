@@ -53,6 +53,16 @@ def _load_json(outdir: Path, name: str) -> dict:
         return {}
 
 
+def _load_convergence(outdir: Path) -> dict:
+    path = outdir / "convergence" / "convergence.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _fmt(v, nd: int = 4) -> str:
     if v is None:
         return "—"
@@ -242,6 +252,10 @@ def render_report(outdir: Path) -> str:
     lo_spectra = sorted(p.name for p in outdir.glob("spectrum_lo*.png"))
     lo_spectra += sorted(p.name for p in outdir.glob("spectrum_to_vs_lo*.png"))
     files.extend(lo_spectra)
+    if (outdir / "convergence" / "convergence.json").exists():
+        files.extend(["convergence/convergence.json",
+                      "convergence/convergence.csv",
+                      "convergence/convergence.md"])
     lines.append("## 6. 输出文件")
     lines.append("")
     for f in files:
@@ -296,6 +310,35 @@ def render_report(outdir: Path) -> str:
         for c in cmds:
             lines.append("- `%s`" % c)
     lines.append("")
+
+    conv = _load_convergence(outdir)
+    if conv:
+        lines.append("## 8. 收敛扫描")
+        lines.append("")
+        lines.append("来源：`convergence/convergence.json`（详见 "
+                     "`convergence/convergence.md`）。")
+        lines.append("")
+        lines.append("| 参数组 | 参考值 | 推荐值 | 是否收敛 | 最大峰位偏差 (cm⁻¹) | 最大活性相对偏差 |")
+        lines.append("|---|---|---|---|---|---|")
+        for g in conv.get("groups") or []:
+            if g.get("group") == "fwhm":
+                lines.append("| FWHM | — | — | 后处理参数 | — | — |")
+                continue
+            fdev = act = None
+            for v in g.get("variants") or []:
+                if v.get("max_freq_dev") is not None:
+                    fdev = max(fdev or 0.0, v["max_freq_dev"])
+                if v.get("max_activity_rel") is not None:
+                    act = max(act or 0.0, v["max_activity_rel"])
+            lines.append("| %s | %s | %s | %s | %s | %s |" % (
+                g.get("label") or g.get("group"),
+                _fmt(g.get("reference_value")),
+                _fmt(g.get("recommended")),
+                "是" if g.get("converged") else "否",
+                _fmt(fdev, 2),
+                "—" if act is None else "%.2f%%" % (100 * act),
+            ))
+        lines.append("")
 
     lines.append("> 本报告由 `qe_report.py` 自动生成。")
     return "\n".join(lines) + "\n"

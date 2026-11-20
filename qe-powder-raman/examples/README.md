@@ -79,3 +79,21 @@ python3 scripts/qe_raman.py all examples/LiF_mp-1138.cif \
 - **CdS/MoS2**：原始 CIF 有六方角噪声，务必经 `prepare`（内部 `spglib.refine_cell`）。
 - **MoS2** 含 -17.29 cm⁻¹ 软模（结构未弛豫），`parse` 会给出 `warning` 状态。
 - 实验对照请使用各自文献值，本表仅作**计算回归基准**，不与实验数值混用。
+
+## 收敛扫描示例
+
+```bash
+# 只准备输入（不跑 QE）
+python scripts/qe_raman.py converge examples/LiF_mp-1138.cif \
+    --outdir runs/LiF/conv --groups ecutwfc --ecutwfc 50 60 70
+
+# 真正执行并生成 convergence.{json,csv,md}
+python scripts/qe_raman.py converge examples/LiF_mp-1138.cif \
+    --outdir runs/LiF/conv --groups ecutwfc,kpt_density,tr2_ph \
+    --np 4 --execute
+```
+
+判据见 `references/qe_compatibility.md` 的“收敛扫描与判据”。粗网格（如
+`ecutwfc 30`）与 60 Ry 基线之间出现数 cm⁻¹ 到十几 cm⁻¹ 的峰位差、以及
+ε∞ 的百分比级变化，属于正常的未收敛表现；用该工具给出推荐值，不要直接
+把粗网格结果当作生产数据。

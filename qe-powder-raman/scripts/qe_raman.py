@@ -12,6 +12,7 @@ Subcommands (implemented incrementally, one step at a time):
     spectrum       broaden modes into a powder-Raman spectrum          [Step 4]
     report         assemble report.md                                 [Step 4]
     all            prepare [-> run ->] parse -> spectrum -> report  (Step 5)
+    converge       parameter convergence scans (E-01)
     validate-input validate a generated QE input file
     list-templates list available input templates
 
@@ -57,6 +58,8 @@ from qe_run import run_workflow  # noqa: E402
 from qe_parse import parse_outdir, print_summary, write_outputs  # noqa: E402
 from qe_spectrum import generate_spectra, load_modes, select_peaks  # noqa: E402
 from qe_report import render_report, write_report  # noqa: E402
+from qe_converge import add_arguments as add_converge_arguments  # noqa: E402
+from qe_converge import run as run_convergence  # noqa: E402
 
 _NOT_IMPLEMENTED = (
     "`{cmd}` is not implemented yet (arrives in a later step of the skill "
@@ -76,6 +79,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pf.add_argument("--bin-dir", default=None, help="QE binary directory")
     pf.add_argument("--pseudo-dir", default=None, help="pseudopotential directory")
     pf.add_argument("--skip-structure", action="store_true", help="skip structure checks")
+
+    cv = sub.add_parser("converge", help="parameter convergence scans")
+    add_converge_arguments(cv)
 
     vi = sub.add_parser("validate-input", help="validate a generated QE input")
     vi.add_argument("file", help="QE input file to validate")
@@ -686,6 +692,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_report(args)
     if args.command == "all":
         return _run_all(args)
+    if args.command == "converge":
+        return run_convergence(args)
     if args.command == "validate-input":
         from validate_input import main as vi_main
 

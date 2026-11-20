@@ -123,3 +123,42 @@ Error in routine phq_setup (1):
 **验证**：LiF + `pseudo/pbe/` + `--no-lraman` + `all --execute`（2×2×2）
 完成 SCF/ph/dynmat/parse/spectrum/report；PBE 结果仅作流程验证，不是
 收敛物理参考。
+
+## 收敛扫描与判据（E-01）
+
+`qe_raman.py converge` 对 `ecutwfc`、`kpt_density`、`tr2_ph` 逐点建目录重跑
+`pw.x → ph.x → dynmat.x`，对 `fwhm` 只做后处理展宽。判据（与
+`examples/README.md` 的回归容差一致）：
+
+| 量 | 判据 | 说明 |
+|---|---|---|
+| 光学模峰位 | `max |Δf| ≤ 2 cm⁻¹` | 按模式编号与参考变体配对 |
+| Raman 活性 | 相对变化 ≤ 5% | 只比较参考活性 > 1e-4 的模 |
+| 总能 | `|ΔE| ≤ 1e-4 Ry/atom` | 排除绝对能量零点差异 |
+| 介电常数 | 相对变化 ≤ 1% | 各向同性时用迹平均 |
+
+参考变体取最密/最严一侧（`ecutwfc`、`kpt_density` 取最大，`tr2_ph` 取最小），
+推荐值为所有已运行变体均在容差内时成本最低的一侧。`fwhm` 没有 DFT 收敛判据：
+孤立峰峰值不随 FWHM 改变，积分随 FWHM 增大。
+
+**注意成本**：每个参数点都是一次完整 SCF+ph+dynmat（AL2O3、MoS2 的 ph 可达
+分钟到数十分钟量级）。先用粗网格做流程检查，再对生产体系扫描；不要用
+`kpt_density` 扫描时仍保留显式 `kpt_grid`（扫描会自动移除显式网格）。
+
+**实测**：LiF 在 2×2×2 网格上扫描 `ecutwfc = 30, 45 Ry`，ε∞ 从 4.08 变到
+3.37（21%），峰位最大变化 15.9 cm⁻¹，判据给出“未收敛”，与 60 Ry 基线的
+预期一致；这验证了扫描链路，而不是 LiF 的收敛推荐值。
+
+## HDF5 与经典 `.dat` 构建的断点兼容（QE 7.5 实测）
+
+QE 可以用 `-DQE_ENABLE_HDF5=ON` 构建，此时 `<outdir>/<prefix>.save/` 内是
+`charge-density.hdf5` 与 `wfc*.hdf5`，而不是经典的 `.dat`。`run` 的
+scf→ph 断点校验（`_artifacts()`）现在同时接受两种后缀：要求存在
+`data-file-schema.xml`、一个 `charge-density.{dat,hdf5}`，并把
+`wfc*.{dat,hdf5}` 纳入指纹。这样在 HDF5 构建（如 QE 7.5）上 scf 成功后
+ph 不会被误判为“scf inputs or artifacts changed”。
+
+QE 7.5 仍满足 `QE_MIN_VERSION = (7, 0)`；`dynmat.x` 的文本输出与
+`q` 方向变量不受 HDF5 影响。回归测试
+`tests/unit/test_run.py::TestHdf5UpstreamArtifacts` 用伪 `pw.x`/`ph.x`
+覆盖了该路径。
