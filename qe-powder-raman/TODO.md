@@ -51,6 +51,24 @@
 
 ## 完成记录
 
+### 2026-11-20 · MP-20 随机抽样复验
+
+- 从 MatterGen `data-release/mp-20/mp_20/test.csv` 的 9,046 行中，保留元素均有内置赝势、`dft_band_gap >= 0.5` eV、`abs(dft_mag_density) <= 1e-4` 的 55 行，按 CSV 原顺序用 Python `random.Random(20261120).sample(rows, 3)` 抽取。三份 CIF 来自原行的 `cif` 字段。
+- 三个初次 SCF 日志都缺少空带能级。SCF 输入现在依据 UPF 价电子数为中性闭壳层晶胞加入一个空带，并完整收敛空带能级。`run` 与 `all --execute` 在已测带隙 ≤ 0.05 eV 时阻止 `ph.x` 启动，旧日志缺少空带信息时记录警告。见 [QE `pw.x` 的 `nbnd` 说明](https://www.quantum-espresso.org/Doc/INPUT_PW.html#idm277)。
+- `QE_REAL_TESTS=1 python tests/run_tests.py` 通过 94 项，包含真实 QE LiF 负对照和重叠能带阻止 `ph.x` 的回归。
+
+| MP ID | 结构 | SCF 带隙 (eV) | 总模式数 | 拉曼活性模式数¹ | 光学虚频数 |
+|---|---|---:|---:|---:|---:|
+| `mp-27281` | LiH₃O₂ | 4.4370 | 36 | 18 | 1 |
+| `mp-625318` | Al(OH)₃ | 4.6098 | 42 | 39 | 1 |
+| `mp-715584` | MoO₃ | 1.3299 | 48 | 45 | 16 |
+
+本机 QE 8.0dev 使用内置 HGH NC/LDA、`kpt_density: 6.0`。前两例用 60/240 Ry、`tr2_ph=1e-14`、1 MPI rank。MoO₃ 用 40/160 Ry、`tr2_ph=1e-10`、4 MPI ranks 完成快速端到端复验，其 60/240 Ry、1 rank 的 SCF 另测得 1.4366 eV。三个报告均保留光学虚频警告。检查了模式数 `3N`、两类谱的 PNG 和各 4,000 行有限数值 CSV。此处采用原始几何与粗网格，材料稳定性、峰位及活性仍需弛豫与收敛验证。
+
+¹ 模表在活性阈值以上的光学模式数，含有活性的虚频；绘谱只纳入符合条件的正频模式。
+
+### 前期记录
+
 2026-11-20 建立清单，完成代码审查、缺陷复现与基线验证。
 2026-11-20 Phase A（P0-01…P0-05）完成：结构/UPF 内容校验、配置与路径语义、阶段完成/产物检查、可靠重跑与 LO 清理；新增回归测试，全套房具测试通过（提交 `20337e7`）。
 2026-11-20 Phase B（P1-01…P1-06）完成：电子结构适用性（gapped/metallic/undeterminable）、共享声学/软模/谱峰分类器、LO 方向校验与逐方向留档、展宽/Stokes/局域场约定、可复现信息持久化、SKILL/README/配置/示例修订；新增回归测试。

@@ -160,9 +160,19 @@ def _scf_vars(cfg, atoms, species, pp_map, prefix, pseudo_dir):
 
 
 def generate_scf(cfg, atoms, species, pp_map, prefix, pseudo_dir) -> str:
+    from qe_pp import parse_upf
+
     tpl = (TEMPLATE_DIR / "scf.in.tmpl").read_text()
     v = _scf_vars(cfg, atoms, species, pp_map, prefix, pseudo_dir)
     v["calculation"] = cfg.get("calculation", "scf")
+    valence = {s: parse_upf(pp_map[s]).z_valence for s in species}
+    v["bands"] = ""
+    v["empty_band_accuracy"] = ""
+    if all(z is not None and np.isfinite(z) for z in valence.values()):
+        occupied = sum(valence[s] for s in atoms.get_chemical_symbols()) / 2
+        if occupied > 0 and np.isclose(occupied, round(occupied), rtol=0, atol=1e-8):
+            v["bands"] = f"  nbnd         = {round(occupied) + 1}\n"
+            v["empty_band_accuracy"] = "  diago_full_acc = .true.\n"
     return render(tpl, v)
 
 

@@ -25,8 +25,9 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
 - 只支持 **LDA（PZ）** 泛函 + `occupations='fixed'`。
 - 不支持：非共线磁性、Hubbard U、meta-GGA/杂化泛函、TS-vdW。
 - 只算 **Γ 点** 一级非共振谐波拉曼；无温度/峰宽/绝对强度标定（除非显式开启 Stokes）。
-- 运行前会检查电子结构：由 SCF 的占据/未占据能级给出 `gapped` / `metallic` /
-  `undeterminable` 判定；`metallic` 记为失败，缺少未占据能级（旧日志）记为警告。
+- 对中性闭壳层晶胞，生成的 SCF 输入会计算一个空带。`run` 与 `all --execute`
+  根据当前 k 网格的占据与未占据能级检查带隙，带隙 ≤ 0.05 eV 时停止在 `ph.x` 之前。
+  缺少空带能级的旧日志仍可读取，并标记为无法判定；粗网格带隙需要独立做收敛验证。
 
 ## 环境与依赖
 

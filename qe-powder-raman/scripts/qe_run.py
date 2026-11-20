@@ -11,6 +11,8 @@ import subprocess
 import time
 from pathlib import Path
 
+from qe_parse import assess_electronic_structure, parse_scf
+
 STATE_FILE = "state.json"
 
 
@@ -220,6 +222,19 @@ def run_workflow(
                 print("  [FAIL] ph.in not found in %s" % outdir)
                 ok = False
                 break
+            scf_log = outdir / "scf.out"
+            if scf_log.is_file():
+                electronic = assess_electronic_structure(
+                    parse_scf(scf_log.read_text(errors="replace"))
+                )
+                state["electronic_structure"] = electronic
+                if electronic["classification"] == "metallic":
+                    state["stages"]["ph"] = {"status": "blocked", "reason": electronic["reason"]}
+                    print("  [FAIL] ph: %s" % electronic["reason"])
+                    ok = False
+                    break
+                if verbose and electronic["classification"] == "undeterminable":
+                    print("  [WARN] ph: %s" % electronic["reason"])
             cmd = launcher(ph, ["-in", "ph.in"])
             if not _run_stage(state, "ph", cmd, outdir / "ph.out", outdir, skip_existing, verbose, env):
                 ok = False

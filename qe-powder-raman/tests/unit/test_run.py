@@ -55,6 +55,24 @@ class TestRunWorkflowEnvAndSkip(unittest.TestCase):
         st = json.loads((self.outdir / "state.json").read_text())
         self.assertEqual(st["stages"]["scf"]["status"], "skipped")
 
+    def test_ph_is_blocked_for_overlapping_bands(self):
+        (self.outdir / "ph.in").touch()
+        (self.outdir / "scf.out").write_text(
+            "convergence has been achieved in   4 iterations\n"
+            "highest occupied, lowest unoccupied level (ev): 2.5 2.4\n"
+            "JOB DONE.\n"
+        )
+        ph = self.bin_dir / "ph.x"
+        ph.write_text("#!/bin/sh\necho JOB DONE.\n")
+        ph.chmod(0o755)
+
+        state, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, stage="ph")
+
+        self.assertFalse(ok)
+        self.assertEqual(state["stages"]["ph"]["status"], "blocked")
+        self.assertEqual(state["electronic_structure"]["gap_ev"], -0.1)
+        self.assertFalse((self.outdir / "ph.out").exists())
+
 
 class TestLoCleanup(unittest.TestCase):
     def setUp(self):

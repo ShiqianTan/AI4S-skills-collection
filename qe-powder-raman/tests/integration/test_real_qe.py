@@ -80,6 +80,8 @@ class TestRealQeLiF(unittest.TestCase):
 
             summary = json.loads((run / "summary.json").read_text())
             self.assertNotEqual(summary["status"], "failed")
+            self.assertEqual(summary["electronic"]["classification"], "gapped")
+            self.assertGreater(summary["electronic"]["gap_ev"], 0.05)
             self.assertEqual(summary["stats"]["total"], 6)  # 3N, N=2
             # LiF is a negative control: no first-order Raman-active mode.
             self.assertEqual(summary["stats"]["raman_active"], [])
