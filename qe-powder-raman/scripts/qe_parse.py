@@ -7,6 +7,7 @@ Produces ``raman_modes.csv`` (one row per mode, incl. LO tables) and
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -406,6 +407,21 @@ def parse_outdir(outdir: str | Path) -> dict:
         key = path.stem.removeprefix("dynmat_")
         rec["lo"][key] = {"modes": lod["modes"], "has_raman": lod["has_raman"],
                           "stats": _stats(lod["modes"])}
+
+    stages = (rec["run_state"] or {}).get("stages", {})
+    records = {name: stages.get(name, {}) for name in ("scf", "ph", "dynmat")}
+    records.update({path.stem: stages.get("lo", {}).get(path.stem, {}) for path in lo_outputs})
+    for name, record in records.items():
+        if record.get("status") in ("running", "stale", "failed", "blocked"):
+            problems.append(f"{name} state is {record['status']}; rerun it before parsing")
+        elif signature := record.get("signature"):
+            input_file = outdir / signature["command"][-1]
+            if (not input_file.is_file()
+                    or hashlib.sha256(input_file.read_bytes()).hexdigest() != signature["input_sha256"]):
+                problems.append(f"{name} input changed; rerun it before parsing")
+            log = outdir / record["log"]
+            if log.is_file() and hashlib.sha256(log.read_bytes()).hexdigest() != record.get("log_sha256"):
+                problems.append(f"{name} log changed; rerun it before parsing")
 
     el = rec["electronic"]
     if el["classification"] == "metallic":

@@ -6,15 +6,83 @@ exit code, elapsed time, the exact command, and the log file name.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
 from qe_parse import assess_electronic_structure, parse_scf
 
 STATE_FILE = "state.json"
+DOWNSTREAM = {
+    "relax": ("scf", "ph", "dynmat", "lo"),
+    "scf": ("ph", "dynmat", "lo"),
+    "ph": ("dynmat", "lo"),
+}
+
+
+def _save_state(cwd: Path, state: dict) -> None:
+    handle = tempfile.NamedTemporaryFile(mode="w", dir=cwd, prefix=".state-",
+                                         suffix=".tmp", delete=False)
+    tmp = Path(handle.name)
+    try:
+        with handle:
+            json.dump(state, handle, indent=2, default=str)
+            handle.write("\n")
+        tmp.replace(cwd / STATE_FILE)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _artifacts(name: str, input_text: str, cwd: Path) -> dict | None:
+    def setting(key):
+        match = re.search(rf"\b{key}\s*=\s*(['\"])(.*?)\1", input_text, re.I)
+        return match.group(2) if match else None
+
+    files = []
+    if name == "scf" and (prefix := setting("prefix")) and (scratch := setting("outdir")):
+        save = cwd / scratch / (prefix + ".save")
+        files = [save / "data-file-schema.xml", save / "charge-density.dat"]
+        files.extend(sorted(save.glob("wfc*.dat")))
+    elif name == "ph" and (matrix := setting("fildyn")):
+        files = [cwd / matrix]
+    elif name.startswith("dynmat"):
+        files = [cwd / value for key in ("filout", "filmol", "filxsf")
+                 if (value := setting(key))]
+    try:
+        sizes = {str(path): path.stat().st_size for path in files if path.is_file()}
+        if len(sizes) != len(files) or not all(sizes.values()):
+            return None
+    except OSError:
+        return None
+    if name == "ph" and files:
+        return {str(files[0]): hashlib.sha256(files[0].read_bytes()).hexdigest()}
+    return sizes
+
+
+def _upstream_issue(stages: dict, name: str, cwd: Path) -> str | None:
+    for upstream in ("scf", "ph"):
+        if name not in DOWNSTREAM[upstream]:
+            continue
+        record = stages.get(upstream, {})
+        if record.get("status") in ("stale", "running", "failed", "blocked"):
+            return f"{upstream} is {record['status']}; rerun it first"
+        signature = record.get("signature")
+        if signature:
+            try:
+                text = (cwd / signature["command"][-1]).read_bytes()
+                log = (cwd / record["log"]).read_bytes()
+            except OSError:
+                return f"{upstream} input or log is missing; rerun it first"
+            artifacts = _artifacts(upstream, text.decode(errors="replace"), cwd)
+            if (hashlib.sha256(text).hexdigest() != signature["input_sha256"]
+                    or hashlib.sha256(log).hexdigest() != record.get("log_sha256")
+                    or artifacts is None or artifacts != record.get("artifacts")):
+                return f"{upstream} inputs or artifacts changed; rerun it first"
+    return None
 
 
 def _launcher(np: int, mpi_command: str, exe: Path, args: list[str]) -> list[str]:
@@ -35,13 +103,23 @@ def _run_stage(
     env: dict | None = None,
 ) -> bool:
     stages = state["stages"]
-    if name not in stages:
-        stages[name] = {}
-    rec = stages[name]
-
-    if skip_existing and log.exists() and rec.get("status") in ("success", "skipped"):
+    records = stages.setdefault("lo", {}) if name.startswith("dynmat_lo") else stages
+    rec = records.setdefault(name, {})
+    input_bytes = (cwd / cmd[-1]).read_bytes()
+    input_text = input_bytes.decode(errors="replace")
+    signature = {
+        "command": cmd,
+        "input_sha256": hashlib.sha256(input_bytes).hexdigest(),
+        "environment": {key: (env or {}).get(key) for key in
+                        ("OMP_NUM_THREADS", "ESPRESSO_PSEUDO")},
+    }
+    if (skip_existing and rec.get("status") in ("success", "skipped")
+            and rec.get("signature") == signature and log.is_file()
+            and rec.get("log_sha256") == hashlib.sha256(log.read_bytes()).hexdigest()
+            and (artifacts := _artifacts(name, input_text, cwd)) is not None
+            and rec.get("artifacts") == artifacts):
         rec["status"] = "skipped"
-        rec["reason"] = "log exists"
+        rec["reason"] = "matching inputs, log and artifacts"
         if verbose:
             print("  [skip] %s (already done: %s)" % (name, log.name))
         return True
@@ -49,24 +127,41 @@ def _run_stage(
     if verbose:
         print("  [run]  %-10s %s" % (name, " ".join(cmd)))
 
-    rec["command"] = cmd
-    rec["log"] = log.name
+    for downstream in DOWNSTREAM.get(name, ()):
+        dependent = stages.get(downstream)
+        if dependent:
+            for entry in dependent.values() if downstream == "lo" else (dependent,):
+                entry.update(status="stale", reason=f"{name} restarted")
+    rec.clear()
+    rec.update(command=cmd, log=log.name, signature=signature, status="running")
+    state["overall_status"] = "running"
+    _save_state(cwd, state)
     start = time.time()
     try:
         with open(log, "w") as fh:
             proc = subprocess.run(cmd, cwd=cwd, stdout=fh, stderr=subprocess.STDOUT, env=env)
         rec["exit_code"] = proc.returncode
         rec["seconds"] = round(time.time() - start, 3)
-        rec["status"] = "success" if proc.returncode == 0 else "failed"
+        rec["status"] = "failed"
+        if proc.returncode == 0:
+            output = log.read_bytes()
+            if b"JOB DONE." in output:
+                rec.update(status="success", log_sha256=hashlib.sha256(output).hexdigest(),
+                           artifacts=_artifacts(name, input_text, cwd))
+            else:
+                rec["error"] = "QE completion marker missing"
     except Exception as exc:  # noqa: BLE001
         rec["status"] = "failed"
         rec["exit_code"] = None
         rec["seconds"] = round(time.time() - start, 3)
         rec["error"] = str(exc)
 
+    _save_state(cwd, state)
     if rec["status"] == "failed":
         if verbose:
-            print("  [FAIL] %s (exit %s) -> %s" % (name, rec.get("exit_code"), log.name))
+            print("  [FAIL] %s (exit %s) -> %s%s" % (
+                name, rec.get("exit_code"), log.name,
+                ": " + rec["error"] if rec.get("error") else ""))
         return False
     if verbose:
         print("  [done] %-10s %.1fs -> %s" % (name, rec.get("seconds", 0.0), log.name))
@@ -196,6 +291,11 @@ def run_workflow(
 
     ok = True
     for name in stages_to_run:
+        issue = _upstream_issue(state["stages"], name, outdir)
+        if issue:
+            print(f"  [FAIL] {name}: {issue}")
+            ok = False
+            break
         if name == "relax":
             if not (outdir / "relax.in").exists():
                 print("  [FAIL] relax.in not found in %s (regenerate with --relax)" % outdir)
@@ -255,42 +355,16 @@ def run_workflow(
                 if verbose:
                     print("  [skip] no LO inputs (dynmat_lo*.in) in %s" % outdir)
                 continue
-            lo_stages = state["stages"].setdefault("lo", {})
             for loin in lo_inputs:
                 key = loin.stem  # e.g. dynmat_lo_1
                 tag = key[len("dynmat_"):] if key.startswith("dynmat_") else key
                 loout = outdir / (loin.stem + ".out")
                 cmd = [str(dyn), "-in", loin.name]
-                # reuse _run_stage but with nested dict
-                rec = lo_stages.setdefault(key, {})
-                if skip_existing and loout.exists() and rec.get("status") in ("success", "skipped"):
-                    rec["status"] = "skipped"
-                    rec["reason"] = "log exists"
-                    if verbose:
-                        print("  [skip] %s (already done)" % key)
-                    continue
-                if verbose:
-                    print("  [run]  %-10s %s" % (key, " ".join(cmd)))
-                rec["command"] = cmd
-                rec["log"] = loout.name
-                start = time.time()
-                try:
-                    with open(loout, "w") as fh:
-                        proc = subprocess.run(cmd, cwd=outdir, stdout=fh, stderr=subprocess.STDOUT, env=env)
-                    rec["exit_code"] = proc.returncode
-                    rec["seconds"] = round(time.time() - start, 3)
-                    rec["status"] = "success" if proc.returncode == 0 else "failed"
-                except Exception as exc:  # noqa: BLE001
-                    rec["status"] = "failed"
-                    rec["error"] = str(exc)
-                if rec["status"] == "failed":
-                    if verbose:
-                        print("  [FAIL] %s -> %s" % (key, loout.name))
+                if not _run_stage(state, key, cmd, loout, outdir, skip_existing, verbose, env):
                     ok = False
-                elif verbose:
-                    print("  [done] %-10s %.1fs -> %s" % (key, rec.get("seconds", 0.0), loout.name))
+                    continue
                 # Older inputs used QE's default filenames for both TO and LO.
-                if rec["status"] == "success":
+                if state["stages"]["lo"][key]["status"] == "success":
                     lo_input = loin.read_text(errors="replace")
                     for variable, ext in (("filmol", ".mold"), ("filxsf", ".axsf")):
                         src = outdir / ("dynmat" + ext)
@@ -298,9 +372,7 @@ def run_workflow(
                             (outdir / ("dynmat_%s%s" % (tag, ext))).write_bytes(src.read_bytes())
 
     state["overall_status"] = "success" if ok else "failed"
-    tmp_path = state_path.with_suffix(".json.tmp")
-    tmp_path.write_text(json.dumps(state, indent=2, default=str) + "\n")
-    tmp_path.replace(state_path)
+    _save_state(outdir, state)
     return state, ok
 
 
@@ -315,7 +387,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--mpi-command", default="mpirun", help="MPI launcher")
     p.add_argument("--omp-num-threads", type=int, default=1, help="OMP_NUM_THREADS")
     p.add_argument("--stage", default="all", choices=["all", "scf", "ph", "dynmat", "lo"])
-    p.add_argument("--skip-existing", action="store_true")
+    p.add_argument("--skip-existing", action="store_true", help="reuse completed stages with matching inputs and outputs")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args(argv)
 

@@ -108,7 +108,7 @@ def _build_parser() -> argparse.ArgumentParser:
     rn.add_argument("--mpi-command", default=None, help="MPI launcher")
     rn.add_argument("--omp-num-threads", type=int, default=None)
     rn.add_argument("--stage", default="all", choices=["all", "relax", "scf", "ph", "dynmat", "lo"])
-    rn.add_argument("--skip-existing", action="store_true", help="skip stages whose log exists")
+    rn.add_argument("--skip-existing", action="store_true", help="reuse completed stages with matching inputs and outputs")
     rn.add_argument("--relax", action="store_true",
                     help="run relax.in first and regenerate SCF from the relaxed structure")
 
@@ -147,7 +147,7 @@ def _build_parser() -> argparse.ArgumentParser:
     al.add_argument("--mpi-command", default=None, help="MPI launcher")
     al.add_argument("--omp-num-threads", type=int, default=None)
     al.add_argument("--stage", default="all", choices=["all", "relax", "scf", "ph", "dynmat", "lo"])
-    al.add_argument("--skip-existing", action="store_true", help="skip stages whose log exists")
+    al.add_argument("--skip-existing", action="store_true", help="reuse completed stages with matching inputs and outputs")
     al.add_argument("--execute", action="store_true",
                     help="actually run pw.x/ph.x/dynmat.x (default: generate only)")
     al.add_argument("--type", default=None, choices=["activity", "stokes", "both"],

@@ -261,13 +261,13 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
     shift = tuple(cfg.get("kpt_shift", [0, 0, 0]))
     grid = resolve_kpoint_grid(cfg, atoms.get_cell())
 
-    # clean stale LO artifacts from a previous prepare (P0-05)
+    # Keep results for requested directions so unchanged inputs can be resumed.
+    lo_names = ["dynmat_lo" if len(lo_dirs) == 1 else f"dynmat_lo_{i}"
+                for i in range(1, len(lo_dirs) + 1)]
     for suffix in ("in", "dat", "out", "mold", "axsf"):
         for stale in outdir.glob(f"dynmat_lo*.{suffix}"):
-            stale.unlink()
-    dt = outdir / "dynmat_table.dat"
-    if dt.exists():
-        dt.unlink()
+            if stale.stem not in lo_names:
+                stale.unlink()
 
     written: list[str] = []
 
@@ -281,8 +281,7 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
     _write("ph.in", generate_ph(cfg, species, prefix))
     _write("dynmat.in", generate_dynmat(prefix, "dynmat_table.dat"))
 
-    for i, q in enumerate(lo_dirs):
-        base = "dynmat_lo" if len(lo_dirs) == 1 else "dynmat_lo_%d" % (i + 1)
+    for base, q in zip(lo_names, lo_dirs):
         _write(base + ".in", generate_dynmat_lo(prefix, q, base + ".dat"))
 
     _write("run.sh", generate_runsh(cfg, bin_dir, pseudo_dir))

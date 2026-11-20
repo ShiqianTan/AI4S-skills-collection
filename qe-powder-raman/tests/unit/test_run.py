@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 PSEUDO = Path(__file__).resolve().parents[2] / "pseudo"
@@ -54,6 +55,57 @@ class TestRunWorkflowEnvAndSkip(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         st = json.loads((self.outdir / "state.json").read_text())
         self.assertEqual(st["stages"]["scf"]["status"], "skipped")
+
+    def test_changed_scf_input_reruns_and_invalidates_downstream(self):
+        def run(stage):
+            return run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1,
+                                stage=stage, skip_existing=True)
+
+        (self.outdir / "ph.in").touch()
+        ph = self.bin_dir / "ph.x"
+        ph.write_text("#!/bin/sh\necho JOB DONE.\n")
+        ph.chmod(0o755)
+        self.assertTrue(run("scf")[1])
+        self.assertTrue(run("ph")[1])
+
+        (self.outdir / "scf.in").write_text("&CONTROL\n prefix='changed'\n/\n")
+        self.assertFalse(run("ph")[1])
+        state, ok = run("scf")
+        self.assertTrue(ok)
+        self.assertEqual(state["stages"]["ph"]["status"], "stale")
+        self.assertEqual(len(self.counter.read_text().splitlines()), 2)
+        self.assertTrue(run("ph")[1])
+
+    def test_interrupt_persists_completed_scf_and_running_ph(self):
+        (self.outdir / "ph.in").touch()
+        (self.outdir / "dynmat.in").touch()
+        from subprocess import run as real_run
+
+        def interrupt_ph(cmd, **kwargs):
+            if cmd[-1] == "ph.in":
+                raise KeyboardInterrupt
+            return real_run(cmd, **kwargs)
+
+        with patch("qe_run.subprocess.run", side_effect=interrupt_ph):
+            with self.assertRaises(KeyboardInterrupt):
+                run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1)
+        state = json.loads((self.outdir / "state.json").read_text())
+        self.assertEqual(state["stages"]["scf"]["status"], "success")
+        self.assertEqual(state["stages"]["ph"]["status"], "running")
+        for name in ("ph.x", "dynmat.x"):
+            exe = self.bin_dir / name
+            exe.write_text("#!/bin/sh\necho JOB DONE.\n")
+            exe.chmod(0o755)
+        state, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, skip_existing=True)
+        self.assertTrue(ok)
+        self.assertEqual(state["stages"]["scf"]["status"], "skipped")
+        self.assertEqual(state["stages"]["ph"]["status"], "success")
+
+    def test_zero_exit_with_incomplete_log_fails(self):
+        (self.bin_dir / "pw.x").write_text("#!/bin/sh\necho interrupted\n")
+        state, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, stage="scf")
+        self.assertFalse(ok)
+        self.assertEqual(state["stages"]["scf"]["status"], "failed")
 
     def test_ph_is_blocked_for_overlapping_bands(self):
         (self.outdir / "ph.in").touch()

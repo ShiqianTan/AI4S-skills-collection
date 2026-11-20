@@ -91,6 +91,14 @@ class TestRealQeLiF(unittest.TestCase):
             # LiF is a negative control: no first-order Raman-active mode.
             self.assertEqual(summary["stats"]["raman_active"], [])
             self.assertEqual(summary["stats"]["sum_raman"], 0.0)
+
+            resumed = subprocess.run([*cmd, "--skip-existing"], capture_output=True,
+                                     text=True, timeout=1800)
+            self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+            stages = json.loads((run / "state.json").read_text())["stages"]
+            for name in ("scf", "ph", "dynmat"):
+                self.assertEqual(stages[name]["status"], "skipped")
+            self.assertEqual(stages["lo"]["dynmat_lo"]["status"], "skipped")
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 

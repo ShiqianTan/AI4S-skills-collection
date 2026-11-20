@@ -88,6 +88,13 @@ class TestParseOutdir(unittest.TestCase):
         rec = parse_outdir(self.tmp)
         self.assertEqual(rec["status"], "failed")
 
+    def test_stale_dynmat_state_rejects_complete_old_log(self):
+        self._copy("LiF_mp-1138")
+        (self.tmp / "state.json").write_text('{"stages": {"dynmat": {"status": "stale"}}}')
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+        self.assertIn("dynmat state is stale", rec["status_reason"])
+
     def test_missing_job_done_dynmat_failed(self):
         self._copy("AlAs_mp-2172")
         txt = (self.tmp / "dynmat.out").read_text()
