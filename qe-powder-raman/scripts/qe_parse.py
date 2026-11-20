@@ -325,10 +325,19 @@ def parse_outdir(outdir: str | Path) -> dict:
     rec["modes"] = dyn["modes"]
     rec["stats"] = _stats(dyn["modes"])
     rec["raman_columns_present"] = dyn["has_raman"]
+    rec["lraman_tensor"] = "Raman tensor" in ph_txt
 
     # completion + artifact checks (P0-04)
     problems: list[str] = []
     warnings: list[str] = []
+
+    relax_path = outdir / "relax_manifest.json"
+    rec["relax"] = None
+    if relax_path.exists():
+        try:
+            rec["relax"] = json.loads(relax_path.read_text())
+        except Exception:  # noqa: BLE001
+            warnings.append("relax_manifest.json unreadable")
 
     if not (outdir / "scf.out").exists():
         problems.append("scf.out missing")
@@ -350,6 +359,12 @@ def parse_outdir(outdir: str | Path) -> dict:
         problems.append("dynmat.out missing")
     elif "JOB DONE." not in dyn_txt:
         problems.append("dynmat.out missing 'JOB DONE.'")
+
+    if not rec["lraman_tensor"]:
+        if dyn["has_raman"]:
+            problems.append("dynmat has Raman columns but ph.out lacks Raman tensor")
+        else:
+            problems.append("Raman tensor not found in ph.out (lraman inactive or incomplete)")
 
     if dyn.get("bad_rows", 0) > 0:
         problems.append("non-numeric mode values (%d row(s))" % dyn["bad_rows"])
@@ -501,6 +516,11 @@ def print_summary(rec: dict) -> None:
     print("  status: %s" % rec["status"])
     if rec.get("status_reason"):
         print("  reason: %s" % rec["status_reason"])
+    relax = rec.get("relax")
+    if relax:
+        print("  relax: final_force=%s final_stress=%s n_atoms=%s"
+              % (relax.get("final_force"), relax.get("final_stress"),
+                 relax.get("n_atoms")))
     for w in rec.get("warnings", []):
         print("  [WARN] %s" % w)
 

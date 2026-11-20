@@ -70,6 +70,9 @@ DEFAULT_BIN_DIR = Path(
 
 QE_BINARIES = ("pw.x", "ph.x", "dynmat.x")
 
+# Minimum QE major.minor accepted by the lraman/dynmat.x workflow.
+QE_MIN_VERSION = (7, 0)
+
 # XC functional strings accepted for LDA + norm-conserving Raman (lraman).
 # HGH pseudopotentials use PZ (SLA-PZ-NOGX-NOGC). Anything else is rejected.
 ACCEPTED_XC_LDA = ("PZ", "SLA-PZ-NOGX-NOGC", "SLA-PZ-NOGC-NOGX")

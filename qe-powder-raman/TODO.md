@@ -6,7 +6,7 @@
 
 ## 验证基线
 
-- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 93 项测试（1 项为可选真 QE 冒烟测试，未设 `QE_REAL_TESTS=1` 时跳过）。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。集成测试基于 LiF、AlAs、MoS₂ 的日志夹具覆盖解析与失败路径；单元测试覆盖配置、结构、UPF、输入生成、执行、谱图与报告。
+- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 111 项测试（1 项为可选真 QE 冒烟测试，未设 `QE_REAL_TESTS=1` 时跳过）。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。集成测试基于 LiF、AlAs、MoS₂ 的日志夹具覆盖解析与失败路径；单元测试覆盖配置、结构、UPF、输入生成、执行、谱图与报告。
 - 本机 QE 8.0dev 已在 6 个 MP-20 体系（LiF、MgH₂、Al₂O₃、AlAs、CdS、MoS₂）上完成 `pw.x → ph.x → dynmat.x` 实跑，日志与回归数值见 `examples/README.md` 的「预期结果与容差（回归基准）」。真实流程冒烟：LiF 与 AlAs 的 `all --execute`（`--np 1`、`kpt_density: 6.0`，即 2 × 2 × 2 网格）。LiF 得到 6 支模式、0 支拉曼活性模式；AlAs 得到 3 支拉曼活性模式、两个 LO 方向输出及 Stokes 谱。粗网格仅用于验证流程，峰位和强度仍需收敛验证。
 
 ## P0 · 输入、执行与结果完整性
@@ -43,6 +43,31 @@
 
 - [x] **P2-03 评估极性粉末的方向平均。** 待 P1-03 的方向、张量及模式追踪可靠后，比较方位采样、权重与实验散射几何对谱形的影响。**验收**：选用明确的粉末散射几何，在立方材料有对称性校验，在各向异性材料有采样收敛记录，再提供可公开使用的选项。见 [兼容性说明](references/qe_compatibility.md)、[QE 单 q 点计算说明](https://www.quantum-espresso.org/Doc/ph_user_guide/node8.html)。
 
+## P3 · Phase D 可信度收尾（已完成）
+
+- [x] **D-01 统一 Git 源与同步方式。** 工作目录自带 `.git`（本地快照、无 remote），权威发布源是 `AI4S-skills-collection` 仓库；当前 rsync 未排除 `.git`，可能把本地快照带入发布子目录。**验收**：同步命令显式排除 `.git`、`__pycache__`、`*.pyc`、`.DS_Store`；文档或 TODO 记录“工作目录为编辑副本、远程仓库为唯一发布源”；本地快照与当前文件内容一致（无未并入库的改动）。
+- [x] **D-02 弛豫结果进入解析与报告。** `relax_manifest.json` 已记录残余力/应力/对称性，但 `parse`/`report` 未读取。**验收**：`summary.json` 含 `relax` 字段；`report.md` 展示是否执行弛豫、残余力/应力、对称性；输出文件清单包含 `relax_manifest.json`；缺少该文件时显示“未弛豫”而非报错。
+- [x] **D-03 修正 `--relax` 帮助文本。** `prepare` 与 `all` 的帮助仍写 “also write relax.in”，而 `run`/`all --execute` 现在会执行并重建输入。**验收**：三处帮助分别说明“仅生成 relax.in”“执行弛豫并重建 SCF/ph/dynmat”，与 `run --relax` 行为一致。
+- [x] **D-04 校验 `lraman` 生效与 Raman 张量完整性。** 当前仅依据 dynmat 是否存在 Raman 列判断，无法区分“全零张量”和“张量未生成”。**验收**：`parse` 检查 `ph.out` 的 `Raman tensor`/`RAMAN COEFFICIENTS` 块；缺失且无 Raman 列时状态为 `failed`；有列但缺张量证据时同样失败；LiF 全零负对照仍为 `success`。`summary.json` 记录 `lraman_tensor`。
+- [x] **D-05 CLI 支持 `--kpt-density` / `--kpt-grid`。** 默认 `kpt_density=30` 与示例基准 6×6×6 不一致，且无法从 CLI 直接复现基准。**验收**：`prepare`/`all` 接受 `--kpt-density FLOAT` 与 `--kpt-grid NX NY NZ`（显式网格优先）；生成输入与 `inputs_manifest.json` 使用覆盖后的值；有单元测试覆盖优先级。
+- [x] **D-06 QE 版本门槛。** `preflight` 只显示版本，不校验最低版本。**验收**：解析 `Program PWSCF v.X.Y`；低于最低支持版本（7.0）时 `FAIL`；无法解析时保持 `WARN`；有单元测试覆盖版本解析。
+
+## P4 · Phase E 方法能力（已确认引入 PBE NC）
+
+- [ ] **E-01 收敛扫描子命令。** 自动化 `ecutwfc`、k 网格、`tr2_ph`、展宽 FWHM 的收敛测试，输出峰位/活性随参数变化的表与收敛判据；记录到报告。
+- [ ] **E-02 引入 PBE 模守恒赝势。** 用户已确认允许引入 PBE NC（`lraman` 不限定 LDA）。扩展赝势校验接受的 XC 集合、增加 PBE/PBEsol NC 赝势获取与校验（来源、SHA-256、元素覆盖），保留内置 HGH LDA 作为冒烟基线。**验收**：PBE NC 体系可完成 `all --execute`；非 NC/错误 XC 仍被拒绝；报告中记录赝势 XC 与来源。
+- [ ] **E-03 LO/IR 谱与逐方向谱。** `spectrum` 支持按 LO 方向出谱、增加 IR 活性谱与 Raman/IR 联合图；区分 Γ 点 TO 与各方向 LO。
+- [ ] **E-04 模式指认与实验对照。** 尝试不可约表示/振动特征指认；支持实验峰位叠加、峰拟合与误差带。
+- [ ] **E-05 层状/低维提示。** 对 2D/层状结构检查真空层厚度、层间距离与软模，给出针对性警告与弛豫建议。
+
+## P5 · Phase F 工程交付
+
+- [ ] **F-01 打包与元数据。** 增加 `pyproject.toml`、console entry point、`__version__`、`LICENSE`、`CHANGELOG`、`CITATION`。
+- [ ] **F-02 CI 与质量门禁。** GitHub Actions 运行测试；增加 coverage、ruff/flake8；为 `report.md` 与谱图增加黄金文件测试。
+- [ ] **F-03 CLI 自动化与并发。** 增加 `--json`、`--quiet`、日志文件；`state.json` 并发锁；多 LO 方向并行。
+- [ ] **F-04 国际化与展示。** 报告/图支持英文；字体回退跨平台；报告嵌入谱图。
+- [ ] **F-05 文档收尾。** 修正 `README.md:19` “templates（Step 2 填充）”、Step 0 “本步”等过期表述；补充一份真实运行产物样例（`report.md` + 谱图）与故障排查案例。
+
 ## 维护方式
 
 - 修改输入校验、计算流程或谱图时，同步更新相关条目的复现、状态与验收证据。新增条目沿用唯一编号，记录影响和最小复现。发现新证据时可调整优先级，保留编号便于追踪。
@@ -51,6 +76,7 @@
 
 ## 完成记录
 
+2026-11-20 Phase D（D-01…D-06）完成：同步排除本地 `.git` 并记录发布方式；弛豫信息写入 `summary.json` 与 `report.md`；修正 `--relax` 帮助；校验 `ph.out` 的 Raman 张量生成（缺失即失败）；新增 `--kpt-density`/`--kpt-grid`；preflight 增加 QE 最低版本 7.0 检查；版本探测改在临时目录执行，避免 `CRASH`/`input_tmp.in` 污染工作目录。全套房具测试 111 项通过（真 QE 默认跳过）。
 ### 2026-11-20 · MP-20 第三轮续跑回归
 
 - 沿用前两轮筛选规则，排除已抽取的 6 个结构和 6 个内置示例，剩 43 条。按 CSV 原顺序用 `random.Random(20261122).sample(rows, 3)` 抽取。真实 QE 8.0dev 使用 HGH NC/LDA、3 MPI ranks、40/160 Ry、`tr2_ph=1e-10`、`kpt_density: 6.0`，输出两类谱的 CSV 和 PNG。

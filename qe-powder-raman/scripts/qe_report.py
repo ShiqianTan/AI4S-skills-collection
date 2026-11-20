@@ -116,11 +116,30 @@ def render_report(outdir: Path) -> str:
         lines.append("| 依据 | %s |" % el["reason"])
     lines.append("")
 
+    relax = s.get("relax")
+    relax_stage = ((s.get("run_state") or {}).get("stages") or {}).get("relax") or {}
+    lines.append("### 结构弛豫（vc-relax）")
+    lines.append("")
+    if relax:
+        lines.append("| 项目 | 值 |")
+        lines.append("|------|----|")
+        if relax_stage.get("status"):
+            lines.append("| 弛豫阶段状态 | %s |" % relax_stage["status"])
+        lines.append("| 残余力 final_force | %s |" % _fmt(relax.get("final_force")))
+        lines.append("| 残余应力 final_stress | %s |" % _fmt(relax.get("final_stress")))
+        lines.append("| 原子数 | %s |" % (relax.get("n_atoms") if relax.get("n_atoms") is not None else "—"))
+        if relax.get("spacegroup") is not None:
+            lines.append("| 弛豫后空间群 | %s |" % relax["spacegroup"])
+    else:
+        lines.append("- 未执行弛豫（未启用 `--relax` 或缺少 `relax_manifest.json`）。")
+    lines.append("")
+
     lines.append("## 2. 介电性质与声子")
     lines.append("")
     ph = [
         ("ph 收敛", "是" if s.get("ph_converged") else "否"),
         ("ph JOB DONE", "是" if s.get("ph_job_done") else "否"),
+        ("Raman 张量生成", "是" if s.get("lraman_tensor") else "否"),
         ("声学求和规则 ASR", _fmt(s.get("asr_metric"))),
     ]
     for k, v in ph:
@@ -204,7 +223,7 @@ def render_report(outdir: Path) -> str:
             lines.extend(_mode_table("LO 表 `%s`" % label, tables[k]))
 
     files = [
-        "raman_modes.csv", "summary.json",
+        "raman_modes.csv", "summary.json", "relax_manifest.json",
         "spectrum_activity.png", "spectrum_stokes.png",
     ]
     lines.append("## 6. 输出文件")

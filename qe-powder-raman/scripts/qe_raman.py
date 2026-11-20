@@ -32,6 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from qe_common import (  # noqa: E402
     DEFAULT_BIN_DIR,
     QE_BINARIES,
+    QE_MIN_VERSION,
     PSEUDO_DIR,
     load_defaults,
     resolve_bin_dir,
@@ -95,9 +96,14 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--prefix", default=None, help="QE prefix (default from config)")
     pr.add_argument("--symprec", type=float, default=1e-3, help="spglib symmetry tolerance")
     pr.add_argument("--no-refine", action="store_true", help="skip spglib.refine_cell")
-    pr.add_argument("--relax", action="store_true", help="also write relax.in (vc-relax)")
+    pr.add_argument("--relax", action="store_true",
+                    help="also generate relax.in (vc-relax); run it with `run --relax`")
     pr.add_argument("--lo", nargs="*", type=float, default=None,
                     help="LO directions 'x y z [x y z ...]'")
+    pr.add_argument("--kpt-density", type=float, default=None,
+                    help="k-point density target (overrides config)")
+    pr.add_argument("--kpt-grid", nargs=3, type=int, default=None, metavar=("NX", "NY", "NZ"),
+                    help="explicit k-point grid (overrides kpt_density)")
 
     rn = sub.add_parser("run", help="execute pw.x/ph.x/dynmat.x in a prepared outdir [Step 3]")
     rn.add_argument("--outdir", default=None, help="prepared run directory")
@@ -141,7 +147,12 @@ def _build_parser() -> argparse.ArgumentParser:
     al.add_argument("--prefix", default=None, help="QE prefix")
     al.add_argument("--symprec", type=float, default=1e-3, help="spglib symmetry tolerance")
     al.add_argument("--no-refine", action="store_true", help="skip spglib.refine_cell")
-    al.add_argument("--relax", action="store_true", help="also write relax.in (vc-relax)")
+    al.add_argument("--relax", action="store_true",
+                    help="include vc-relax: generate relax.in; with --execute run it and regenerate SCF")
+    al.add_argument("--kpt-density", type=float, default=None,
+                    help="k-point density target (overrides config)")
+    al.add_argument("--kpt-grid", nargs=3, type=int, default=None, metavar=("NX", "NY", "NZ"),
+                    help="explicit k-point grid (overrides kpt_density)")
     al.add_argument("--bin-dir", default=None, help="QE binary directory")
     al.add_argument("--np", type=int, default=None, help="MPI processes")
     al.add_argument("--mpi-command", default=None, help="MPI launcher")
@@ -166,6 +177,16 @@ def _build_parser() -> argparse.ArgumentParser:
 # ---------------------------------------------------------------------------
 
 
+def _parse_version(text: str) -> tuple[int, int] | None:
+    """Parse 'Program PWSCF v.8.0dev' -> (8, 0)."""
+    import re
+
+    match = re.search(r"Program PWSCF\s+v\.?\s*(\d+)\.(\d+)", text or "", re.I)
+    if not match:
+        return None
+    return int(match.group(1)), int(match.group(2))
+
+
 def _check_binaries(bin_dir: Path) -> list[tuple[str, str, str]]:
     msgs: list[tuple[str, str, str]] = []
     if not bin_dir.is_dir():
@@ -180,15 +201,28 @@ def _check_binaries(bin_dir: Path) -> list[tuple[str, str, str]]:
     pw = bin_dir / "pw.x"
     if pw.exists():
         try:
-            out = subprocess.run(
-                [str(pw), "--version"], capture_output=True, text=True, timeout=20
-            )
+            import tempfile
+
+            # Run in a scratch dir: some QE builds emit CRASH/input_tmp.in.
+            with tempfile.TemporaryDirectory(prefix="qer_pwver_") as scratch:
+                out = subprocess.run(
+                    [str(pw), "--version"], capture_output=True, text=True,
+                    timeout=20, cwd=scratch,
+                )
             first = (out.stdout or out.stderr).splitlines()
             version = next((ln.strip() for ln in first if "Program PWSCF" in ln), None)
         except Exception:  # noqa: BLE001
             version = None
     if version:
         msgs.append(("PASS", "qe_version", version))
+        parsed = _parse_version(version)
+        required = "%d.%d" % QE_MIN_VERSION
+        if parsed is None:
+            msgs.append(("WARN", "qe_version",
+                         "could not parse version (need >= %s)" % required))
+        elif parsed < QE_MIN_VERSION:
+            msgs.append(("FAIL", "qe_version",
+                         "%d.%d < required %s" % (parsed[0], parsed[1], required)))
     else:
         msgs.append(("WARN", "qe_version", "could not read QE version from pw.x --version"))
     return msgs
@@ -372,8 +406,19 @@ def _load_config(path: str | None) -> dict:
     return cfg
 
 
+def _apply_cli_overrides(cfg: dict, args: argparse.Namespace) -> dict:
+    """Apply CLI overrides that only affect input generation (k-point grid)."""
+    density = getattr(args, "kpt_density", None)
+    if density is not None:
+        cfg["kpt_density"] = float(density)
+    grid = getattr(args, "kpt_grid", None)
+    if grid:
+        cfg["kpt_grid"] = [int(x) for x in grid]
+    return cfg
+
+
 def _run_prepare(args: argparse.Namespace) -> int:
-    cfg = _load_config(args.config)
+    cfg = _apply_cli_overrides(_load_config(args.config), args)
     for level, key, text in validate_config(cfg):
         print("[%s] %-14s %s" % (level, key, text))
         if level == "FAIL":

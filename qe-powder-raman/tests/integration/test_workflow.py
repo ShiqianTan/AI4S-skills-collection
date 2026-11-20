@@ -136,6 +136,33 @@ class TestParseOutdir(unittest.TestCase):
         self.assertEqual(rec["status"], "success")
         self.assertTrue(any("undeterminable" in w for w in rec["warnings"]))
 
+    def test_lraman_tensor_missing_failed(self):
+        self._copy("AlAs_mp-2172")
+        ph = self.tmp / "ph.out"
+        text = "\n".join(
+            line for line in ph.read_text().splitlines()
+            if "raman tensor" not in line.lower()
+        )
+        ph.write_text(text + "\n")
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+        self.assertIn("Raman tensor", rec["status_reason"])
+
+    def test_relax_manifest_in_summary_and_report(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "relax_manifest.json").write_text(
+            '{"final_force": 0.0123, "final_stress": 0.45,'
+            ' "n_atoms": 2, "spacegroup": "F-43m"}')
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["relax"]["n_atoms"], 2)
+        self.assertAlmostEqual(rec["relax"]["final_force"], 0.0123)
+        write_outputs(rec)
+        summary = (self.tmp / "summary.json").read_text()
+        self.assertIn('"relax"', summary)
+        text = render_report(self.tmp)
+        self.assertIn("结构弛豫", text)
+        self.assertIn("0.0123", text)
+
     def test_report_sections(self):
         self._copy("AlAs_mp-2172")
         (self.tmp / "inputs_manifest.json").write_text(
@@ -152,6 +179,7 @@ class TestParseOutdir(unittest.TestCase):
         write_outputs(rec)
         text = render_report(self.tmp)
         self.assertIn("电子结构适用性", text)
+        self.assertIn("Raman 张量生成", text)
         self.assertIn("## 7. 可复现信息", text)
         self.assertIn("Raman CM 因子", text)
         self.assertIn("q=(1.000", text)

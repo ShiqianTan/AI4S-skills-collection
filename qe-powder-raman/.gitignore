@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+CRASH
+input_tmp.in
