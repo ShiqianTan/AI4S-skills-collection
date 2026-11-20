@@ -325,16 +325,6 @@ def parse_outdir(outdir: str | Path) -> dict:
     rec["stats"] = _stats(dyn["modes"])
     rec["raman_columns_present"] = dyn["has_raman"]
 
-    lo: dict = {}
-    for p in sorted(outdir.glob("dynmat_lo*.out")):
-        key = p.stem[len("dynmat_"):]  # "lo", "lo_1", "lo_2", ...
-        if not key:
-            key = p.stem
-        lod = parse_dynmat(p.read_text(errors="replace"))
-        lo[key] = {"modes": lod["modes"], "has_raman": lod["has_raman"],
-                   "stats": _stats(lod["modes"])}
-    rec["lo"] = lo
-
     # completion + artifact checks (P0-04)
     problems: list[str] = []
     warnings: list[str] = []
@@ -363,6 +353,7 @@ def parse_outdir(outdir: str | Path) -> dict:
     if dyn.get("bad_rows", 0) > 0:
         problems.append("non-numeric mode values (%d row(s))" % dyn["bad_rows"])
 
+    expected = len(rec["modes"])
     manifest_path = outdir / "pseudopotential_manifest.json"
     if manifest_path.exists():
         try:
@@ -381,6 +372,40 @@ def parse_outdir(outdir: str | Path) -> dict:
             warnings.append("pseudopotential_manifest.json unreadable")
     else:
         warnings.append("n_atoms 未知 (no pseudopotential_manifest.json; 3N check skipped)")
+
+    # The generated input manifest describes the requested directions, even
+    # when an input or output went missing. Historical imports may have logs only.
+    lo_outputs = {p.with_suffix(".out") for p in outdir.glob("dynmat_lo*.in")}
+    lo_outputs.update(outdir.glob("dynmat_lo*.out"))
+    input_manifest = outdir / "inputs_manifest.json"
+    if input_manifest.is_file():
+        try:
+            directions = json.loads(input_manifest.read_text()).get("lo_dirs")
+            if isinstance(directions, list):
+                lo_outputs = {
+                    outdir / ("dynmat_lo.out" if len(directions) == 1 else f"dynmat_lo_{i}.out")
+                    for i in range(1, len(directions) + 1)
+                }
+        except (OSError, ValueError, AttributeError):
+            warnings.append("inputs_manifest.json unreadable")
+
+    rec["lo"] = {}
+    for path in sorted(lo_outputs):
+        if not path.is_file():
+            problems.append(f"{path.name} missing (requested LO)")
+            continue
+        text = path.read_text(errors="replace")
+        lod = parse_dynmat(text)
+        if "JOB DONE." not in text:
+            problems.append(f"{path.name} missing 'JOB DONE.'")
+        if lod["bad_rows"]:
+            problems.append(f"{path.name} contains non-numeric mode values")
+        indices = [m["mode"] for m in lod["modes"]]
+        if not expected or indices != list(range(1, expected + 1)):
+            problems.append(f"{path.name} expected {expected} consecutive LO modes; found {len(indices)}")
+        key = path.stem.removeprefix("dynmat_")
+        rec["lo"][key] = {"modes": lod["modes"], "has_raman": lod["has_raman"],
+                          "stats": _stats(lod["modes"])}
 
     el = rec["electronic"]
     if el["classification"] == "metallic":

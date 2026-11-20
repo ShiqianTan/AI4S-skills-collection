@@ -203,6 +203,8 @@ def generate_dynmat_lo(prefix, q, filout) -> str:
         "fildyn": prefix + ".dyn",
         "qx": fmt_num(q[0]), "qy": fmt_num(q[1]), "qz": fmt_num(q[2]),
         "filout": filout,
+        "filmol": str(Path(filout).with_suffix(".mold")),
+        "filxsf": str(Path(filout).with_suffix(".axsf")),
     })
 
 
@@ -260,12 +262,9 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
     grid = resolve_kpoint_grid(cfg, atoms.get_cell())
 
     # clean stale LO artifacts from a previous prepare (P0-05)
-    for stale in outdir.glob("dynmat_lo*.in"):
-        stale.unlink()
-    for stale in outdir.glob("dynmat_lo*.dat"):
-        stale.unlink()
-    for stale in outdir.glob("dynmat_lo*.out"):
-        stale.unlink()
+    for suffix in ("in", "dat", "out", "mold", "axsf"):
+        for stale in outdir.glob(f"dynmat_lo*.{suffix}"):
+            stale.unlink()
     dt = outdir / "dynmat_table.dat"
     if dt.exists():
         dt.unlink()

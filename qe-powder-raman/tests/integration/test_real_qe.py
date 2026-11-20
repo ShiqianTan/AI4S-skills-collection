@@ -59,7 +59,7 @@ class TestRealQeLiF(unittest.TestCase):
         tmp = Path(tempfile.mkdtemp(prefix="qer_realqe_"))
         try:
             cfg = tmp / "cfg.yaml"
-            cfg.write_text("kpt_density: 6.0\n")
+            cfg.write_text("kpt_density: 6.0\nlo_to_directions: [[0, 0, 1]]\n")
             run = tmp / "run"
             cmd = [
                 sys.executable, str(SCRIPTS / "qe_raman.py"), "all",
@@ -83,6 +83,11 @@ class TestRealQeLiF(unittest.TestCase):
             self.assertEqual(summary["electronic"]["classification"], "gapped")
             self.assertGreater(summary["electronic"]["gap_ev"], 0.05)
             self.assertEqual(summary["stats"]["total"], 6)  # 3N, N=2
+            self.assertEqual(summary["lo"]["lo"]["stats"]["total"], 6)
+            self.assertNotEqual((run / "dynmat.mold").read_bytes(),
+                                (run / "dynmat_lo.mold").read_bytes())
+            self.assertNotEqual((run / "dynmat.axsf").read_bytes(),
+                                (run / "dynmat_lo.axsf").read_bytes())
             # LiF is a negative control: no first-order Raman-active mode.
             self.assertEqual(summary["stats"]["raman_active"], [])
             self.assertEqual(summary["stats"]["sum_raman"], 0.0)

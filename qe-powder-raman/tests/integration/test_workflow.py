@@ -39,6 +39,31 @@ class TestParseOutdir(unittest.TestCase):
         self.assertTrue((self.tmp / "raman_modes.csv").exists())
         self.assertTrue((self.tmp / "summary.json").exists())
 
+    def test_missing_requested_lo_fails(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "inputs_manifest.json").write_text('{"lo_dirs": [[0, 0, 1]]}')
+        (self.tmp / "dynmat_lo.out").unlink()
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+        self.assertIn("dynmat_lo.out missing", rec["status_reason"])
+
+    def test_truncated_lo_fails_even_with_completion_marker(self):
+        self._copy("AlAs_mp-2172")
+        log = self.tmp / "dynmat_lo.out"
+        text = log.read_text().splitlines()
+        header = next(i for i, line in enumerate(text) if line.startswith("# mode"))
+        log.write_text("\n".join(text[:header + 2]) + "\nJOB DONE.\n")
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "failed")
+        self.assertIn("expected 6 consecutive LO modes; found 1", rec["status_reason"])
+
+    def test_unrequested_lo_log_is_ignored(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "inputs_manifest.json").write_text('{"lo_dirs": []}')
+        rec = parse_outdir(self.tmp)
+        self.assertEqual(rec["status"], "success")
+        self.assertEqual(rec["lo"], {})
+
     def test_lif_success_no_raman(self):
         self._copy("LiF_mp-1138")
         rec = parse_outdir(self.tmp)

@@ -7,6 +7,7 @@ exit code, elapsed time, the exact command, and the log file name.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -288,12 +289,13 @@ def run_workflow(
                     ok = False
                 elif verbose:
                     print("  [done] %-10s %.1fs -> %s" % (key, rec.get("seconds", 0.0), loout.name))
-                # keep per-direction eigenvector artifacts (dynmat.mold/axsf are
-                # overwritten by every LO run)
-                for src_name, ext in (("dynmat.mold", ".mold"), ("dynmat.axsf", ".axsf")):
-                    src = outdir / src_name
-                    if src.exists():
-                        (outdir / ("dynmat_%s%s" % (tag, ext))).write_bytes(src.read_bytes())
+                # Older inputs used QE's default filenames for both TO and LO.
+                if rec["status"] == "success":
+                    lo_input = loin.read_text(errors="replace")
+                    for variable, ext in (("filmol", ".mold"), ("filxsf", ".axsf")):
+                        src = outdir / ("dynmat" + ext)
+                        if not re.search(rf"\b{variable}\s*=", lo_input, re.I) and src.is_file():
+                            (outdir / ("dynmat_%s%s" % (tag, ext))).write_bytes(src.read_bytes())
 
     state["overall_status"] = "success" if ok else "failed"
     tmp_path = state_path.with_suffix(".json.tmp")
