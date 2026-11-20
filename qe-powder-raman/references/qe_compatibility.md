@@ -162,3 +162,44 @@ QE 7.5 仍满足 `QE_MIN_VERSION = (7, 0)`；`dynmat.x` 的文本输出与
 `q` 方向变量不受 HDF5 影响。回归测试
 `tests/unit/test_run.py::TestHdf5UpstreamArtifacts` 用伪 `pw.x`/`ph.x`
 覆盖了该路径。
+
+## 模式指认与实验对照（E-04）
+
+`assign` 子命令给出的是**活性指认**，不是不可约表示：
+
+- 每个光学模按 Raman/IR 张量阈值标为 `Raman+IR` / 仅 Raman / 仅 IR / 静默；
+  虚频光学模标为软模。阈值默认 `1e-4`。
+- 频率差在 `--degeneracy-tol`（默认 1 cm⁻¹）内的模式归为同一简并组，
+  报告组号与简并度。
+- 真正的不可约表示（A1g、E2g 等）需要特征向量与空间群特征标表，当前
+  不计算；对已知体系可人工对照文献。
+
+实验文件支持两种格式（CSV 或空白分隔）：
+
+```
+freq_cm1,intensity[,error]      # 少量行：实验峰表
+```
+
+行数 > 50 时按完整谱处理：自动检峰（默认 prominence ≥ 5% 最大值），逐峰
+用 Lorentzian 拟合。装有 `scipy` 时用 `curve_fit` 给出 1σ 中心/FWHM 误差；
+没有 `scipy` 时退回矩估计（中心、半高宽），并在 `experimental_fit.csv`
+的 `method` 列标明。匹配按最近预测模、频率容差 `--tol`（默认 20 cm⁻¹），
+输出偏差、RMS 与叠图 `assignment_overlay.png`。
+
+`report.md` 第 9 节汇总活性分类与模式表；实验匹配与拟合细节在
+`assignment.md`。
+
+## 层状/低维提示（E-05）
+
+`structure` / `preflight` / `prepare` 现在沿三个晶向投影原子分数坐标，
+用垂直晶面间距 `V / |a_j × a_k|` 把最大空隙换算成 Å：
+
+- 最大空隙 ≥ 8 Å：判为 slab/准二维，给出 `slab_vacuum` 警告（附真空厚度、
+  方向、层数），提示面内弛豫与层间软模。
+- 否则最大空隙 ≥ 2.5 Å 且两侧为同一元素：判为层状/范德华结构，给出
+  `layered_gap` 警告（附间隙、元素、层数）。
+- 层数由同元素大间隙分隔的团簇数估计（例如 2H-MoS₂ 沿 c 轴为 2 层）。
+
+检测结果写入 `structure_manifest.json` 的 `layers` 字段，`report.md` 的
+「层状/低维提示」小节展示，软模存在时同时提示先做 vc-relax。注意这只是
+几何提示：Γ 点流程不含层间耦合修正，也不自动加色散修正。

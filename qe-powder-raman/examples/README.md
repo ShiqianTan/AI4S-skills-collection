@@ -97,3 +97,17 @@ python scripts/qe_raman.py converge examples/LiF_mp-1138.cif \
 `ecutwfc 30`）与 60 Ry 基线之间出现数 cm⁻¹ 到十几 cm⁻¹ 的峰位差、以及
 ε∞ 的百分比级变化，属于正常的未收敛表现；用该工具给出推荐值，不要直接
 把粗网格结果当作生产数据。
+
+## 模式指认与实验对照
+
+```bash
+# 先完成 parse；实验峰表列：freq_cm1,intensity[,error]
+python scripts/qe_raman.py assign --outdir runs/AlAs --experimental exp_peaks.csv --tol 20
+
+# 也可以给完整实验谱（>50 行）：自动检峰 + Lorentzian 拟合
+python scripts/qe_raman.py assign --outdir runs/AlAs --experimental exp_spectrum.csv
+python scripts/qe_raman.py report --outdir runs/AlAs   # 第 9 节汇总模式指认
+```
+
+MoS₂ 等层状体系在 `prepare`/`preflight` 会给出 `layered_gap` 警告（本例
+约 4.3 Å 的 S–S 间隙、2 层），提示先做 vc-relax 并检查层间软模。

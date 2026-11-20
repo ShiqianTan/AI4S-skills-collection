@@ -63,6 +63,17 @@ def _load_convergence(outdir: Path) -> dict:
         return {}
 
 
+def _load_assignment(outdir: Path) -> list[dict]:
+    path = outdir / "mode_assignment.csv"
+    if not path.exists():
+        return []
+    try:
+        with open(path) as fh:
+            return list(csv.DictReader(fh))
+    except OSError:
+        return []
+
+
 def _fmt(v, nd: int = 4) -> str:
     if v is None:
         return "—"
@@ -85,6 +96,7 @@ def render_report(outdir: Path) -> str:
     s = _load_summary(outdir)
     tables = _load_mode_tables(outdir)
     ppman = _load_json(outdir, "pseudopotential_manifest.json")
+    struct_manifest = _load_json(outdir, "structure_manifest.json")
 
     lines: list[str] = []
     lines.append("# QE 粉末拉曼计算报告")
@@ -144,6 +156,27 @@ def render_report(outdir: Path) -> str:
     else:
         lines.append("- 未执行弛豫（未启用 `--relax` 或缺少 `relax_manifest.json`）。")
     lines.append("")
+
+    layers = struct_manifest.get("layers") or {}
+    if layers.get("is_slab") or layers.get("is_layered"):
+        lines.append("### 层状/低维提示")
+        lines.append("")
+        lines.append("| 项目 | 值 |")
+        lines.append("|------|----|")
+        lines.append("| 类型 | %s |" % ("slab/准二维（真空层）" if layers.get("is_slab") else "层状/范德华间隙"))
+        lines.append("| 方向 | %s |" % layers.get("axis", "—"))
+        lines.append("| 最大间隙 (Å) | %s |" % _fmt(layers.get("vacuum_thickness"), 2))
+        lines.append("| 层数 | %s |" % layers.get("layer_count", "—"))
+        if layers.get("gap_elements"):
+            lines.append("| 间隙两侧元素 | %s |"
+                         % "-".join(str(e) for e in layers["gap_elements"]))
+        lines.append("")
+        if (s.get("stats") or {}).get("soft_modes"):
+            lines.append("- 检测到软模：层间/面外模式可能为虚频，建议先 vc-relax 并考虑色散修正。")
+        else:
+            lines.append("- 建议：层间/面外模式仍可能偏软，生产计算前建议 vc-relax；"
+                         "Gamma 点流程不含层间耦合修正。")
+        lines.append("")
 
     lines.append("## 2. 介电性质与声子")
     lines.append("")
@@ -256,6 +289,9 @@ def render_report(outdir: Path) -> str:
         files.extend(["convergence/convergence.json",
                       "convergence/convergence.csv",
                       "convergence/convergence.md"])
+    if (outdir / "mode_assignment.csv").exists():
+        files.extend(["mode_assignment.csv", "assignment.md",
+                      "assignment_overlay.png"])
     lines.append("## 6. 输出文件")
     lines.append("")
     for f in files:
@@ -337,6 +373,40 @@ def render_report(outdir: Path) -> str:
                 "是" if g.get("converged") else "否",
                 _fmt(fdev, 2),
                 "—" if act is None else "%.2f%%" % (100 * act),
+            ))
+        lines.append("")
+
+    assign = _load_assignment(outdir)
+    if assign:
+        counts: dict[str, int] = {}
+        to_rows = [r for r in assign if (r.get("table") or "to") == "to"]
+        for row in to_rows:
+            counts[row.get("activity", "?")] = counts.get(row.get("activity", "?"), 0) + 1
+        lines.append("## 9. 模式指认")
+        lines.append("")
+        lines.append("来源：`mode_assignment.csv` / `assignment.md`"
+                     "（由 `assign` 子命令生成）。")
+        lines.append("")
+        lines.append("| 活性类型 | 模数 |")
+        lines.append("|---|---|")
+        labels = {"both": "Raman+IR", "raman": "仅 Raman", "ir": "仅 IR",
+                  "silent": "静默", "soft": "软模（虚频）"}
+        for key in ("both", "raman", "ir", "silent", "soft"):
+            if counts.get(key):
+                lines.append("| %s | %d |" % (labels[key], counts[key]))
+        lines.append("")
+        lines.append("| 模 | 频率 (cm⁻¹) | 活性 | Raman | IR | 退偏 | 简并 |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for row in to_rows[:20]:
+            depol = row.get("depol") or "—"
+            lines.append("| %s | %s | %s | %s | %s | %s | %s |" % (
+                row.get("mode", "—"), _fmt(float(row["freq_cm1"]), 2)
+                if row.get("freq_cm1") else "—",
+                labels.get(row.get("activity", ""), row.get("activity", "—")),
+                _fmt(float(row["raman"]), 4) if row.get("raman") else "—",
+                _fmt(float(row["ir"]), 4) if row.get("ir") else "—",
+                depol if depol == "—" else _fmt(float(depol), 4),
+                row.get("degeneracy", "1"),
             ))
         lines.append("")
 

@@ -10,6 +10,7 @@ Subcommands (implemented incrementally, one step at a time):
     run            execute pw.x / ph.x / dynmat.x                     [Step 3]
     parse          parse outputs into raman_modes.csv / summary.json  [Step 3]
     spectrum       broaden modes into a powder-Raman spectrum          [Step 4]
+    assign         mode assignment + experimental matching (E-04)
     report         assemble report.md                                 [Step 4]
     all            prepare [-> run ->] parse -> spectrum -> report  (Step 5)
     converge       parameter convergence scans (E-01)
@@ -154,6 +155,21 @@ def _build_parser() -> argparse.ArgumentParser:
     rpt = sub.add_parser("report", help="assemble report.md [Step 4]")
     rpt.add_argument("--outdir", default=None, help="run directory with summary.json")
     rpt.add_argument("--config", default=None, help="YAML config file")
+
+    asg = sub.add_parser("assign", help="mode assignment + experimental comparison (E-04)")
+    asg.add_argument("--outdir", default=None, help="run directory with raman_modes.csv")
+    asg.add_argument("--config", default=None, help="YAML config file")
+    asg.add_argument("--experimental", default=None,
+                     help="CSV/whitespace freq,intensity[,error]; >50 rows = spectrum")
+    asg.add_argument("--tol", type=float, default=None,
+                     help="experimental matching tolerance (cm-1, default 20)")
+    asg.add_argument("--degeneracy-tol", type=float, default=None,
+                     help="degeneracy grouping tolerance (cm-1, default 1)")
+    asg.add_argument("--threshold", type=float, default=None,
+                     help="Raman/IR activity cutoff (default 1e-4)")
+    asg.add_argument("--min-prominence", type=float, default=0.05,
+                     help="peak detection prominence fraction for a spectrum")
+    asg.add_argument("--formats", default=None, help="comma list: png,svg")
 
     al = sub.add_parser(
         "all", help="prepare [-> run ->] parse -> spectrum -> report [Step 5]"
@@ -486,6 +502,8 @@ def _run_prepare(args: argparse.Namespace) -> int:
 
     if info.get("fallback_reason"):
         print("refinement fallback: %s" % info["fallback_reason"])
+    if res.layers:
+        info["layers"] = res.layers
     (Path(outdir) / "structure_manifest.json").write_text(
         _json.dumps(info, indent=2, ensure_ascii=False) + "\n")
     (Path(outdir) / "effective_config.json").write_text(
@@ -652,6 +670,65 @@ def _run_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_assign(args: argparse.Namespace) -> int:
+    from qe_assign import (assign_modes, fit_spectrum, match_experimental,
+                           read_experimental, write_assignment, SPECTRUM_ROWS)
+
+    cfg = _load_config(getattr(args, "config", None))
+    outdir = Path(args.outdir or cfg.get("outdir", "runs"))
+    if not (outdir / "raman_modes.csv").exists():
+        print("assign: FAIL (no raman_modes.csv in %s; run `parse` first)"
+              % outdir, file=sys.stderr)
+        return 1
+    modes = load_modes(outdir).get("to", [])
+    assignment = assign_modes(
+        modes,
+        threshold=(args.threshold if args.threshold is not None else 1e-4),
+        degeneracy_tol=(args.degeneracy_tol
+                        if args.degeneracy_tol is not None else 1.0),
+    )
+    match_entries = list(assignment["entries"])
+    tables = load_modes(outdir)
+    for key in sorted(k for k in tables if k != "to"):
+        match_entries.extend(assign_modes(
+            tables[key],
+            threshold=(args.threshold if args.threshold is not None else 1e-4),
+            degeneracy_tol=(args.degeneracy_tol
+                            if args.degeneracy_tol is not None else 1.0),
+            table=key)["entries"])
+    matching = None
+    fits = None
+    exp_rows = None
+    if args.experimental:
+        exp_rows = read_experimental(args.experimental)
+        if not exp_rows:
+            print("assign: FAIL (no numeric rows in %s)" % args.experimental,
+                  file=sys.stderr)
+            return 1
+        if len(exp_rows) > SPECTRUM_ROWS:
+            fits = fit_spectrum(exp_rows, min_prominence=args.min_prominence)
+            exp_peaks = [{"freq": f["center"], "intensity": f["amplitude"],
+                          "error": f["center_err"]} for f in fits]
+        else:
+            exp_peaks = exp_rows
+        if exp_peaks:
+            matching = match_experimental(
+                match_entries, exp_peaks,
+                tol_cm1=(args.tol if args.tol is not None else 20.0))
+    formats = tuple(f.strip() for f in
+                    (args.formats or "png,svg").split(",") if f.strip())
+    written = write_assignment(outdir, assignment, matching, fits, exp_rows,
+                               formats=formats)
+    for e in assignment["entries"]:
+        print("  mode %-3d %8.2f cm-1  %-9s deg=%d"
+              % (e["mode"], e["freq"], e["activity"], e["degeneracy"]))
+    if matching:
+        print("assign: %d/%d experimental peaks matched"
+              % (matching["n_matched"], len(matching["matches"])))
+    print("assign: wrote " + ", ".join(p.name for p in written))
+    return 0
+
+
 def _run_all(args: argparse.Namespace) -> int:
     rc = _run_prepare(args)
     if rc != 0:
@@ -690,6 +767,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_spectrum(args)
     if args.command == "report":
         return _run_report(args)
+    if args.command == "assign":
+        return _run_assign(args)
     if args.command == "all":
         return _run_all(args)
     if args.command == "converge":

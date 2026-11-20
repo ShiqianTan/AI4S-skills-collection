@@ -9,7 +9,9 @@ sys.path.insert(0, str(SCRIPTS))
 
 from qe_struct import (  # noqa: E402
     StructureCheckResult,
+    _check_layers,
     _check_partial_occupancy,
+    analyze_layers,
     check_structure,
     parse_final_structure,
     refine_structure,
@@ -126,6 +128,38 @@ class TestParseFinalStructure(unittest.TestCase):
     def test_relax_metrics(self):
         m = relax_metrics("step 1\nTotal force = 0.0500\nTotal force = 0.0123\n")
         self.assertAlmostEqual(m["final_force"], 0.0123)
+
+
+class TestLayers(unittest.TestCase):
+    def test_mos2_layered(self):
+        res = check_structure(EXAMPLES / "MoS2_mp-2815.cif")
+        self.assertFalse(res.has_fail)
+        self.assertIsNotNone(res.layers)
+        self.assertTrue(res.layers["is_layered"])
+        self.assertEqual(res.layers["layer_count"], 2)
+        self.assertEqual(res.layers["gap_elements"], ["S", "S"])
+        keys = [k for _, k, _ in res.messages]
+        self.assertIn("layered_gap", keys)
+
+    def test_lif_not_layered(self):
+        res = check_structure(EXAMPLES / "LiF_mp-1138.cif")
+        self.assertFalse(res.layers["is_layered"])
+        self.assertFalse(res.layers["is_slab"])
+        keys = [k for _, k, _ in res.messages]
+        self.assertNotIn("layered_gap", keys)
+        self.assertNotIn("slab_vacuum", keys)
+
+    def test_synthetic_slab_vacuum(self):
+        from ase import Atoms
+
+        atoms = Atoms("Si2", positions=[(0, 0, 0), (1.35, 1.35, 0)],
+                      cell=[3.0, 3.0, 20.0], pbc=True)
+        info = analyze_layers(atoms)
+        self.assertTrue(info["is_slab"])
+        self.assertGreater(info["vacuum_thickness"], 8.0)
+        res = StructureCheckResult()
+        _check_layers(atoms, res)
+        self.assertTrue(any(k == "slab_vacuum" for _, k, _ in res.messages))
 
 
 if __name__ == "__main__":

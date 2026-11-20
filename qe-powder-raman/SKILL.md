@@ -1,6 +1,6 @@
 ---
 name: qe-powder-raman
-description: Compute solid-state (crystal) powder Raman spectra with Quantum ESPRESSO. Run the pw.x SCF, then ph.x (epsil + lraman, Gamma), then dynmat.x, then broaden modes into a powder Raman spectrum and a report. Use when the user wants a first-order, non-resonant, harmonic powder Raman spectrum for a periodic insulating crystal. Handles structure reading (CIF or POSCAR), pseudopotential validation (NC + LDA only), input generation, execution, output parsing, spectrum plotting, reporting, and parameter convergence scans.
+description: Compute solid-state (crystal) powder Raman spectra with Quantum ESPRESSO. Run the pw.x SCF, then ph.x (epsil + lraman, Gamma), then dynmat.x, then broaden modes into a powder Raman spectrum and a report. Use when the user wants a first-order, non-resonant, harmonic powder Raman spectrum for a periodic insulating crystal. Handles structure reading (CIF or POSCAR), pseudopotential validation (NC + LDA only), input generation, execution, output parsing, spectrum plotting, reporting, parameter convergence scans, mode assignment with optional experimental comparison, and layered/2D structure hints.
 metadata:
   runtime: local
   execution_mode: cli
@@ -54,6 +54,7 @@ python scripts/qe_raman.py prepare examples/LiF_mp-1138.cif --config config.yaml
 python scripts/qe_raman.py run      --outdir runs/LiF --stage all --np 4
 python scripts/qe_raman.py parse    --outdir runs/LiF
 python scripts/qe_raman.py spectrum --outdir runs/LiF --fwhm 8
+python scripts/qe_raman.py assign   --outdir runs/LiF --experimental exp_peaks.csv
 python scripts/qe_raman.py report   --outdir runs/LiF
 
 # 3) 一步到位（可选 --execute 真正计算，否则只生成输入）
@@ -94,7 +95,7 @@ qe-powder-raman/
 
 ## 状态
 
-六个构建步骤已全部完成，Phase A–E 的可信度与能力项持续补齐。全部 11 个子命令可用：
+六个构建步骤已全部完成，Phase A–E 的可信度与能力项持续补齐。全部 12 个子命令可用：
 
 | 子命令 | 作用 | 落地步骤 |
 |---|---|---|
@@ -104,7 +105,8 @@ qe-powder-raman/
 | `run` | 执行 pw.x/ph.x/dynmat.x（state.json） | Step 3 |
 | `parse` | 解析输出（raman_modes.csv / summary.json） | Step 3 |
 | `spectrum` | Raman 活性谱 + 可选 Stokes、IR 活性谱、逐 LO 方向谱与 TO/LO 对比图（CSV/PNG/SVG） | Step 4 |
-| `report` | 汇总 report.md | Step 4 |
+| `assign` | 模式指认（活性/简并）+ 实验峰匹配与 Lorentzian 拟合、叠图、assignment.md | Phase E (E-04) |
+| `report` | 汇总 report.md（含收敛、模式指认、层状提示） | Step 4 |
 | `converge` | 参数收敛扫描（ecutwfc / k 网格 / tr2_ph / FWHM），输出 convergence.{json,csv,md} | Phase E (E-01) |
 | `all` | 串联以上全流程（`--execute` 触发计算） | Step 5 |
 | `validate-input` | 输入文件轻量校验 | Step 2 |

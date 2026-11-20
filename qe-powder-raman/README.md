@@ -18,7 +18,7 @@ qe-powder-raman/
 ├── pseudo/                      # 内置赝势：HGH LDA NC（10 元素）+ pbe/（PBE NC，仅声子/IR）
 ├── templates/                   # QE 输入模板（Step 2 填充）
 ├── scripts/                     # 主程序与模块
-│   ├── qe_raman.py              # CLI：preflight / prepare / run / parse / spectrum / report / converge / all
+│   ├── qe_raman.py              # CLI：preflight / prepare / run / parse / spectrum / assign / report / converge / all
 │   ├── qe_common.py             # 常量与默认值
 │   ├── qe_struct.py             # 结构读取与预检（ASE + spglib）
 │   ├── qe_pp.py                 # UPF 头解析与 NC/LDA 校验
@@ -28,6 +28,7 @@ qe-powder-raman/
 │   ├── qe_spectrum.py           # 光谱绘制（Step 4）
 │   ├── qe_report.py             # 报告（Step 4）
 │   ├── qe_converge.py           # 收敛扫描（E-01）
+│   ├── qe_assign.py             # 模式指认 + 实验对照（E-04）
 │   ├── list_templates.py
 │   └── validate_input.py
 ├── examples/                    # 6 个 MP-20 示例结构（Step 5）
@@ -67,6 +68,9 @@ python scripts/qe_raman.py parse    --outdir runs/MySys
 # 画谱（默认同时输出 Raman 活性/Stokes、IR 活性、Raman+IR 联合图，以及每个 LO 方向的谱）
 python scripts/qe_raman.py spectrum --outdir runs/MySys --fwhm 8 [--type both] [--no-ir] [--no-lo-spectra]
 
+# 模式指认 + 实验对照（实验文件：freq,intensity[,error]；>50 行按完整谱检峰拟合）
+python scripts/qe_raman.py assign   --outdir runs/MySys --experimental exp_peaks.csv --tol 20
+
 # 报告（写 report.md）
 python scripts/qe_raman.py report   --outdir runs/MySys
 
@@ -88,6 +92,11 @@ python scripts/qe_raman.py converge <structure> --outdir runs/MySys/convergence 
 每个 LO 方向的 `spectrum_lo[_N].*`，以及与 Γ 点 TO 叠加的 `spectrum_to_vs_lo[_N].png`。
 `--no-ir` / `--no-lo-spectra`（或配置 `spectrum_ir: false` / `spectrum_lo: false`）可关闭。
 
+`assign` 输出 `mode_assignment.csv`、`assignment.md`、`assignment_overlay.png`
+（存在实验谱时另有 `experimental_fit.csv`），并把模式指认汇总到 `report.md` 第 9 节。
+层状/低维结构（真空层 ≥ 8 Å，或 ≥ 2.5 Å 的同元素范德华间隙）在预检中给出
+`slab_vacuum` / `layered_gap` 警告，并写入结构清单与报告。
+
 **PBE NC（仅声子/IR）**：QE 的 `lraman` 不支持 GGA（源码
 `PHonon/PH/phq_setup.f90` 直接报 `third order derivatives not implemented
 with GGA`）。内置 PBE NC 在 `pseudo/pbe/`，必须关闭 Raman：
@@ -106,7 +115,7 @@ python scripts/qe_raman.py all <structure> --pseudo-dir pseudo/pbe \
 ## 测试
 
 ```bash
-python tests/run_tests.py     # 153 项单元 + 集成测试（2 项真 QE 测试默认跳过）
+python tests/run_tests.py     # 165 项单元 + 集成测试（2 项真 QE 测试默认跳过）
 ```
 
 示例结构见 `examples/`（6 个 MP-20 体系，含负对照 LiF 与层状/纤锌矿/闪锌矿等

@@ -234,5 +234,46 @@ class TestParseOutdir(unittest.TestCase):
         self.assertIn("q=(1.000", text)
 
 
+class TestAssignmentAndLayers(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qer_int_e04_"))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_assign_and_report_section(self):
+        from qe_assign import (assign_modes, match_experimental,
+                               write_assignment)
+        from qe_spectrum import load_modes
+
+        for name in ("scf.out", "ph.out", "dynmat.out", "dynmat_lo.out"):
+            shutil.copy(FIXTURES / "AlAs_mp-2172" / name, self.tmp / name)
+        rec = parse_outdir(self.tmp)
+        write_outputs(rec)
+        assignment = assign_modes(load_modes(self.tmp)["to"])
+        matching = match_experimental(
+            assignment["entries"],
+            [{"freq": 331.0, "intensity": 1.0, "error": 0.1},
+             {"freq": 364.0, "intensity": 0.5, "error": 0.1}])
+        write_assignment(self.tmp, assignment, matching)
+        self.assertTrue((self.tmp / "mode_assignment.csv").exists())
+        self.assertTrue((self.tmp / "assignment_overlay.png").exists())
+        text = render_report(self.tmp)
+        self.assertIn("## 9. 模式指认", text)
+        self.assertIn("Raman+IR", text)
+
+    def test_report_layered_warning(self):
+        for name in ("scf.out", "ph.out", "dynmat.out"):
+            shutil.copy(FIXTURES / "MoS2_mp-2815" / name, self.tmp / name)
+        write_outputs(parse_outdir(self.tmp))
+        (self.tmp / "structure_manifest.json").write_text(
+            '{"layers": {"is_layered": true, "is_slab": false, "axis": "c",'
+            ' "vacuum_thickness": 4.31, "layer_count": 2,'
+            ' "gap_elements": ["S", "S"]}}')
+        text = render_report(self.tmp)
+        self.assertIn("层状/低维提示", text)
+        self.assertIn("层状/范德华间隙", text)
+
+
 if __name__ == "__main__":
     unittest.main()

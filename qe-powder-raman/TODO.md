@@ -6,7 +6,7 @@
 
 ## 验证基线
 
-- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 153 项测试（2 项为可选真 QE 冒烟测试，未设 `QE_REAL_TESTS=1` 时跳过）。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。集成测试基于 LiF、AlAs、MoS₂ 的日志夹具覆盖解析与失败路径；单元测试覆盖配置、结构、UPF、输入生成、执行、谱图与报告。
+- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 165 项测试（2 项为可选真 QE 冒烟测试，未设 `QE_REAL_TESTS=1` 时跳过）。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。集成测试基于 LiF、AlAs、MoS₂ 的日志夹具覆盖解析与失败路径；单元测试覆盖配置、结构、UPF、输入生成、执行、谱图与报告。
 - 本机 QE 8.0dev 已在 6 个 MP-20 体系（LiF、MgH₂、Al₂O₃、AlAs、CdS、MoS₂）上完成 `pw.x → ph.x → dynmat.x` 实跑，日志与回归数值见 `examples/README.md` 的「预期结果与容差（回归基准）」。真实流程冒烟：LiF 与 AlAs 的 `all --execute`（`--np 1`、`kpt_density: 6.0`，即 2 × 2 × 2 网格）。LiF 得到 6 支模式、0 支拉曼活性模式；AlAs 得到 3 支拉曼活性模式、两个 LO 方向输出及 Stokes 谱。粗网格仅用于验证流程，峰位和强度仍需收敛验证。
 
 ## P0 · 输入、执行与结果完整性
@@ -57,8 +57,8 @@
 - [x] **E-01 收敛扫描子命令。** 新增 `converge`：对 `ecutwfc`、`kpt_density`、`tr2_ph` 逐点建目录跑完整 `pw.x → ph.x → dynmat.x`，`fwhm` 只做后处理展宽；输出 `convergence.{json,csv,md}`，判据为峰位 ≤ 2 cm⁻¹、Raman 活性相对变化 ≤ 5%、总能 ≤ 1e-4 Ry/atom、介电常数相对变化 ≤ 1%，并给出推荐最小可用值；`report.md` 增加“收敛扫描”章节。已用 LiF 30/45 Ry 实跑复验（ε∞ 4.08→3.37，最大峰移 15.9 cm⁻¹，判为未收敛），另有单元/集成回归覆盖。
 - [x] **E-02 引入 PBE 模守恒赝势。** 已核实 QE 的 `lraman` **只支持 LDA**：`PHonon/PH/phq_setup.f90` 对 GGA 直接报 `third order derivatives not implemented with GGA`；实测 MoS₂+PBE NC 的 `pw.x` 正常、`ph.x` 立即失败。因此调整为：内置 PseudoDojo ONCVPSP-PBE-FR-PDv0.4 NC 赝势（`pseudo/pbe/`，10 元素，fully relativistic，来源+SHA-256 记录），赝势校验接受 LDA/GGA NC，manifest 记录 `xc_families`/`raman_supported`/`pseudo_source`；Raman 开启时对 GGA 直接 FAIL 并提示 LDA 或 `--no-lraman`；新增 `raman: false` / `--no-lraman` 的声子/IR/介电工作流。**验收（修订）**：PBE NC 体系可用 `all --execute --no-lraman` 完成全流程（LiF 2×2×2 已复验）；PBE + 默认 Raman 被明确拦截；非 NC/未知 XC 仍被拒绝；报告中记录 XC/来源。
 - [x] **E-03 LO/IR 谱与逐方向谱。** `spectrum` 现按每个 LO 表输出 `spectrum_lo[_N].*`（标题含 `q=(x,y,z)`，方向取自 `inputs_manifest.json`），并生成与 Γ 点 TO 叠加的 `spectrum_to_vs_lo[_N].png`；新增 IR 活性谱 `spectrum_ir.*` 与双轴联合图 `spectrum_raman_ir.png`（LiF 无拉曼但有 IR 时也有效）。`--no-ir` / `--no-lo-spectra` 与配置 `spectrum_ir` / `spectrum_lo` 可关闭；AlAs（LO 365 cm⁻¹ vs TO 332 cm⁻¹）与 LiF（拉曼空白、IR 有峰）已回归。
-- [ ] **E-04 模式指认与实验对照。** 尝试不可约表示/振动特征指认；支持实验峰位叠加、峰拟合与误差带。
-- [ ] **E-05 层状/低维提示。** 对 2D/层状结构检查真空层厚度、层间距离与软模，给出针对性警告与弛豫建议。
+- [x] **E-04 模式指认与实验对照。** 已实现 `assign` 子命令：按 Raman/IR 活性与频率简并给出模式指认（`mode_assignment.csv` / `assignment.md`），支持实验峰表或完整谱（>50 行自动检峰并用 Lorentzian 拟合，scipy 可选、否则矩估计），输出实验匹配偏差、RMS、误差带与 `assignment_overlay.png`；`report.md` 增加第 9 节。未计算不可约表示（需特征向量与空间群特征标表）。
+- [x] **E-05 层状/低维提示。** 已实现 `analyze_layers`：沿三个晶向测量最大间隙（真空层 ≥ 8 Å 判为 slab/准二维；≥ 2.5 Å 且两侧同元素判为层状/范德华间隙），估计层数并写入 `structure_manifest.json`；预检给出 `slab_vacuum` / `layered_gap` 警告与 vc-relax/色散修正建议，`report.md` 增加「层状/低维提示」（含软模提示）。
 
 ## P5 · Phase F 工程交付
 
@@ -128,6 +128,7 @@
 2026-11-20 Phase B（P1-01…P1-06）完成：电子结构适用性（gapped/metallic/undeterminable）、共享声学/软模/谱峰分类器、LO 方向校验与逐方向留档、展宽/Stokes/局域场约定、可复现信息持久化、SKILL/README/配置/示例修订；新增回归测试。
 2026-11-20 Phase C（P2-01…P2-03）完成：分层回归（含可选真 QE 冒烟 `tests/integration/test_real_qe.py`，`QE_REAL_TESTS=1` 时运行）、六示例「预期结果与容差」基准、`--relax` 实际执行并解析末态结构重生成 SCF（残余力/应力/对称性写入 `relax_manifest.json`）、显式 `kpt_grid` 与 `ecutrho` 提示、极性粉末方向平均评估记录。**遗留**：`ecutwfc`/k 网格/`tr2_ph` 的系统收敛扫描与多方向 LO 收敛记录列为后续工作（P2-02/P2-03 文档已注明）。全套房具测试 92 项通过（真 QE 测试默认跳过）。
 2026-11-20 Phase E（E-02）完成：核实 QE `lraman` 仅支持 LDA（`phq_setup.f90` 的 GGA 拦截，MoS₂+PBE 实测复现），将 PBE NC 定位为声子/IR 工作流——内置 `pseudo/pbe/`（PseudoDojo ONCVPSP-PBE-FR-PDv0.4，10 元素，fully relativistic），manifest 记录 XC 家族/来源/SHA-256，Raman 开启时显式拦截 GGA，新增 `raman: false` 与 `--no-lraman`；LiF PBE `all --execute` 全流程复验通过；全套房具测试 122 项通过（2 项真 QE 默认跳过）。
-2026-11-20 兼容性修复：`pw.x` HDF5 构建（QE 7.5，`.hdf5` 电荷密度/波函数）下 scf→ph 断点校验误判已修复，`_artifacts()` 同时接受 `.dat` 与 `.hdf5`，并新增伪 QE HDF5 回归测试；测试 153 项通过。
-2026-11-20 Phase E（E-01）完成：新增 `converge` 收敛扫描（ecutwfc/kpt_density/tr2_ph/FWHM，逐变体目录 + 统一判据 + 推荐值 + `convergence.{json,csv,md}`），`report.md` 汇总收敛结果；LiF 30/45 Ry 真 QE 复验判为未收敛，验证判据与链路。全套房具测试 153 项通过（2 项真 QE 默认跳过）。
+2026-11-20 兼容性修复：`pw.x` HDF5 构建（QE 7.5，`.hdf5` 电荷密度/波函数）下 scf→ph 断点校验误判已修复，`_artifacts()` 同时接受 `.dat` 与 `.hdf5`，并新增伪 QE HDF5 回归测试；测试 165 项通过。
+2026-11-20 Phase E（E-04/E-05）完成：新增 `assign` 模式指认与实验对照（活性分类、简并分组、实验匹配、谱峰拟合、叠图、报告第 9 节）以及层状/低维检测（真空层、同元素范德华间隙、层数、结构性警告）；全套房具测试 165 项通过（2 项真 QE 默认跳过）。
+2026-11-20 Phase E（E-01）完成：新增 `converge` 收敛扫描（ecutwfc/kpt_density/tr2_ph/FWHM，逐变体目录 + 统一判据 + 推荐值 + `convergence.{json,csv,md}`），`report.md` 汇总收敛结果；LiF 30/45 Ry 真 QE 复验判为未收敛，验证判据与链路。全套房具测试 165 项通过（2 项真 QE 默认跳过）。
 2026-11-20 Phase E（E-03）完成：`spectrum` 增加 IR 活性谱与 Raman/IR 联合图、逐 LO 方向谱及 TO/LO 叠加对比图，方向标签来自 `inputs_manifest.json`；新增单元/集成回归（AlAs 的 TO/LO、LiF 的“拉曼空白但 IR 有峰”），全套房具测试 132 项通过（2 项真 QE 默认跳过）。

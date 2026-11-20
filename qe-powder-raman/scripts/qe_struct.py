@@ -37,6 +37,7 @@ class StructureCheckResult:
         self.n_sym_ops = 0
         self.cell = None
         self.angles: tuple[float, float, float] | None = None
+        self.layers: dict | None = None
 
     def add(self, level: str, key: str, text: str) -> None:
         self.messages.append((level, key, text))
@@ -98,6 +99,9 @@ def check_structure(path: str | Path) -> StructureCheckResult:
     # ---- symmetry ----------------------------------------------------------
     _check_symmetry(atoms, res)
 
+    # ---- layered / 2D hints (E-05) -----------------------------------------
+    _check_layers(atoms, res)
+
     # ---- magnetic hint -----------------------------------------------------
     mag = [e for e in set(res.elements) if e in MAGNETIC_HINT_ELEMENTS]
     if mag:
@@ -143,6 +147,112 @@ def validate_structure(atoms, res: StructureCheckResult) -> None:
 
     if not atoms.get_chemical_symbols():
         res.add("FAIL", "no_elements", "structure has no recognizable elements")
+
+
+def analyze_layers(atoms, *, slab_vacuum_ang: float = 8.0,
+                   gap_min_ang: float = 2.5) -> dict:
+    """Detect slab vacuum and layered/vdW gaps (E-05).
+
+    For each lattice direction the atoms are projected onto the fractional
+    coordinate and the largest empty gap is measured in Angstrom using the
+    perpendicular width ``V / |a_j x a_k|``.  A gap >= 8 A is treated as slab
+    vacuum; otherwise a gap >= 2.5 A bordered by the same element on both sides
+    is treated as a possible van der Waals interlayer gap.
+    """
+    import numpy as np
+
+    n = len(atoms)
+    if n == 0:
+        return {"is_slab": False, "is_layered": False, "layer_count": 0}
+    cell = np.asarray(atoms.get_cell(), dtype=float)
+    vol = abs(float(np.linalg.det(cell)))
+    frac = atoms.get_scaled_positions(wrap=True)
+    symbols = atoms.get_chemical_symbols()
+
+    best = None
+    heights: list[float] = []
+    for axis in range(3):
+        j, k = (axis + 1) % 3, (axis + 2) % 3
+        area = float(np.linalg.norm(np.cross(cell[j], cell[k])))
+        height = vol / area if area > 0.0 else 0.0
+        heights.append(round(height, 6))
+        s = frac[:, axis] % 1.0
+        order = np.argsort(s)
+        ss = s[order]
+        if n == 1:
+            gaps = [(height, 1.0, symbols[order[0]], symbols[order[0]],
+                     int(order[0]), int(order[0]))]
+        else:
+            gaps = []
+            for t in range(n):
+                if t < n - 1:
+                    g = float(ss[t + 1] - ss[t])
+                else:
+                    g = float(1.0 + ss[0] - ss[-1])
+                lo = int(order[t])
+                hi = int(order[(t + 1) % n])
+                gaps.append((g * height, g, symbols[lo], symbols[hi], lo, hi))
+        gap = max(gaps, key=lambda item: item[0])
+        if best is None or gap[0] > best[0]:
+            best = (gap[0], axis, height, gap, gaps)
+
+    max_gap, axis, _height, gap, gaps = best
+    is_slab = max_gap >= slab_vacuum_ang
+    same_element = gap[2] == gap[3]
+    is_layered = (not is_slab) and max_gap >= gap_min_ang and same_element
+
+    internal = [
+        g for g in gaps
+        if g[0] >= gap_min_ang and g[2] == g[3] and g is not gap
+    ]
+    if is_slab:
+        layer_count = max(1, len(internal))
+    elif is_layered:
+        layer_count = max(1, len(internal) + 1)
+    else:
+        layer_count = 1
+
+    return {
+        "axis": "abc"[axis],
+        "axis_index": axis,
+        "vacuum_thickness": round(float(max_gap), 4),
+        "peaks": heights,
+        "gap_elements": [gap[2], gap[3]],
+        "layer_count": int(layer_count),
+        "is_slab": bool(is_slab),
+        "is_layered": bool(is_layered),
+        "slab_vacuum_ang": slab_vacuum_ang,
+        "gap_min_ang": gap_min_ang,
+    }
+
+
+def _check_layers(atoms, res: StructureCheckResult) -> None:
+    """Emit E-05 warnings for slab vacuum / layered structures."""
+    try:
+        info = analyze_layers(atoms)
+    except Exception as exc:  # noqa: BLE001
+        res.add("WARN", "layers", "layer analysis failed: %s" % exc)
+        return
+    res.layers = info
+    if info.get("is_slab"):
+        res.add(
+            "WARN",
+            "slab_vacuum",
+            "quasi-2D/slab detected: %.2f A vacuum along %s (%d layer(s)); "
+            "Gamma-only bulk workflow, no interlayer coupling in SCF; relax "
+            "in-plane parameters and check for soft interlayer modes"
+            % (info["vacuum_thickness"], info["axis"], info["layer_count"]),
+        )
+    elif info.get("is_layered"):
+        res.add(
+            "WARN",
+            "layered_gap",
+            "possible layered/vdW structure: %.2f A %s-%s gap along %s "
+            "(%d layer(s)); interlayer modes may be soft -> consider vc-relax "
+            "and dispersion correction; Raman assumes a 3D crystal"
+            % (info["vacuum_thickness"], info["gap_elements"][0],
+               info["gap_elements"][1], info["axis"], info["layer_count"]),
+        )
 
 
 def _check_partial_occupancy(atoms, res: StructureCheckResult) -> None:
