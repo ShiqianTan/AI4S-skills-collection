@@ -44,6 +44,8 @@ DEFAULT_CONFIG: dict = {
     "temperature": 300.0,     # K (for optional Stokes spectrum)
     "laser_wavelength": 532.0,  # nm (for optional Stokes spectrum)
     "spectrum_broadening": "lorentzian",
+    "spectrum_ir": True,      # also write spectrum_ir + Raman/IR joint plot (E-03)
+    "spectrum_lo": True,      # also write per-LO-direction spectra (E-03)
     # k-point density (per reciprocal Angstrom): k_i = max(1, round(density/len_i))
     "kpt_density": 30.0,
     "kpt_shift": [0, 0, 0],

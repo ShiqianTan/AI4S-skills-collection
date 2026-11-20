@@ -63,8 +63,8 @@ python scripts/qe_raman.py run      --outdir runs/MySys --np 4
 # 解析（写 raman_modes.csv / summary.json）
 python scripts/qe_raman.py parse    --outdir runs/MySys
 
-# 画谱（活性谱默认，--type stokes 给 Stokes；--broadening lorentzian|gaussian）
-python scripts/qe_raman.py spectrum --outdir runs/MySys --fwhm 8 [--type both]
+# 画谱（默认同时输出 Raman 活性/Stokes、IR 活性、Raman+IR 联合图，以及每个 LO 方向的谱）
+python scripts/qe_raman.py spectrum --outdir runs/MySys --fwhm 8 [--type both] [--no-ir] [--no-lo-spectra]
 
 # 报告（写 report.md）
 python scripts/qe_raman.py report   --outdir runs/MySys
@@ -72,6 +72,11 @@ python scripts/qe_raman.py report   --outdir runs/MySys
 # 一步到位（--execute 触发计算，否则只生成输入）
 python scripts/qe_raman.py all <structure> --outdir runs/MySys --np 4 [--execute]
 ```
+
+`spectrum` 输出：`spectrum_activity.*`（默认）、`spectrum_stokes.*`（`--type stokes|both`）、
+`spectrum_ir.*` 与 `spectrum_raman_ir.png`（IR 活性 + 双轴联合图）、
+每个 LO 方向的 `spectrum_lo[_N].*`，以及与 Γ 点 TO 叠加的 `spectrum_to_vs_lo[_N].png`。
+`--no-ir` / `--no-lo-spectra`（或配置 `spectrum_ir: false` / `spectrum_lo: false`）可关闭。
 
 **PBE NC（仅声子/IR）**：QE 的 `lraman` 不支持 GGA（源码
 `PHonon/PH/phq_setup.f90` 直接报 `third order derivatives not implemented

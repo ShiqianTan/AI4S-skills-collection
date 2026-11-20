@@ -138,8 +138,12 @@ def _build_parser() -> argparse.ArgumentParser:
     spc.add_argument("--fwhm", type=float, default=None, help="broadening FWHM (cm-1)")
     spc.add_argument("--temperature", type=float, default=None, help="Kelvin (Stokes)")
     spc.add_argument("--laser-wavelength", type=float, default=None, help="nm (Stokes)")
-    spc.add_argument("--threshold", type=float, default=None, help="Raman activity cutoff")
+    spc.add_argument("--threshold", type=float, default=None, help="Raman/IR activity cutoff")
     spc.add_argument("--formats", default=None, help="comma list: png,svg,csv")
+    spc.add_argument("--no-ir", dest="ir", action="store_false", default=None,
+                     help="skip the IR activity spectrum and Raman/IR joint plot")
+    spc.add_argument("--no-lo-spectra", dest="lo_spectra", action="store_false",
+                     default=None, help="skip the per-LO-direction spectra")
 
     rpt = sub.add_parser("report", help="assemble report.md [Step 4]")
     rpt.add_argument("--outdir", default=None, help="run directory with summary.json")
@@ -597,19 +601,27 @@ def _run_spectrum(args: argparse.Namespace) -> int:
     laser = args.laser_wavelength if args.laser_wavelength is not None else float(cfg.get("laser_wavelength", 532.0))
     threshold = args.threshold if args.threshold is not None else 1e-4
     formats = tuple(f.strip() for f in (args.formats or "png,csv").split(",") if f.strip())
+    include_ir = (True if getattr(args, "ir", None) is None
+                  else bool(args.ir)) and bool(cfg.get("spectrum_ir", True))
+    include_lo = (True if getattr(args, "lo_spectra", None) is None
+                  else bool(args.lo_spectra)) and bool(cfg.get("spectrum_lo", True))
 
-    peaks = select_peaks(load_modes(outdir).get("to", []), threshold=threshold)
+    tables = load_modes(outdir)
+    peaks = select_peaks(tables.get("to", []), threshold=threshold)
     if not peaks:
         print("spectrum: no Raman-active optical modes (blank spectrum)")
     else:
         for f, a in sorted(peaks, key=lambda t: t[0]):
             print("  peak %8.2f cm-1  activity %.6f" % (f, a))
+    if include_lo and any(k != "to" for k in tables):
+        print("spectrum: LO tables %s"
+              % ", ".join(sorted(k for k in tables if k != "to")))
 
     try:
         written = generate_spectra(
             outdir, spectrum_type=spectrum_type, broadening=broadening, fwhm=fwhm,
             temperature=temperature, laser_wavelength=laser, threshold=threshold,
-            formats=formats,
+            formats=formats, include_ir=include_ir, include_lo=include_lo,
         )
     except ValueError as exc:
         print("spectrum: FAIL (invalid parameters: %s)" % exc, file=sys.stderr)

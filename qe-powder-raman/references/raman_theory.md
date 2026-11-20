@@ -64,6 +64,18 @@ I(ω) ∝ A(ω) · (n(ω)+1) · (ω_L − ω)⁴ / ω
 | 退偏比 | 无量纲 0–0.75 | dynmat.x |
 | 介电常数 | 无量纲（3×3 张量） | ph.x |
 
+## 谱类型与 LO/IR（E-03）
+
+- `spectrum_activity`：Γ 点 Raman 活性直接展宽，无频率/热因子，单位 Å⁴/amu。
+- `spectrum_stokes`：额外乘 `(ω_L−ω)^4/ω · (n+1)`，仅用于同一组 Γ 点模式，
+  强度为任意单位，不能与非共振活性直接比较绝对大小。
+- `spectrum_ir`：Γ 点 IR 活性（(D/Å)²/amu）按相同 FWHM 展宽；不乘 Stokes 因子。
+  三重简并/方向平均已由 `dynmat.x` 的 IR 活性定义处理。
+- `spectrum_lo[_N]`：来自指定 `q` 方向的完整模表（含未位移的 TO 支），因此
+  峰位整体与 TO 谱相同、仅 LO 支上移；`spectrum_to_vs_lo[_N]` 把两者叠加，
+  便于读出 LO-TO 分裂。方向取自 `inputs_manifest.json` 的 `lo_dirs`。
+- 默认谱始终是 Γ 点 TO（无非解析修正）；LO 谱是逐方向结果，不做 x/y/z 简单平均。
+
 ## 参考
 
 - D. Porezag, M. R. Pederson, Phys. Rev. B 54, 7830 (1996)（lraman 实现）。

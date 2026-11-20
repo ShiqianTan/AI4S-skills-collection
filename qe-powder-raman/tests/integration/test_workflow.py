@@ -11,6 +11,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 from qe_parse import parse_outdir, write_outputs  # noqa: E402
 from qe_report import render_report  # noqa: E402
+from qe_spectrum import generate_spectra  # noqa: E402
 
 
 class TestParseOutdir(unittest.TestCase):
@@ -70,6 +71,28 @@ class TestParseOutdir(unittest.TestCase):
         self.assertEqual(rec["status"], "success")
         self.assertEqual(rec["stats"]["raman_active"], [])
         self.assertEqual(rec["stats"]["sum_raman"], 0.0)
+
+    def test_alas_ir_and_per_lo_spectra(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "inputs_manifest.json").write_text('{"lo_dirs": [[1, 0, 0]]}')
+        write_outputs(parse_outdir(self.tmp))
+        generate_spectra(self.tmp, formats=("png", "csv"))
+        for name in ("spectrum_ir.png", "spectrum_raman_ir.png",
+                     "spectrum_lo.png", "spectrum_to_vs_lo.png"):
+            self.assertTrue((self.tmp / name).is_file(), name)
+        self.assertGreater(len((self.tmp / "spectrum_lo.csv")
+                               .read_text().splitlines()), 2)
+
+    def test_lif_ir_spectrum_present_without_raman(self):
+        self._copy("LiF_mp-1138")
+        write_outputs(parse_outdir(self.tmp))
+        written = generate_spectra(self.tmp, formats=("csv",), include_lo=False)
+        names = {p.name for p in written}
+        self.assertIn("spectrum_ir.csv", names)
+        self.assertEqual(len((self.tmp / "spectrum_activity.csv")
+                             .read_text().splitlines()), 1)
+        self.assertGreater(len((self.tmp / "spectrum_ir.csv")
+                               .read_text().splitlines()), 2)
 
     def test_mos2_warning_soft_mode(self):
         self._copy("MoS2_mp-2815")

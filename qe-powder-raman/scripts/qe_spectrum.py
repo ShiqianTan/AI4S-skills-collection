@@ -10,12 +10,20 @@ Reads ``raman_modes.csv`` in a run directory and produces a broadened
     thermal population factor ``n(omega)+1``.
 
 Output files: ``spectrum_activity.{csv,png,svg}`` and/or
-``spectrum_stokes.{csv,png,svg}``.
+``spectrum_stokes.{csv,png,svg}``.  E-03 adds:
+
+  * ``spectrum_ir.{csv,png,svg}`` — IR activity of the Γ-point modes.
+  * ``spectrum_raman_ir.png`` — Raman and IR activity on twin axes.
+  * ``spectrum_lo[_N].{csv,png,svg}`` — one spectrum per requested LO
+    direction (title/label carries ``q=(x, y, z)`` from inputs_manifest.json).
+  * ``spectrum_to_vs_lo[_N].png`` — the same spectrum overlaid on the Γ-point
+    TO spectrum, making the LO-TO shift visible.
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 import sys
 from pathlib import Path
@@ -128,6 +136,40 @@ def select_peaks(modes: list[dict], threshold: float = 1e-4,
             if m["freq"] > min_freq and m["raman"] > threshold]
 
 
+def select_ir_peaks(modes: list[dict], threshold: float = 1e-4,
+                    min_freq: float = 1.0) -> list[tuple[float, float]]:
+    """Return (freq, IR_activity) for IR-active optical modes (E-03)."""
+    cls = classify_modes(modes)
+    return [(m["freq"], m["ir"]) for m in cls["optical"]
+            if m["freq"] > min_freq and m["ir"] > threshold]
+
+
+def lo_direction_labels(outdir, keys) -> dict[str, str]:
+    """Map LO table keys ('lo', 'lo_1', ...) to 'q=(x, y, z)' labels.
+
+    The requested directions live in inputs_manifest.json; historical imports
+    without that manifest simply fall back to the bare table key.
+    """
+    labels: dict[str, str] = {}
+    try:
+        manifest = json.loads((Path(outdir) / "inputs_manifest.json").read_text())
+        dirs = manifest.get("lo_dirs") or []
+    except (OSError, ValueError, AttributeError):
+        dirs = []
+    for key in keys:
+        idx = None
+        if key == "lo":
+            idx = 0
+        elif key.startswith("lo_"):
+            try:
+                idx = int(key.split("_")[-1]) - 1
+            except ValueError:
+                idx = None
+        if idx is not None and 0 <= idx < len(dirs):
+            labels[key] = "q=(%s)" % ", ".join("%.3f" % float(x) for x in dirs[idx])
+    return labels
+
+
 def build_spectrum(peaks, *, broadening: str = "lorentzian", fwhm: float = 8.0,
                    spectrum_type: str = "activity", temperature: float = 300.0,
                    laser_wavelength: float = 532.0, npoints: int = 4000,
@@ -152,10 +194,11 @@ def build_spectrum(peaks, *, broadening: str = "lorentzian", fwhm: float = 8.0,
 
 
 def plot_spectrum(x, y, peaks, *, title: str, xlabel: str, ylabel: str,
-                  outpath: Path, dpi: int = 160) -> None:
+                  outpath: Path, dpi: int = 160,
+                  blank_text: str = "无一级拉曼活性") -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     if x is None:
-        ax.text(0.5, 0.5, "无一级拉曼活性", ha="center", va="center",
+        ax.text(0.5, 0.5, blank_text, ha="center", va="center",
                 transform=ax.transAxes, fontsize=14)
     else:
         for f, a in peaks:
@@ -172,6 +215,84 @@ def plot_spectrum(x, y, peaks, *, title: str, xlabel: str, ylabel: str,
     plt.close(fig)
 
 
+def plot_joint_spectrum(x_raman, y_raman, x_ir, y_ir, *,
+                        outpath: Path, dpi: int = 160) -> None:
+    """Raman (left axis) and IR (right axis) powder spectra in one figure."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    lines = []
+    if x_raman is not None:
+        line, = ax.plot(x_raman, y_raman, color="tab:blue", lw=1.4,
+                        label="Raman 活性")
+        lines.append(line)
+        ax.set_ylabel("Raman 活性 (Å$^4$/amu)", color="tab:blue")
+        ax.tick_params(axis="y", labelcolor="tab:blue")
+    else:
+        ax.text(0.5, 0.5, "无一级拉曼活性", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+
+    ax2 = ax.twinx()
+    if x_ir is not None:
+        line, = ax2.plot(x_ir, y_ir, color="tab:red", lw=1.2, label="IR 活性")
+        lines.append(line)
+        ax2.set_ylabel("IR 活性 (D/Å)$^2$/amu", color="tab:red")
+        ax2.tick_params(axis="y", labelcolor="tab:red")
+
+    ax.set_title("粉末 Raman 与 IR 活性对比", fontsize=13)
+    ax.set_xlabel("波数 (cm$^{-1}$)")
+    if lines:
+        ax.legend(lines, [ln.get_label() for ln in lines], loc="upper right",
+                  fontsize=9)
+    fig.tight_layout()
+    fig.savefig(outpath, dpi=dpi)
+    plt.close(fig)
+
+
+def plot_to_lo_comparison(x_to, y_to, x_lo, y_lo, *, label: str = "",
+                          outpath: Path, dpi: int = 160) -> None:
+    """Overlay the Γ-point TO spectrum with one LO-direction spectrum."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+    if x_to is not None:
+        ax.plot(x_to, y_to, color="gray", lw=1.0, ls="--", label="Γ 点 TO")
+    if x_lo is not None:
+        ax.plot(x_lo, y_lo, color="tab:blue", lw=1.4,
+                label=("LO " + label).strip())
+    if x_to is None and x_lo is None:
+        ax.text(0.5, 0.5, "无一级拉曼活性", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+    ax.set_title("TO 与 LO 方向谱对比" + (("  " + label) if label else ""),
+                 fontsize=13)
+    ax.set_xlabel("波数 (cm$^{-1}$)")
+    ax.set_ylabel("Raman 活性 (Å$^4$/amu)")
+    ax.legend(loc="upper right", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(outpath, dpi=dpi)
+    plt.close(fig)
+
+
+def _write_series(base: Path, x, y, peaks, *, title: str, ylabel: str,
+                  formats, dpi: int, blank_text: str =
+                  "无一级拉曼活性") -> list[Path]:
+    """Write one broadened series as CSV/PNG/SVG under ``base``."""
+    written: list[Path] = []
+    if "csv" in formats:
+        csv_path = base.with_suffix(".csv")
+        with open(csv_path, "w", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(["freq_cm1", "intensity"])
+            if x is not None:
+                for xi, yi in zip(x, y):
+                    w.writerow([xi, yi])
+        written.append(csv_path)
+    for ext in ("png", "svg"):
+        if ext in formats:
+            path = base.with_suffix("." + ext)
+            plot_spectrum(x, y, peaks, title=title, xlabel="波数 (cm$^{-1}$)",
+                          ylabel=ylabel, outpath=path, dpi=dpi,
+                          blank_text=blank_text)
+            written.append(path)
+    return written
+
+
 # ---------------------------------------------------------------------------
 # driver
 # ---------------------------------------------------------------------------
@@ -180,7 +301,8 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
                      broadening: str = "lorentzian", fwhm: float = 8.0,
                      temperature: float = 300.0, laser_wavelength: float = 532.0,
                      threshold: float = 1e-4, formats=("png", "csv"),
-                     dpi: int = 160) -> list[Path]:
+                     dpi: int = 160, include_ir: bool = True,
+                     include_lo: bool = True) -> list[Path]:
     outdir = Path(outdir)
     validate_spectrum_params(fwhm=fwhm, temperature=temperature,
                              laser_wavelength=laser_wavelength, threshold=threshold,
@@ -205,30 +327,62 @@ def generate_spectra(outdir, *, spectrum_type: str = "activity",
             use_peaks, broadening=broadening, fwhm=fwhm, spectrum_type=t,
             temperature=temperature, laser_wavelength=laser_wavelength,
         )
-        base = outdir / ("spectrum_" + t)
         is_stokes = t == "stokes"
-        title = ("粉末拉曼光谱（Stokes）" if is_stokes else "粉末拉曼光谱（活性）")
-        ylabel = "强度 (a.u.)" if is_stokes else "Raman 活性 (Å$^4$/amu)"
+        written.extend(_write_series(
+            outdir / ("spectrum_" + t), x, y, scaled,
+            title=("粉末拉曼光谱（Stokes）" if is_stokes else "粉末拉曼光谱（活性）"),
+            ylabel=("强度 (a.u.)" if is_stokes else "Raman 活性 (Å$^4$/amu)"),
+            formats=formats, dpi=dpi,
+        ))
 
-        if "csv" in formats:
-            csv_path = base.with_suffix(".csv")
-            with open(csv_path, "w", newline="") as fh:
-                w = csv.writer(fh)
-                w.writerow(["freq_cm1", "intensity"])
-                if x is not None:
-                    for xi, yi in zip(x, y):
-                        w.writerow([xi, yi])
-            written.append(csv_path)
+    if include_ir:
+        ir_peaks = select_ir_peaks(to_modes, threshold=threshold)
+        x_ir, y_ir, s_ir = build_spectrum(
+            ir_peaks, broadening=broadening, fwhm=fwhm,
+            spectrum_type="activity",
+        )
+        written.extend(_write_series(
+            outdir / "spectrum_ir", x_ir, y_ir, s_ir,
+            title="粉末红外光谱（IR 活性）",
+            ylabel="IR 活性 (D/Å)$^2$/amu",
+            formats=formats, dpi=dpi, blank_text="无 IR 活性",
+        ))
         if "png" in formats:
-            png_path = base.with_suffix(".png")
-            plot_spectrum(x, y, scaled, title=title, xlabel="波数 (cm$^{-1}$)",
-                          ylabel=ylabel, outpath=png_path, dpi=dpi)
-            written.append(png_path)
-        if "svg" in formats:
-            svg_path = base.with_suffix(".svg")
-            plot_spectrum(x, y, scaled, title=title, xlabel="波数 (cm$^{-1}$)",
-                          ylabel=ylabel, outpath=svg_path, dpi=dpi)
-            written.append(svg_path)
+            x_act, y_act, _ = build_spectrum(
+                peaks, broadening=broadening, fwhm=fwhm,
+                spectrum_type="activity",
+            )
+            joint = outdir / "spectrum_raman_ir.png"
+            plot_joint_spectrum(x_act, y_act, x_ir, y_ir,
+                                outpath=joint, dpi=dpi)
+            written.append(joint)
+
+    if include_lo:
+        lo_keys = sorted(k for k in tables if k != "to")
+        labels = lo_direction_labels(outdir, lo_keys)
+        x_to, y_to, _ = build_spectrum(
+            peaks, broadening=broadening, fwhm=fwhm, spectrum_type="activity",
+        )
+        for key in lo_keys:
+            lo_peaks = select_peaks(tables[key], threshold=threshold)
+            x, y, scaled = build_spectrum(
+                lo_peaks, broadening=broadening, fwhm=fwhm,
+                spectrum_type="activity",
+            )
+            suffix = ("  " + labels[key]) if key in labels else ""
+            written.extend(_write_series(
+                outdir / ("spectrum_" + key), x, y, scaled,
+                title="LO 方向谱%s" % suffix,
+                ylabel="Raman 活性 (Å$^4$/amu)",
+                formats=formats, dpi=dpi,
+            ))
+            if "png" in formats:
+                cmp_path = outdir / ("spectrum_to_vs_%s.png" % key)
+                plot_to_lo_comparison(
+                    x_to, y_to, x, y,
+                    label=labels.get(key, ""), outpath=cmp_path, dpi=dpi,
+                )
+                written.append(cmp_path)
     return written
 
 
@@ -257,6 +411,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="Raman activity cutoff")
     p.add_argument("--formats", default="png,csv",
                    help="comma-separated: png,svg,csv (default png,csv)")
+    p.add_argument("--no-ir", dest="ir", action="store_false", default=True,
+                   help="skip the IR activity spectrum and Raman/IR joint plot")
+    p.add_argument("--no-lo-spectra", dest="lo_spectra", action="store_false",
+                   default=True, help="skip the per-LO-direction spectra")
     p.add_argument("--dpi", type=int, default=160)
     args = p.parse_args(argv)
 
@@ -274,7 +432,8 @@ def main(argv: list[str] | None = None) -> int:
         outdir, spectrum_type=args.type, broadening=args.broadening,
         fwhm=args.fwhm, temperature=args.temperature,
         laser_wavelength=args.laser_wavelength, threshold=args.threshold,
-        formats=formats, dpi=args.dpi,
+        formats=formats, dpi=args.dpi, include_ir=args.ir,
+        include_lo=args.lo_spectra,
     )
     for w in written:
         print("  wrote %s" % w)

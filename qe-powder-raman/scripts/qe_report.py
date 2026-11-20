@@ -215,6 +215,8 @@ def render_report(outdir: Path) -> str:
         lines.append("## 5. LO-TO 分裂（纵向光学 LO）")
         lines.append("")
         lines.append("默认 TO 谱来自 Γ 点、未加非解析修正；下列 LO 表按指定方向单独计算。")
+        lines.append("每个方向另有 `spectrum_lo*.{csv,png}` 谱图；IR 活性见 "
+                     "`spectrum_ir.*` 与 `spectrum_raman_ir.png`。")
         lines.append("")
         lo_dirs = _load_json(outdir, "inputs_manifest.json").get("lo_dirs") or []
         for k in lo_keys:
@@ -235,7 +237,11 @@ def render_report(outdir: Path) -> str:
     files = [
         "raman_modes.csv", "summary.json", "relax_manifest.json",
         "spectrum_activity.png", "spectrum_stokes.png",
+        "spectrum_ir.png", "spectrum_raman_ir.png",
     ]
+    lo_spectra = sorted(p.name for p in outdir.glob("spectrum_lo*.png"))
+    lo_spectra += sorted(p.name for p in outdir.glob("spectrum_to_vs_lo*.png"))
+    files.extend(lo_spectra)
     lines.append("## 6. 输出文件")
     lines.append("")
     for f in files:

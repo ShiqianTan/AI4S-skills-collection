@@ -16,7 +16,7 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
 ```
 
 支持：结构读取（CIF/POSCAR/QE）、赝势校验（只允许 NC + LDA）、输入生成、
-可选执行、输出解析、光谱绘制（Raman 活性谱 + 可选 Stokes 谱）、报告汇总。
+可选执行、输出解析、光谱绘制（Raman 活性谱 + 可选 Stokes 谱 + IR 活性谱 + 逐 LO 方向谱）、报告汇总。
 
 ## 适用与限制（MVP）
 
@@ -100,7 +100,7 @@ qe-powder-raman/
 | `prepare` | 生成 scf/ph/dynmat(±LO) 输入 + run.sh | Step 2 |
 | `run` | 执行 pw.x/ph.x/dynmat.x（state.json） | Step 3 |
 | `parse` | 解析输出（raman_modes.csv / summary.json） | Step 3 |
-| `spectrum` | 活性谱 + 可选 Stokes 谱（CSV/PNG/SVG） | Step 4 |
+| `spectrum` | Raman 活性谱 + 可选 Stokes、IR 活性谱、逐 LO 方向谱与 TO/LO 对比图（CSV/PNG/SVG） | Step 4 |
 | `report` | 汇总 report.md | Step 4 |
 | `all` | 串联以上全流程（`--execute` 触发计算） | Step 5 |
 | `validate-input` | 输入文件轻量校验 | Step 2 |

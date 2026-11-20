@@ -34,6 +34,8 @@ fwhm: 8.0              # cm^-1 broadening (must be > 0)
 temperature: 300.0     # K (optional Stokes spectrum; must be >= 0)
 laser_wavelength: 532.0  # nm (optional Stokes spectrum; must be > 0)
 spectrum_broadening: lorentzian   # lorentzian | gaussian
+spectrum_ir: true       # write spectrum_ir + Raman/IR joint plot
+spectrum_lo: true       # write one spectrum per requested LO direction
 
 # --- k-point mesh (automatic; density in units of reciprocal Angstrom) -----
 kpt_density: 30.0

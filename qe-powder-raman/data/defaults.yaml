@@ -11,6 +11,8 @@ fwhm: 8.0
 temperature: 300.0
 laser_wavelength: 532.0
 spectrum_broadening: lorentzian
+spectrum_ir: true
+spectrum_lo: true
 kpt_density: 30.0
 np: 4
 omp_num_threads: 1
