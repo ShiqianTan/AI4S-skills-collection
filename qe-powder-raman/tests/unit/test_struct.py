@@ -11,7 +11,9 @@ from qe_struct import (  # noqa: E402
     StructureCheckResult,
     _check_partial_occupancy,
     check_structure,
+    parse_final_structure,
     refine_structure,
+    relax_metrics,
     validate_structure,
 )
 
@@ -95,6 +97,35 @@ class TestValidateStructure(unittest.TestCase):
         self.assertTrue(
             any(lvl == "FAIL" and key == "non_3d" for lvl, key, _ in res.messages)
         )
+
+
+_RELAX_BLOCK = """Begin final coordinates
+     new unit-cell volume = 100.0
+CELL_PARAMETERS (angstrom)
+    4.000000   0.000000   0.000000
+    0.000000   4.000000   0.000000
+    0.000000   0.000000   4.000000
+ATOMIC_POSITIONS (crystal)
+Li  0.000000  0.000000  0.000000
+F   0.500000  0.500000  0.500000
+End final coordinates
+"""
+
+
+class TestParseFinalStructure(unittest.TestCase):
+    def test_parse(self):
+        atoms = parse_final_structure(_RELAX_BLOCK)
+        self.assertIsNotNone(atoms)
+        self.assertEqual(len(atoms), 2)
+        self.assertEqual(list(atoms.get_chemical_symbols()), ["Li", "F"])
+        self.assertAlmostEqual(float(atoms.get_cell()[0][0]), 4.0, places=6)
+
+    def test_missing_block(self):
+        self.assertIsNone(parse_final_structure("no coordinates here"))
+
+    def test_relax_metrics(self):
+        m = relax_metrics("step 1\nTotal force = 0.0500\nTotal force = 0.0123\n")
+        self.assertAlmostEqual(m["final_force"], 0.0123)
 
 
 if __name__ == "__main__":

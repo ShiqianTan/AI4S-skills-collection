@@ -14,6 +14,7 @@ pseudopotential manifest.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -359,6 +360,86 @@ def refine_structure(atoms, symprec: float = 1e-3):
         "elements": list(refined.get_chemical_symbols()),
     }
     return refined, info
+
+
+_BOHR_TO_ANG = 0.529177210903
+
+
+def parse_final_structure(text: str):
+    """Parse the relaxed structure from a pw.x relax/vc-relax output.
+
+    Returns an ase.Atoms parsed from the ``Begin final coordinates`` ...
+    ``End final coordinates`` block, or None if absent/unparseable.
+    """
+    import numpy as np
+    from ase import Atoms
+
+    m = re.search(r"Begin final coordinates(.*?)End final coordinates", text, re.S)
+    if not m:
+        return None
+    block = m.group(1)
+
+    cell = None
+    cm = re.search(r"CELL_PARAMETERS\s*[\(\{](angstrom|bohr|alat)[\)\}]",
+                   block, re.I)
+    if cm:
+        unit = cm.group(1).lower()
+        rows = []
+        for line in block[cm.end():].strip().splitlines()[:3]:
+            parts = line.split()
+            if len(parts) < 3:
+                break
+            try:
+                rows.append([float(x) for x in parts[:3]])
+            except ValueError:
+                break
+        if len(rows) == 3:
+            cell = np.array(rows, dtype=float)
+            if unit == "bohr":
+                cell = cell * _BOHR_TO_ANG
+
+    pm = re.search(r"ATOMIC_POSITIONS\s*[\(\{](angstrom|crystal|bohr|alat)[\)\}]",
+                   block, re.I)
+    if not pm or cell is None:
+        return None
+    unit = pm.group(1).lower()
+    syms = []
+    coords = []
+    for line in block[pm.end():].strip().splitlines():
+        parts = line.split()
+        if len(parts) < 4:
+            break
+        try:
+            coords.append([float(x) for x in parts[1:4]])
+        except ValueError:
+            break
+        syms.append(parts[0])
+    if not syms:
+        return None
+    coords = np.array(coords, dtype=float)
+    if unit == "crystal":
+        return Atoms(symbols=syms, scaled_positions=coords, cell=cell, pbc=True)
+    if unit == "bohr":
+        coords = coords * _BOHR_TO_ANG
+    return Atoms(symbols=syms, positions=coords, cell=cell, pbc=True)
+
+
+def relax_metrics(text: str) -> dict:
+    """Extract residual force / stress from a relax output (best effort)."""
+    out: dict = {"final_force": None, "final_stress": None}
+    forces = re.findall(r"Total force =\s*([-\d.eE+]+)", text)
+    if forces:
+        try:
+            out["final_force"] = float(forces[-1])
+        except ValueError:
+            pass
+    stresses = re.findall(r"Total stress \(Ry/bohr\*\*3\)\s*=?\s*([-\d.eE+]+)", text)
+    if stresses:
+        try:
+            out["final_stress"] = float(stresses[-1])
+        except ValueError:
+            pass
+    return out
 
 
 def write_validated_cif(atoms, outdir: str | Path) -> Path:

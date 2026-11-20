@@ -70,6 +70,56 @@ def _run_stage(
     return True
 
 
+def _regenerate_from_relax(outdir: Path, pseudo_dir: Path, bin_dir: Path,
+                           verbose: bool) -> bool:
+    """After a successful relax, rebuild scf/ph/dynmat inputs from the relaxed
+    structure and record residual force/stress/symmetry in relax_manifest.json."""
+    import json
+
+    from qe_struct import parse_final_structure, relax_metrics
+    from qe_inputs import generate_inputs
+
+    relax_out = outdir / "relax.out"
+    if not relax_out.exists():
+        return False
+    text = relax_out.read_text(errors="replace")
+    atoms = parse_final_structure(text)
+    if atoms is None:
+        if verbose:
+            print("  [FAIL] could not parse final coordinates from relax.out")
+        return False
+
+    eff = outdir / "effective_config.json"
+    cfg = json.loads(eff.read_text()) if eff.exists() else {}
+    im = outdir / "inputs_manifest.json"
+    man = json.loads(im.read_text()) if im.exists() else {}
+    prefix = man.get("prefix") or cfg.get("prefix", "raman")
+    lo_dirs = [tuple(q) for q in (man.get("lo_dirs") or [])]
+
+    sg = None
+    try:
+        import spglib
+
+        ds = spglib.get_symmetry_dataset(
+            (atoms.get_cell(), atoms.get_scaled_positions(), atoms.get_atomic_numbers()),
+            symprec=1e-3)
+        if ds is not None:
+            sg = {"number": ds.number, "symbol": ds.international}
+    except Exception:  # noqa: BLE001
+        sg = None
+
+    metrics = relax_metrics(text)
+    metrics.update({"n_atoms": len(atoms), "spacegroup": sg})
+    (outdir / "relax_manifest.json").write_text(json.dumps(metrics, indent=2) + "\n")
+    if verbose:
+        print("  [relax] inputs regenerated from relaxed structure "
+              "(%d atoms, residual force=%s)" % (len(atoms), metrics.get("final_force")))
+
+    generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=lo_dirs,
+                    with_relax=False, bin_dir=bin_dir)
+    return True
+
+
 def run_workflow(
     outdir: str | Path,
     bin_dir: str | Path,
@@ -80,6 +130,7 @@ def run_workflow(
     stage: str = "all",
     skip_existing: bool = False,
     verbose: bool = True,
+    with_relax: bool = False,
 ) -> tuple[dict, bool]:
     """Run the workflow stages in an existing prepared outdir.
 
@@ -121,6 +172,8 @@ def run_workflow(
     stages_to_run: list[str] = []
     if stage == "all":
         stages_to_run = ["scf", "ph", "dynmat", "lo"]
+        if with_relax:
+            stages_to_run = ["relax"] + stages_to_run
     else:
         stages_to_run = [stage]
 
@@ -140,7 +193,20 @@ def run_workflow(
 
     ok = True
     for name in stages_to_run:
-        if name == "scf":
+        if name == "relax":
+            if not (outdir / "relax.in").exists():
+                print("  [FAIL] relax.in not found in %s (regenerate with --relax)" % outdir)
+                ok = False
+                break
+            cmd = launcher(pw, ["-in", "relax.in"])
+            if not _run_stage(state, "relax", cmd, outdir / "relax.out", outdir,
+                              skip_existing, verbose, env):
+                ok = False
+                break
+            if not _regenerate_from_relax(outdir, pseudo_dir, bin_dir, verbose):
+                ok = False
+                break
+        elif name == "scf":
             if not (outdir / "scf.in").exists():
                 print("  [FAIL] scf.in not found in %s" % outdir)
                 ok = False

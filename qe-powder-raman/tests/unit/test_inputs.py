@@ -15,6 +15,7 @@ from qe_inputs import (  # noqa: E402
     generate_inputs,
     kpoint_grid,
     render,
+    resolve_kpoint_grid,
     species_order,
 )
 
@@ -73,6 +74,18 @@ class TestKpointGrid(unittest.TestCase):
         cell = [[20.0, 0, 0], [0, 20.0, 0], [0, 0, 20.0]]
         k = kpoint_grid(cell, density=30.0)
         self.assertEqual(k, (2, 2, 2))
+
+
+class TestResolveKpointGrid(unittest.TestCase):
+    def test_explicit_grid_overrides_density(self):
+        cell = [[5.0, 0, 0], [0, 5.0, 0], [0, 0, 5.0]]
+        cfg = {"kpt_density": 30.0, "kpt_grid": [2, 3, 4]}
+        self.assertEqual(resolve_kpoint_grid(cfg, cell), (2, 3, 4))
+
+    def test_density_fallback(self):
+        cell = [[5.0, 0, 0], [0, 5.0, 0], [0, 0, 5.0]]
+        cfg = {"kpt_density": 30.0}
+        self.assertEqual(resolve_kpoint_grid(cfg, cell), (6, 6, 6))
 
 
 class TestLoValidation(unittest.TestCase):

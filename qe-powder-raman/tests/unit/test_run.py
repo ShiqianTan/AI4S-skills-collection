@@ -87,5 +87,50 @@ class TestLoCleanup(unittest.TestCase):
         self.assertTrue((self.tmp / "inputs_manifest.json").exists())
 
 
+_RELAX_OUT = (
+    "Begin final coordinates\n"
+    "CELL_PARAMETERS (angstrom)\n"
+    " 4.0 0.0 0.0\n 0.0 4.0 0.0\n 0.0 0.0 4.0\n"
+    "ATOMIC_POSITIONS (crystal)\n"
+    "Li 0.0 0.0 0.0\nF 0.5 0.5 0.5\n"
+    "End final coordinates\n"
+)
+
+
+class TestRelaxStage(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qer_relax_"))
+        self.outdir = self.tmp / "run"
+        self.outdir.mkdir()
+        (self.outdir / "relax.in").write_text("&CONTROL\n/\n")
+        (self.outdir / "effective_config.json").write_text(
+            json.dumps({"prefix": "t", "ecutwfc": 60.0, "ecutrho": 240.0}))
+        (self.outdir / "inputs_manifest.json").write_text(
+            json.dumps({"prefix": "t", "lo_dirs": []}))
+        self.bin_dir = self.tmp / "bin"
+        self.bin_dir.mkdir()
+        (self.bin_dir / "dynmat.x").write_text("#!/bin/sh\nexit 0\n")
+        (self.bin_dir / "dynmat.x").chmod(0o755)
+        pw = self.bin_dir / "pw.x"
+        pw.write_text(
+            "#!/bin/sh\n"
+            "cat <<'EOF'\n" + _RELAX_OUT + "EOF\n"
+            "echo 'JOB DONE.'\nexit 0\n"
+        )
+        pw.chmod(0o755)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_relax_regenerates_scf(self):
+        state, ok = run_workflow(
+            self.outdir, self.bin_dir, PSEUDO, np=1, stage="relax")
+        self.assertTrue(ok)
+        self.assertTrue((self.outdir / "relax_manifest.json").exists())
+        scf = (self.outdir / "scf.in").read_text()
+        self.assertIn("ATOMIC_POSITIONS", scf)
+        self.assertIn("F", scf)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -67,10 +67,25 @@ def species_order(atoms) -> list[str]:
 
 
 def kpoint_grid(cell, density: float, shift=(0, 0, 0)) -> tuple[int, int, int]:
-    """Monkhorst-Pack grid: k_i = max(1, round(density / |a_i|)) with |a_i| in Angstrom."""
+    """Monkhorst-Pack grid from a real-space length target.
+
+    ``k_i = max(1, round(density / |a_i|))`` with ``|a_i|`` the i-th lattice
+    vector length in Angstrom.  ``density`` is therefore a real-space sampling
+    target (Angstrom of cell per k-point along each axis), NOT a
+    reciprocal-Angstrom spacing.  For an explicit grid use ``kpt_grid``.
+    """
     lengths = np.linalg.norm(cell, axis=1)
     grid = [max(1, int(round(density / float(L)))) for L in lengths]
     return (grid[0], grid[1], grid[2])
+
+
+def resolve_kpoint_grid(cfg, cell) -> tuple[int, int, int]:
+    """Return the k-grid: an explicit ``kpt_grid`` wins over ``kpt_density``."""
+    kg = cfg.get("kpt_grid")
+    if kg:
+        vals = [max(1, int(x)) for x in kg]
+        return (vals[0], vals[1], vals[2])
+    return kpoint_grid(cell, float(cfg.get("kpt_density", 30.0)))
 
 
 # ---------------------------------------------------------------------------
@@ -124,7 +139,7 @@ def _scf_vars(cfg, atoms, species, pp_map, prefix, pseudo_dir):
     ecutwfc = float(cfg["ecutwfc"])
     ecutrho = max(float(cfg.get("ecutrho", 4 * ecutwfc)), 4 * ecutwfc)
     shift = tuple(cfg.get("kpt_shift", [0, 0, 0]))
-    grid = kpoint_grid(atoms.get_cell(), float(cfg.get("kpt_density", 30.0)), shift)
+    grid = resolve_kpoint_grid(cfg, atoms.get_cell())
     return {
         "prefix": prefix,
         "outdir": cfg.get("qe_outdir", "./tmp"),
@@ -232,7 +247,7 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
         clean_lo.append(q)
     lo_dirs = clean_lo
     shift = tuple(cfg.get("kpt_shift", [0, 0, 0]))
-    grid = kpoint_grid(atoms.get_cell(), float(cfg.get("kpt_density", 30.0)), shift)
+    grid = resolve_kpoint_grid(cfg, atoms.get_cell())
 
     # clean stale LO artifacts from a previous prepare (P0-05)
     for stale in outdir.glob("dynmat_lo*.in"):

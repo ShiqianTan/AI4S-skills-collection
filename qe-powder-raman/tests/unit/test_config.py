@@ -48,5 +48,40 @@ class TestDefaults(unittest.TestCase):
         self.assertEqual(cfg["qe_outdir"], "./tmp")
 
 
+class TestPhaseCValidation(unittest.TestCase):
+    def test_low_ecutrho_warns(self):
+        cfg = load_defaults()
+        cfg["ecutwfc"] = 60.0
+        cfg["ecutrho"] = 120.0
+        msgs = validate_config(cfg)
+        self.assertTrue(
+            any(lvl == "WARN" and key == "ecutrho" for lvl, key, _ in msgs)
+        )
+        self.assertFalse(any(lvl == "FAIL" and key == "ecutrho" for lvl, key, _ in msgs))
+
+    def test_ecutrho_ok(self):
+        cfg = load_defaults()
+        cfg["ecutwfc"] = 60.0
+        cfg["ecutrho"] = 240.0
+        msgs = validate_config(cfg)
+        self.assertFalse(any(key == "ecutrho" for _, key, _ in msgs))
+
+    def test_kpt_grid_bad_fail(self):
+        for bad in ([0, 2, 2], [1, 2], [-1, 2, 2]):
+            cfg = load_defaults()
+            cfg["kpt_grid"] = bad
+            msgs = validate_config(cfg)
+            self.assertTrue(
+                any(lvl == "FAIL" and key == "kpt_grid" for lvl, key, _ in msgs),
+                "expected kpt_grid FAIL for %r" % (bad,),
+            )
+
+    def test_kpt_grid_ok(self):
+        cfg = load_defaults()
+        cfg["kpt_grid"] = [2, 3, 4]
+        msgs = validate_config(cfg)
+        self.assertFalse(any(key == "kpt_grid" for _, key, _ in msgs))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -107,8 +107,10 @@ def _build_parser() -> argparse.ArgumentParser:
     rn.add_argument("--np", type=int, default=None, help="MPI processes")
     rn.add_argument("--mpi-command", default=None, help="MPI launcher")
     rn.add_argument("--omp-num-threads", type=int, default=None)
-    rn.add_argument("--stage", default="all", choices=["all", "scf", "ph", "dynmat", "lo"])
+    rn.add_argument("--stage", default="all", choices=["all", "relax", "scf", "ph", "dynmat", "lo"])
     rn.add_argument("--skip-existing", action="store_true", help="skip stages whose log exists")
+    rn.add_argument("--relax", action="store_true",
+                    help="run relax.in first and regenerate SCF from the relaxed structure")
 
     ps = sub.add_parser("parse", help="parse outputs into raman_modes.csv + summary.json [Step 3]")
     ps.add_argument("--outdir", default=None, help="run directory")
@@ -144,7 +146,7 @@ def _build_parser() -> argparse.ArgumentParser:
     al.add_argument("--np", type=int, default=None, help="MPI processes")
     al.add_argument("--mpi-command", default=None, help="MPI launcher")
     al.add_argument("--omp-num-threads", type=int, default=None)
-    al.add_argument("--stage", default="all", choices=["all", "scf", "ph", "dynmat", "lo"])
+    al.add_argument("--stage", default="all", choices=["all", "relax", "scf", "ph", "dynmat", "lo"])
     al.add_argument("--skip-existing", action="store_true", help="skip stages whose log exists")
     al.add_argument("--execute", action="store_true",
                     help="actually run pw.x/ph.x/dynmat.x (default: generate only)")
@@ -469,6 +471,7 @@ def _run_run(args: argparse.Namespace) -> int:
         outdir, bin_dir, pseudo_dir,
         np=np, mpi_command=mpi_command, omp_num_threads=omp,
         stage=args.stage, skip_existing=args.skip_existing, verbose=True,
+        with_relax=getattr(args, "relax", False),
     )
     print("\nrun: %s" % ("OK" if ok else "FAIL"))
     return 0 if ok else 1

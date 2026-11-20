@@ -175,6 +175,30 @@ def validate_config(cfg: dict) -> list[tuple[str, str, str]]:
                 raise ValueError
         except (TypeError, ValueError, KeyError):
             msgs.append(("FAIL", key, "must be an integer >= 1: %r" % cfg.get(key)))
+
+    # ecutrho should be >= 4*ecutwfc for NC pseudopotentials
+    try:
+        ecw = float(cfg.get("ecutwfc", 0.0))
+        ecr = float(cfg.get("ecutrho", 0.0))
+        if ecw > 0 and ecr > 0 and ecr < 4.0 * ecw - 1e-6:
+            msgs.append(("WARN", "ecutrho",
+                         "ecutrho=%.1f < 4*ecutwfc=%.1f (input generator auto-raises it)"
+                         % (ecr, 4.0 * ecw)))
+    except (TypeError, ValueError):
+        pass
+
+    # explicit k-point grid overrides kpt_density
+    kg = cfg.get("kpt_grid")
+    if kg is not None:
+        try:
+            if len(kg) != 3:
+                raise ValueError
+            vals = [int(x) for x in kg]
+            if any(v < 1 for v in vals):
+                raise ValueError
+        except (TypeError, ValueError):
+            msgs.append(("FAIL", "kpt_grid",
+                         "kpt_grid must be 3 positive integers: %r" % (kg,)))
     return msgs
 
 
