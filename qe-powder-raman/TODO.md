@@ -6,8 +6,8 @@
 
 ## 验证基线
 
-- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 46 项测试。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。现有集成测试基于 LiF、AlAs、MoS₂ 的日志夹具，主要覆盖解析。
-- 本机 QE 8.0dev 实跑 LiF 和 AlAs 的 `all --execute`，使用 `--np 1`、`kpt_density: 6.0`（2 × 2 × 2 网格）和 CSV 输出。LiF 得到 6 支模式、0 支拉曼活性模式。AlAs 得到 3 支拉曼活性模式、两个 LO 方向的输出及 Stokes 谱。粗网格用于验证流程，峰位和强度仍需收敛验证。
+- `python tests/run_tests.py` 在本机 Conda Python 3.11.15 环境下通过全部 93 项测试（1 项为可选真 QE 冒烟测试，未设 `QE_REAL_TESTS=1` 时跳过）。ASE 3.28.0、spglib 2.7.0。系统 `python3` 缺少 ASE，直接运行会产生依赖相关失败。集成测试基于 LiF、AlAs、MoS₂ 的日志夹具覆盖解析与失败路径；单元测试覆盖配置、结构、UPF、输入生成、执行、谱图与报告。
+- 本机 QE 8.0dev 已在 6 个 MP-20 体系（LiF、MgH₂、Al₂O₃、AlAs、CdS、MoS₂）上完成 `pw.x → ph.x → dynmat.x` 实跑，日志与回归数值见 `examples/README.md` 的「预期结果与容差（回归基准）」。真实流程冒烟：LiF 与 AlAs 的 `all --execute`（`--np 1`、`kpt_density: 6.0`，即 2 × 2 × 2 网格）。LiF 得到 6 支模式、0 支拉曼活性模式；AlAs 得到 3 支拉曼活性模式、两个 LO 方向输出及 Stokes 谱。粗网格仅用于验证流程，峰位和强度仍需收敛验证。
 
 ## P0 · 输入、执行与结果完整性
 
