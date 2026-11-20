@@ -28,6 +28,17 @@ class TestValidateConfig(unittest.TestCase):
         msgs = validate_config(cfg)
         self.assertTrue(any(lvl == "FAIL" and key == "fwhm" for lvl, key, _ in msgs))
 
+    def test_ph_symmetry_switch(self):
+        from qe_inputs import generate_ph
+
+        cfg = load_defaults()
+        self.assertIn("search_sym = .true.", generate_ph(cfg, ["Li"], "test"))
+        cfg["ph_search_sym"] = False
+        self.assertIn("search_sym = .false.", generate_ph(cfg, ["Li"], "test"))
+        cfg["ph_search_sym"] = "false"
+        msgs = validate_config(cfg)
+        self.assertTrue(any(lvl == "FAIL" and key == "ph_search_sym" for lvl, key, _ in msgs))
+
     def test_zero_ecutwfc_fail(self):
         cfg = load_defaults()
         cfg["ecutwfc"] = 0.0

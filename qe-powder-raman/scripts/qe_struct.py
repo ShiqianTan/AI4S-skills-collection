@@ -484,33 +484,36 @@ def parse_final_structure(text: str):
     import numpy as np
     from ase import Atoms
 
-    m = re.search(r"Begin final coordinates(.*?)End final coordinates", text, re.S)
-    if not m:
+    blocks = re.findall(r"Begin final coordinates(.*?)End final coordinates", text, re.S)
+    if not blocks:
         return None
-    block = m.group(1)
+    block = blocks[-1]
 
-    cell = None
-    cm = re.search(r"CELL_PARAMETERS\s*[\(\{](angstrom|bohr|alat)[\)\}]",
+    cm = re.search(r"CELL_PARAMETERS\s*[\(\{](angstrom|bohr|alat)"
+                   r"(?:\s*=\s*([-+\d.eEdD]+))?\s*[\)\}]",
                    block, re.I)
-    if cm:
-        unit = cm.group(1).lower()
-        rows = []
-        for line in block[cm.end():].strip().splitlines()[:3]:
-            parts = line.split()
-            if len(parts) < 3:
-                break
-            try:
-                rows.append([float(x) for x in parts[:3]])
-            except ValueError:
-                break
-        if len(rows) == 3:
-            cell = np.array(rows, dtype=float)
-            if unit == "bohr":
-                cell = cell * _BOHR_TO_ANG
+    if not cm:
+        return None
+    unit = cm.group(1).lower()
+    alat_ang = None
+    try:
+        if cm.group(2) is not None:
+            alat_ang = float(cm.group(2).lower().replace("d", "e")) * _BOHR_TO_ANG
+            if not np.isfinite(alat_ang) or alat_ang <= 0:
+                return None
+        cell = np.array([[float(x) for x in line.split()[:3]]
+                         for line in block[cm.end():].strip().splitlines()[:3]])
+    except ValueError:
+        return None
+    factor = {"angstrom": 1, "bohr": _BOHR_TO_ANG, "alat": alat_ang}[unit]
+    if (factor is None or cell.shape != (3, 3) or not np.isfinite(cell).all()
+            or np.linalg.matrix_rank(cell) != 3):
+        return None
+    cell *= factor
 
     pm = re.search(r"ATOMIC_POSITIONS\s*[\(\{](angstrom|crystal|bohr|alat)[\)\}]",
                    block, re.I)
-    if not pm or cell is None:
+    if not pm:
         return None
     unit = pm.group(1).lower()
     syms = []
@@ -524,13 +527,17 @@ def parse_final_structure(text: str):
         except ValueError:
             break
         syms.append(parts[0])
-    if not syms:
+    if not syms or not np.isfinite(coords).all():
         return None
     coords = np.array(coords, dtype=float)
     if unit == "crystal":
         return Atoms(symbols=syms, scaled_positions=coords, cell=cell, pbc=True)
     if unit == "bohr":
         coords = coords * _BOHR_TO_ANG
+    if unit == "alat":
+        if alat_ang is None:
+            return None
+        coords = coords * alat_ang
     return Atoms(symbols=syms, positions=coords, cell=cell, pbc=True)
 
 

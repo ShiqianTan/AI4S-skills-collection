@@ -33,6 +33,8 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
   根据当前 k 网格的占据与未占据能级检查带隙，带隙 ≤ 0.05 eV 时停止在 `ph.x` 之前。
   缺少空带能级的旧日志仍可读取，并标记为无法判定；粗网格带隙需要独立做收敛验证。
 
+请求含无序、金属、非默认方法或不明确参数时，先查 [输入预检与回复指南](references/input-triage.md)。
+
 ## 环境与依赖
 
 - Python 3.9+，并安装 numpy / PyYAML / ASE / spglib / matplotlib

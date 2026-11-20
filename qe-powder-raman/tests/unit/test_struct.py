@@ -125,6 +125,15 @@ class TestParseFinalStructure(unittest.TestCase):
     def test_missing_block(self):
         self.assertIsNone(parse_final_structure("no coordinates here"))
 
+    def test_latest_alat_block_scales_cell_and_positions(self):
+        latest = _RELAX_BLOCK.replace("(angstrom)", "(alat= 2.0)").replace("(crystal)", "(alat)")
+        atoms = parse_final_structure(_RELAX_BLOCK + latest)
+        self.assertAlmostEqual(atoms.cell[0, 0], 8 * 0.529177210903)
+        self.assertAlmostEqual(atoms.positions[1, 0], 0.529177210903)
+
+    def test_alat_without_scale_is_rejected(self):
+        self.assertIsNone(parse_final_structure(_RELAX_BLOCK.replace("(angstrom)", "(alat)")))
+
     def test_relax_metrics(self):
         m = relax_metrics("step 1\nTotal force = 0.0500\nTotal force = 0.0123\n")
         self.assertAlmostEqual(m["final_force"], 0.0123)

@@ -150,13 +150,16 @@ def _run_stage(
         rec["exit_code"] = proc.returncode
         rec["seconds"] = round(time.time() - start, 3)
         rec["status"] = "failed"
+        output = log.read_bytes()
         if proc.returncode == 0:
-            output = log.read_bytes()
             if b"JOB DONE." in output:
                 rec.update(status="success", log_sha256=hashlib.sha256(output).hexdigest(),
                            artifacts=_artifacts(name, input_text, cwd))
             else:
                 rec["error"] = "QE completion marker missing"
+        elif name == "ph" and b"set_irr_sym_new" in output and b"wrong representation" in output:
+            rec["error"] = ("QE phonon symmetry representation failed; retry in a fresh "
+                            "directory with ph_search_sym: false if the structure is valid")
     except Exception as exc:  # noqa: BLE001
         rec["status"] = "failed"
         rec["exit_code"] = None
@@ -176,7 +179,7 @@ def _run_stage(
 
 
 def _regenerate_from_relax(outdir: Path, pseudo_dir: Path, bin_dir: Path,
-                           verbose: bool) -> bool:
+                           verbose: bool) -> str | None:
     """After a successful relax, rebuild scf/ph/dynmat inputs from the relaxed
     structure and record residual force/stress/symmetry in relax_manifest.json."""
     import json
@@ -186,13 +189,22 @@ def _regenerate_from_relax(outdir: Path, pseudo_dir: Path, bin_dir: Path,
 
     relax_out = outdir / "relax.out"
     if not relax_out.exists():
-        return False
+        return "relax.out missing"
     text = relax_out.read_text(errors="replace")
-    atoms = parse_final_structure(text)
+    if "maximum number of steps has been reached" in text.lower():
+        return "vc-relax reached the maximum number of steps before convergence"
+    if not re.search(r"\bbfgs converged in\b", text, re.I):
+        return "vc-relax has no BFGS convergence marker"
+    try:
+        atoms = parse_final_structure(text)
+    except (KeyError, ValueError):
+        atoms = None
     if atoms is None:
-        if verbose:
-            print("  [FAIL] could not parse final coordinates from relax.out")
-        return False
+        return "could not parse final coordinates from relax.out"
+    initial = (outdir / "relax.in").read_text(errors="replace")
+    nat = re.search(r"\bnat\s*=\s*(\d+)", initial, re.I)
+    if nat and len(atoms) != int(nat.group(1)):
+        return f"vc-relax returned {len(atoms)} atoms, expected {nat.group(1)}"
 
     eff = outdir / "effective_config.json"
     cfg = json.loads(eff.read_text()) if eff.exists() else {}
@@ -222,7 +234,7 @@ def _regenerate_from_relax(outdir: Path, pseudo_dir: Path, bin_dir: Path,
 
     generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=lo_dirs,
                     with_relax=False, bin_dir=bin_dir)
-    return True
+    return None
 
 
 def run_workflow(
@@ -313,7 +325,10 @@ def run_workflow(
                               skip_existing, verbose, env):
                 ok = False
                 break
-            if not _regenerate_from_relax(outdir, pseudo_dir, bin_dir, verbose):
+            error = _regenerate_from_relax(outdir, pseudo_dir, bin_dir, verbose)
+            if error:
+                state["stages"]["relax"].update(status="failed", error=error)
+                print(f"  [FAIL] relax: {error}")
                 ok = False
                 break
         elif name == "scf":

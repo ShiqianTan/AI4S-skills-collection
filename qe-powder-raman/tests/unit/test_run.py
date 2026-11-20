@@ -158,6 +158,7 @@ class TestLoCleanup(unittest.TestCase):
 
 
 _RELAX_OUT = (
+    "bfgs converged in 2 scf cycles and 1 bfgs steps\n"
     "Begin final coordinates\n"
     "CELL_PARAMETERS (angstrom)\n"
     " 4.0 0.0 0.0\n 0.0 4.0 0.0\n 0.0 0.0 4.0\n"
@@ -200,6 +201,19 @@ class TestRelaxStage(unittest.TestCase):
         scf = (self.outdir / "scf.in").read_text()
         self.assertIn("ATOMIC_POSITIONS", scf)
         self.assertIn("F", scf)
+
+    def test_unconverged_relax_does_not_regenerate_scf(self):
+        scf = self.outdir / "scf.in"
+        scf.write_text("original input\n")
+        pw = self.bin_dir / "pw.x"
+        pw.write_text(pw.read_text().replace(
+            _RELAX_OUT.splitlines()[0], "The maximum number of steps has been reached."))
+        state, ok = run_workflow(self.outdir, self.bin_dir, PSEUDO, np=1, with_relax=True)
+        self.assertFalse(ok)
+        self.assertEqual(state["stages"]["relax"]["status"], "failed")
+        self.assertIn("maximum number of steps", state["stages"]["relax"]["error"])
+        self.assertEqual(scf.read_text(), "original input\n")
+        self.assertFalse((self.outdir / "scf.out").exists())
 
 
 if __name__ == "__main__":

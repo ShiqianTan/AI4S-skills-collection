@@ -177,6 +177,9 @@ def validate_config(cfg: dict) -> list[tuple[str, str, str]]:
         msgs.append(("FAIL", "occupations",
                      "occupations must be 'fixed' for the Raman MVP (got %r)" % occ))
 
+    if not isinstance(cfg.get("ph_search_sym", True), bool):
+        msgs.append(("FAIL", "ph_search_sym", "must be a YAML boolean (true or false)"))
+
     float_keys = [
         "ecutwfc", "ecutrho", "conv_thr", "tr2_ph", "mixing_beta",
         "fwhm", "temperature", "laser_wavelength", "kpt_density",

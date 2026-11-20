@@ -188,6 +188,7 @@ def generate_ph(cfg, species, prefix) -> str:
     return render(tpl, {
         "prefix": prefix,
         "outdir": cfg.get("qe_outdir", "./tmp"),
+        "search_sym": fmt_num(cfg.get("ph_search_sym", True)),
         "amass": amass_block(species),
         "tr2_ph": fmt_num(cfg.get("tr2_ph", 1.0e-14)),
         "lraman": fmt_num(cfg.get("raman", True)),
