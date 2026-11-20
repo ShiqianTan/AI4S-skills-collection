@@ -12,6 +12,9 @@
 
 # --- Pseudopotentials (default: bundled pseudo/ directory) -----------------
 # pseudo_dir: /path/to/my/pseudopotentials
+# Bundled PBE NC (phonon/IR only; QE lraman rejects GGA):
+# pseudo_dir: /path/to/qe-powder-raman/pseudo/pbe
+# raman: false
 
 # --- SCF -------------------------------------------------------------------
 ecutwfc: 60.0          # Ry (wavefunction cutoff)
@@ -22,6 +25,9 @@ occupations: fixed     # Raman MVP requires an insulating (gapped) system
 
 # --- ph.x ------------------------------------------------------------------
 tr2_ph: 1.0e-14
+# Raman response. QE lraman supports LDA only; set false for GGA/PBE
+# pseudopotentials (phonon + IR + dielectric, no Raman activity).
+raman: true
 
 # --- Spectrum --------------------------------------------------------------
 fwhm: 8.0              # cm^-1 broadening (must be > 0)

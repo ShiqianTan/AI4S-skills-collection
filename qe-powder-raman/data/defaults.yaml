@@ -6,6 +6,7 @@ conv_thr: 1.0e-10
 mixing_beta: 0.5
 occupations: fixed
 tr2_ph: 1.0e-14
+raman: true
 fwhm: 8.0
 temperature: 300.0
 laser_wavelength: 532.0

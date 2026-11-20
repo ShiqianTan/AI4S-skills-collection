@@ -92,7 +92,8 @@ def _validate_ph(text: str) -> list[tuple[str, str, str]]:
     req(bool(re.search(r"\btr2_ph\b\s*=", text, re.I)), "tr2_ph", "tr2_ph present")
     req(bool(re.search(r"\bepsil\b\s*=\s*\.true\.", text, re.I)), "epsil", "epsil=.true.")
     req(bool(re.search(r"\btrans\b\s*=\s*\.true\.", text, re.I)), "trans", "trans=.true.")
-    req(bool(re.search(r"\blraman\b\s*=\s*\.true\.", text, re.I)), "lraman", "lraman=.true.")
+    req(bool(re.search(r"\blraman\b\s*=\s*\.(true|false)\.", text, re.I)),
+        "lraman", "lraman set (true|false)")
     req(bool(re.search(r"\basr\b\s*=\s*\.true\.", text, re.I)), "asr", "asr=.true.")
     req(bool(re.search(r"\bfildyn\b\s*=", text, re.I)), "fildyn", "fildyn present")
     qline = re.search(r"/\s*\n\s*([-+0-9.eE]+\s+[-+0-9.eE]+\s+[-+0-9.eE]+)", text)

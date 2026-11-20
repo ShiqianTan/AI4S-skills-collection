@@ -36,6 +36,9 @@ DEFAULT_CONFIG: dict = {
     # ph.x
     "tr2_ph": 1.0e-14,
     "alpha_mix": 0.5,
+    # Raman response. QE's lraman implementation only supports LDA; set this
+    # to False for GGA/PBE pseudopotentials (phonon + IR only, no Raman).
+    "raman": True,
     # Raman / spectrum
     "fwhm": 8.0,              # cm^-1
     "temperature": 300.0,     # K (for optional Stokes spectrum)
@@ -73,9 +76,27 @@ QE_BINARIES = ("pw.x", "ph.x", "dynmat.x")
 # Minimum QE major.minor accepted by the lraman/dynmat.x workflow.
 QE_MIN_VERSION = (7, 0)
 
-# XC functional strings accepted for LDA + norm-conserving Raman (lraman).
-# HGH pseudopotentials use PZ (SLA-PZ-NOGX-NOGC). Anything else is rejected.
+# XC functional strings accepted for norm-conserving pseudopotentials.
+# HGH pseudopotentials use PZ (SLA-PZ-NOGX-NOGC); PBE/PBEsol are GGA.
 ACCEPTED_XC_LDA = ("PZ", "SLA-PZ-NOGX-NOGC", "SLA-PZ-NOGC-NOGX")
+ACCEPTED_XC_GGA = ("PBE", "PBESOL", "SLA-PW-PBX-PBC", "SLA-PW-PBESOL")
+
+# QE's lraman (third-order derivatives) is implemented for LDA only:
+# PHonon/PH/phq_setup.f90 raises
+#   "third order derivatives not implemented with GGA".
+RAMAN_XC_FAMILIES = ("LDA",)
+
+
+def xc_family(functional: str | None) -> str | None:
+    """Classify a UPF ``functional`` string as ``"LDA"``, ``"GGA"`` or None."""
+    if not functional:
+        return None
+    u = str(functional).strip().upper()
+    if u in tuple(x.upper() for x in ACCEPTED_XC_LDA) or "PZ" in u or "LDA" in u:
+        return "LDA"
+    if u in tuple(x.upper() for x in ACCEPTED_XC_GGA) or "PBE" in u:
+        return "GGA"
+    return None
 
 # Elements whose presence warns about possible magnetism (MVP is nonmagnetic).
 # This is only a hint; a real magnetic check requires an SCF run.
@@ -127,14 +148,18 @@ def load_defaults() -> dict:
 def resolve_bin_dir(bin_dir: str | Path | None) -> Path:
     """Resolve the QE binary directory from CLI > env > default."""
     if bin_dir:
-        return Path(bin_dir).expanduser()
-    return Path(DEFAULT_BIN_DIR).expanduser()
+        return Path(bin_dir).expanduser().resolve()
+    return Path(DEFAULT_BIN_DIR).expanduser().resolve()
 
 
 def resolve_pseudo_dir(pseudo_dir: str | Path | None) -> Path:
-    """Resolve the pseudopotential directory from CLI > bundled default."""
+    """Resolve the pseudopotential directory from CLI > bundled default.
+
+    Explicit paths are made absolute so QE (launched with its working
+    directory set to the run outdir) can always find the UPF files.
+    """
     if pseudo_dir and str(pseudo_dir).strip() not in ("", "auto"):
-        return Path(pseudo_dir).expanduser()
+        return Path(pseudo_dir).expanduser().resolve()
     return PSEUDO_DIR
 
 

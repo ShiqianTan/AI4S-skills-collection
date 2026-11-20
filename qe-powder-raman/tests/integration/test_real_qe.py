@@ -102,6 +102,46 @@ class TestRealQeLiF(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
+    def test_pbe_phonon_ir_without_lraman(self):
+        bin_dir = _bin_dir()
+        if bin_dir is None or not (bin_dir / "pw.x").exists():
+            self.skipTest("pw.x not found (set QE_BIN to a QE install)")
+        pseudo = SKILL / "pseudo" / "pbe"
+        if not (pseudo / "Li.pbe-fr-oncvpsp.UPF").exists():
+            self.skipTest("bundled PBE pseudopotentials missing")
+
+        tmp = Path(tempfile.mkdtemp(prefix="qer_realqe_pbe_"))
+        try:
+            run = tmp / "run"
+            cmd = [
+                sys.executable, str(SCRIPTS / "qe_raman.py"), "all",
+                str(EXAMPLE),
+                "--pseudo-dir", str(pseudo),
+                "--outdir", str(run),
+                "--prefix", "LiF",
+                "--kpt-grid", "2", "2", "2",
+                "--no-lraman",
+                "--bin-dir", str(bin_dir),
+                "--np", "1",
+                "--execute",
+            ]
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+            self.assertEqual(
+                proc.returncode, 0,
+                "PBE all --execute failed:\nstdout:\n%s\nstderr:\n%s"
+                % (proc.stdout[-4000:], proc.stderr[-4000:]),
+            )
+            summary = json.loads((run / "summary.json").read_text())
+            self.assertEqual(summary["status"], "success")
+            self.assertFalse(summary["lraman"])
+            self.assertEqual(summary["stats"]["total"], 6)
+            self.assertEqual(summary["stats"]["raman_active"], [])
+            text = (run / "report.md").read_text()
+            self.assertIn("PseudoDojo", text)
+            self.assertIn("仅声子/IR", text)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

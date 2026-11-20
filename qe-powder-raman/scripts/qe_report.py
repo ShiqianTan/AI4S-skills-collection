@@ -74,6 +74,7 @@ def _mode_table(title: str, modes: list[dict]) -> list[str]:
 def render_report(outdir: Path) -> str:
     s = _load_summary(outdir)
     tables = _load_mode_tables(outdir)
+    ppman = _load_json(outdir, "pseudopotential_manifest.json")
 
     lines: list[str] = []
     lines.append("# QE 粉末拉曼计算报告")
@@ -139,6 +140,7 @@ def render_report(outdir: Path) -> str:
     ph = [
         ("ph 收敛", "是" if s.get("ph_converged") else "否"),
         ("ph JOB DONE", "是" if s.get("ph_job_done") else "否"),
+        ("Raman 计算 (lraman)", "开启" if s.get("lraman", True) else "关闭（仅声子/IR）"),
         ("Raman 张量生成", "是" if s.get("lraman_tensor") else "否"),
         ("声学求和规则 ASR", _fmt(s.get("asr_metric"))),
     ]
@@ -158,6 +160,14 @@ def render_report(outdir: Path) -> str:
     if dyn.get("polarizability"):
         p = dyn["polarizability"]
         lines.append("- 极化率 (Å³) 对角元：%s" % ", ".join(_fmt(p[i][i]) for i in range(3)))
+    fams = ppman.get("xc_families") or []
+    if fams:
+        lines.append("- 赝势 XC 家族：%s" % ", ".join(fams))
+    if ppman.get("pseudo_source"):
+        lines.append("- 赝势来源：%s" % "; ".join(ppman["pseudo_source"]))
+    if fams and "GGA" in fams:
+        lines.append("- 注意：QE `lraman` 不支持 GGA/PBE（`third order derivatives "
+                     "not implemented with GGA`），PBE NC 仅用于声子/IR（`--no-lraman`）。")
     if not dyn.get("has_raman", True):
         lines.append("- 注意：dynmat 未输出 Raman 列（该体系无一级拉曼活性）。")
     lines.append("")
@@ -235,7 +245,6 @@ def render_report(outdir: Path) -> str:
 
     struct = _load_json(outdir, "structure_manifest.json")
     effcfg = _load_json(outdir, "effective_config.json")
-    ppman = _load_json(outdir, "pseudopotential_manifest.json")
     run_state = s.get("run_state") or {}
 
     lines.append("## 7. 可复现信息")
@@ -259,6 +268,12 @@ def render_report(outdir: Path) -> str:
               "fwhm", "temperature", "laser_wavelength", "spectrum_broadening"):
         if k in effcfg:
             lines.append("| %s | %s |" % (k, effcfg[k]))
+    lines.append("| Raman (lraman) | %s |"
+                 % ("开启" if effcfg.get("raman", s.get("lraman", True)) else "关闭（仅声子/IR）"))
+    if ppman.get("xc_families"):
+        lines.append("| 赝势 XC 家族 | %s |" % ", ".join(ppman["xc_families"]))
+    if ppman.get("pseudo_source"):
+        lines.append("| 赝势来源 | %s |" % "; ".join(ppman["pseudo_source"]))
     pps = ppman.get("pseudopotentials") or {}
     for elx in sorted(pps):
         e = pps[elx]

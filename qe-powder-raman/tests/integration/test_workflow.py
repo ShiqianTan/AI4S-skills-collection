@@ -163,6 +163,32 @@ class TestParseOutdir(unittest.TestCase):
         self.assertIn("结构弛豫", text)
         self.assertIn("0.0123", text)
 
+    def test_lraman_off_parse(self):
+        self._copy("LiF_mp-1138")
+        (self.tmp / "ph.in").write_text("&inputph\n  lraman    = .false.\n/\n")
+        rec = parse_outdir(self.tmp)
+        self.assertFalse(rec["lraman"])
+        self.assertFalse(rec["lraman_tensor"])
+        self.assertEqual(rec["status"], "success")
+        self.assertTrue(any("lraman disabled" in w for w in rec["warnings"]))
+
+    def test_report_records_pseudo_xc_and_source(self):
+        self._copy("AlAs_mp-2172")
+        (self.tmp / "ph.in").write_text("&inputph\n  lraman    = .false.\n/\n")
+        (self.tmp / "effective_config.json").write_text('{"raman": false}')
+        (self.tmp / "pseudopotential_manifest.json").write_text(
+            '{"n_atoms": 2, "xc_families": ["GGA"], "raman_supported": false,'
+            ' "pseudo_source": ["PseudoDojo ONCVPSP-PBE-FR-PDv0.4"],'
+            ' "pseudopotentials": {"Al": {"file": "Al.pbe-fr-oncvpsp.UPF",'
+            ' "functional": "PBE", "sha256": "%s"}}}' % ("b" * 64))
+        rec = parse_outdir(self.tmp)
+        write_outputs(rec)
+        text = render_report(self.tmp)
+        self.assertIn("赝势 XC 家族", text)
+        self.assertIn("GGA", text)
+        self.assertIn("PseudoDojo", text)
+        self.assertIn("仅声子/IR", text)
+
     def test_report_sections(self):
         self._copy("AlAs_mp-2172")
         (self.tmp / "inputs_manifest.json").write_text(

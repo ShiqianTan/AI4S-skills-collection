@@ -80,3 +80,46 @@ QE 的 `lraman` 只在满足以下条件时才可用（源码 `PHonon/PH/phq_rea
 
 **结论**：默认活性谱与报告的定位是“沿给定方向的 LO-TO + Γ 点 TO”，
 极性粉末的自动方向平均列为后续工作（P2-03 未做生产声明）。
+
+## PBE/GGA 与 lraman 的硬性限制（E-02）
+
+**结论：QE 的 `lraman` 只能用于 LDA，不能用 PBE/PBEsol 等 GGA 泛函。**
+本 skill 因此把 PBE NC 定位为“声子/IR 工作流”，Raman 步骤仍只接受 LDA。
+
+**源码依据**（本机 QE 8.0dev，commit `215ff8a23`）：
+
+```fortran
+! PHonon/PH/phq_setup.f90
+IF (xclib_dft_is('gradient').and.(lraman.or.elop)) call errore('phq_setup', &
+   'third order derivatives not implemented with GGA', 1)
+```
+
+该限制自 2010 年存在，`phq_readin.f90` 另有 PAW/USPP/noncolin/Hubbard U
+与 `lraman` 不兼容的检查。
+
+**实测复现**：MoS2 + PBE NC（`Mo-PBE.upf`/`S-PBE.upf`）时 `pw.x` 正常，
+`ph.x` 立即报：
+
+```
+Error in routine phq_setup (1):
+  third order derivatives not implemented with GGA
+```
+
+**本 skill 的处理**：
+
+- 赝势校验现在识别 LDA 与 GGA/PBE NC：两者都可通过 `check_pseudo`，
+  但 `pseudopotential_manifest.json` 会记录 `xc_families` 与
+  `raman_supported`（PBE ⇒ `false`）。
+- Raman 开启时，`prepare`/`run` 会对 GGA 赝势直接 FAIL，并提示使用 LDA
+  或 `--no-lraman`。
+- `--no-lraman`（或配置 `raman: false`）生成 `lraman = .false.` 的 `ph.in`，
+  进入“声子 + 红外 + 介电”模式；`parse`/`report` 会标记“仅声子/IR”，
+  不声称有 Raman 活性。
+- 内置 PBE NC 位于 `pseudo/pbe/`（PseudoDojo ONCVPSP-PBE-FR-PDv0.4，
+  fully relativistic；10 个元素 Li/F/Mg/H/Al/O/As/Cd/S/Mo），来源与
+  SHA-256 写入 `data/pseudopotential_map.json` 和每次运行的 manifest。
+- 内置 LDA HGH 仍为默认与回归基线（`pseudo/`）。
+
+**验证**：LiF + `pseudo/pbe/` + `--no-lraman` + `all --execute`（2×2×2）
+完成 SCF/ph/dynmat/parse/spectrum/report；PBE 结果仅作流程验证，不是
+收敛物理参考。

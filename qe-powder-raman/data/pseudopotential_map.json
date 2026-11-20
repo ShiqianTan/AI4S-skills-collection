@@ -1,6 +1,25 @@
 {
-  "_comment": "Bundled HGH LDA norm-conserving pseudopotentials (X.pz-hgh.UPF). z_valence is read from the UPF header at runtime; values listed here are informational.",
+  "_comment": "Bundled norm-conserving pseudopotentials. `pseudo/` holds HGH LDA (X.pz-hgh.UPF); `pseudo/pbe/` holds PseudoDojo ONCVPSP PBE (X.pbe-fr-oncvpsp.UPF). z_valence is read from the UPF header at runtime; values listed here are informational. QE lraman supports LDA only, so the PBE set is intended for phonon/IR runs with --no-lraman.",
   "bundled_elements": ["Li", "F", "Mg", "H", "Al", "O", "As", "Cd", "S", "Mo"],
-  "source": "HGH analytical NC pseudopotentials, cpmd2upf v.5.0.1",
-  "z_valence": {"H": 1, "Li": 1, "O": 6, "F": 7, "Mg": 2, "Al": 3, "S": 6, "As": 5, "Cd": 2, "Mo": 6}
+  "source": "LDA: HGH analytical NC pseudopotentials, cpmd2upf v.5.0.1 (pseudo/). PBE: PseudoDojo ONCVPSP-PBE-FR-PDv0.4, fully relativistic NC (pseudo/pbe/).",
+  "z_valence": {"H": 1, "Li": 1, "O": 6, "F": 7, "Mg": 2, "Al": 3, "S": 6, "As": 5, "Cd": 2, "Mo": 6},
+  "z_valence_pbe": {"H": 1, "Li": 3, "O": 6, "F": 7, "Mg": 10, "Al": 3, "S": 6, "As": 15, "Cd": 20, "Mo": 14},
+  "sets": {
+    "hgh_lda": {
+      "dir": "pseudo",
+      "xc": "LDA",
+      "raman": true,
+      "elements": ["Li", "F", "Mg", "H", "Al", "O", "As", "Cd", "S", "Mo"]
+    },
+    "oncvdjo_pbe": {
+      "dir": "pseudo/pbe",
+      "xc": "PBE",
+      "raman": false,
+      "elements": ["Li", "F", "Mg", "H", "Al", "O", "As", "Cd", "S", "Mo"]
+    }
+  },
+  "sources": {
+    "*.pz-hgh.UPF": "HGH LDA NC (cpmd2upf v5.0.1), bundled in pseudo/",
+    "*.pbe-fr-oncvpsp.UPF": "PseudoDojo ONCVPSP-PBE-FR-PDv0.4 (raw.githubusercontent.com/abinit/pseudo_dojo/master/pseudo_dojo/pseudos/ONCVPSP-PBE-FR-PDv0.4), PBE NC fully relativistic, bundled in pseudo/pbe/"
+  }
 }

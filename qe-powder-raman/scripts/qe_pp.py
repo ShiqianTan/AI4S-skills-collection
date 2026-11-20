@@ -2,22 +2,24 @@
 """
 Pseudopotential reading and validation for the qe-powder-raman skill.
 
-Step 0 scope:
   - parse a UPF header (element, pseudo_type, functional, z_valence)
-  - check that the file is norm-conserving (NC) and LDA (PZ family)
+  - check that the file is norm-conserving (NC) with LDA or GGA/PBE XC
+  - build the element -> UPF manifest with provenance and SHA-256
 
-Step 1 will extend this with a full element -> UPF manifest and the
-bundled `pseudo/` directory mapping.
+Note: QE's ``lraman`` only supports LDA (``PHonon/PH/phq_setup.f90`` errors on
+GGA). GGA/PBE NC pseudopotentials are therefore accepted for phonon/IR runs
+(``raman: false`` / ``--no-lraman``) but rejected when Raman is requested.
 """
 
 from __future__ import annotations
 
+import fnmatch
 import hashlib
 import json
 import re
 from pathlib import Path
 
-from qe_common import ACCEPTED_XC_LDA
+from qe_common import DATA_DIR, xc_family
 
 
 def _sha256(path: str | Path) -> str:
@@ -123,13 +125,20 @@ def check_pseudo(
         msgs.append(("WARN", "type", "%s pseudo_type=%r unrecognized" % (tag, upf.pseudo_type)))
 
     func = upf.functional or ""
-    if func in ACCEPTED_XC_LDA:
+    fam = xc_family(func)
+    if fam == "LDA":
         msgs.append(("PASS", "xc", "%s functional=%s (LDA)" % (tag, func)))
-    elif "PZ" in func or "LDA" in func.upper():
-        msgs.append(("PASS", "xc", "%s functional=%s (LDA)" % (tag, func)))
+    elif fam == "GGA":
+        msgs.append(
+            ("PASS", "xc",
+             "%s functional=%s (GGA; usable for phonon/IR with lraman disabled)"
+             % (tag, func))
+        )
     else:
         msgs.append(
-            ("FAIL", "xc", "%s functional=%s is not LDA; Raman skill requires LDA+NC" % (tag, func))
+            ("FAIL", "xc",
+             "%s functional=%s is not LDA/GGA; this skill requires NC pseudopotentials "
+             "with LDA or PBE" % (tag, func))
         )
 
     if upf.z_valence is None:
@@ -137,6 +146,58 @@ def check_pseudo(
     else:
         msgs.append(("PASS", "z_valence", "%s z_valence=%.6g" % (tag, upf.z_valence)))
     return msgs
+
+
+def raman_xc_issues(
+    manifest: dict, raman_enabled: bool = True
+) -> list[tuple[str, str, str]]:
+    """Check whether a pseudopotential manifest can be used for the Raman step.
+
+    QE's ``lraman`` implements only LDA third-order derivatives
+    (``PHonon/PH/phq_setup.f90``: "third order derivatives not implemented with
+    GGA").  GGA/PBE pseudopotentials are therefore accepted by
+    :func:`check_pseudo` but must run with ``lraman=.false.`` (phonon/IR only).
+    """
+    msgs: list[tuple[str, str, str]] = []
+    if not raman_enabled:
+        msgs.append(("INFO", "lraman", "Raman disabled (lraman=.false.): phonon/IR only"))
+        return msgs
+    entries = (manifest.get("pseudopotentials") or {}).items()
+    for el, entry in sorted(entries):
+        func = entry.get("functional")
+        fam = xc_family(func)
+        if fam == "GGA":
+            msgs.append(
+                ("FAIL", "raman_gga",
+                 "%s: functional=%s is GGA; QE lraman rejects GGA "
+                 "('third order derivatives not implemented with GGA', "
+                 "PHonon/PH/phq_setup.f90). Use LDA pseudopotentials or "
+                 "--no-lraman for phonon/IR." % (el, func))
+            )
+        elif fam is None:
+            msgs.append(
+                ("FAIL", "raman_xc",
+                 "%s: functional=%s is not recognized as LDA/GGA" % (el, func))
+            )
+    return msgs
+
+
+def _pseudo_sources() -> dict[str, str]:
+    """Filename-pattern -> provenance strings from data/pseudopotential_map.json."""
+    path = DATA_DIR / "pseudopotential_map.json"
+    try:
+        data = json.loads(path.read_text())
+    except Exception:  # noqa: BLE001
+        return {}
+    sources = data.get("sources") or {}
+    return {str(k): str(v) for k, v in sources.items()}
+
+
+def _source_for(file_name: str, sources: dict[str, str]) -> str:
+    for pattern, source in sources.items():
+        if fnmatch.fnmatch(file_name.lower(), pattern.lower()):
+            return source
+    return "user-supplied"
 
 
 def element_pp_map(pseudo_dir: str | Path, elements: list[str]) -> dict[str, list[str]]:
@@ -186,6 +247,7 @@ def build_pseudopotential_manifest(
         "errors": [],
     }
     mapping = element_pp_map(pseudo_dir, elements)
+    sources = _pseudo_sources()
     zsum = 0.0
     for el in sorted(set(elements)):
         count = elements.count(el)
@@ -211,6 +273,7 @@ def build_pseudopotential_manifest(
             "is_ultrasoft": upf.is_ultrasoft,
             "count": count,
             "sha256": _sha256(path),
+            "source": _source_for(Path(path).name, sources),
         }
         manifest["pseudopotentials"][el] = entry
         if upf.z_valence is not None:
@@ -221,6 +284,18 @@ def build_pseudopotential_manifest(
             elif level == "WARN":
                 manifest["warnings"].append("%s: %s" % (el, text))
     manifest["n_valence_electrons"] = round(zsum, 6)
+    families = sorted({
+        fam for fam in (
+            xc_family(e.get("functional"))
+            for e in manifest["pseudopotentials"].values()
+        ) if fam
+    })
+    manifest["xc_families"] = families
+    manifest["raman_supported"] = bool(families) and "GGA" not in families
+    manifest["pseudo_source"] = sorted({
+        e.get("source") for e in manifest["pseudopotentials"].values()
+        if e.get("source")
+    })
 
     if outdir is not None:
         out = Path(outdir)

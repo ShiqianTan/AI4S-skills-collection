@@ -15,7 +15,7 @@ qe-powder-raman/
 │   ├── pseudopotential_map.json # 内置赝势清单（信息性）
 │   └── raman_knowledge.json     # 兼容性/单位/拒绝规则知识库
 ├── references/                  # 兼容性 / 理论 / 常见失败
-├── pseudo/                      # 内置 HGH LDA NC 赝势（10 个元素）
+├── pseudo/                      # 内置赝势：HGH LDA NC（10 元素）+ pbe/（PBE NC，仅声子/IR）
 ├── templates/                   # QE 输入模板（Step 2 填充）
 ├── scripts/                     # 主程序与模块
 │   ├── qe_raman.py              # CLI：preflight / prepare / run / parse / spectrum / report / all
@@ -55,7 +55,7 @@ Python 依赖（numpy / PyYAML / ASE / spglib / matplotlib）请安装在运行�
 python scripts/qe_raman.py preflight <structure> [--pseudo-dir pseudo] [--bin-dir PATH]
 
 # 结构精化 + 生成输入（写 validated.cif / pseudopotential_manifest.json / scf.in / ph.in / dynmat.in / run.sh）
-python scripts/qe_raman.py prepare  <structure> --config config.yaml --outdir runs/MySys --prefix MySys [--lo 0 0 1] [--kpt-grid 6 6 6 | --kpt-density 30]
+python scripts/qe_raman.py prepare  <structure> --config config.yaml --outdir runs/MySys --prefix MySys [--lo 0 0 1] [--kpt-grid 6 6 6 | --kpt-density 30] [--no-lraman]
 
 # 执行计算（可只跑某阶段 --stage {scf,ph,dynmat,lo}）
 python scripts/qe_raman.py run      --outdir runs/MySys --np 4
@@ -73,13 +73,25 @@ python scripts/qe_raman.py report   --outdir runs/MySys
 python scripts/qe_raman.py all <structure> --outdir runs/MySys --np 4 [--execute]
 ```
 
+**PBE NC（仅声子/IR）**：QE 的 `lraman` 不支持 GGA（源码
+`PHonon/PH/phq_setup.f90` 直接报 `third order derivatives not implemented
+with GGA`）。内置 PBE NC 在 `pseudo/pbe/`，必须关闭 Raman：
+
+```bash
+python scripts/qe_raman.py all <structure> --pseudo-dir pseudo/pbe \
+    --outdir runs/MySys_PBE --no-lraman --execute
+```
+
+此时 `ph.in` 写 `lraman=.false.`，输出只有声子频率、IR 活性与介电常数；
+`parse`/`report` 会标记“仅声子/IR”。Raman 计算请继续使用默认 LDA HGH 赝势。
+
 输入文件轻量校验：`python scripts/qe_raman.py validate-input runs/MySys/scf.in`。
 列出模板：`python scripts/qe_raman.py list-templates`。
 
 ## 测试
 
 ```bash
-python tests/run_tests.py     # 单元 + 集成（无需 QE/MPI）
+python tests/run_tests.py     # 122 项单元 + 集成测试（2 项真 QE 测试默认跳过）
 ```
 
 示例结构见 `examples/`（6 个 MP-20 体系，含负对照 LiF 与层状/纤锌矿/闪锌矿等

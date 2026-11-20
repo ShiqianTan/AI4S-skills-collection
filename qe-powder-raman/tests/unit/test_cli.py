@@ -29,7 +29,7 @@ class TestVersionParsing(unittest.TestCase):
 
 class TestCliOverrides(unittest.TestCase):
     def _args(self, **kwargs):
-        defaults = {"kpt_density": None, "kpt_grid": None}
+        defaults = {"kpt_density": None, "kpt_grid": None, "no_lraman": False}
         defaults.update(kwargs)
         return argparse.Namespace(**defaults)
 
@@ -47,6 +47,10 @@ class TestCliOverrides(unittest.TestCase):
         cfg = _apply_cli_overrides({"kpt_density": 30.0}, self._args())
         self.assertEqual(cfg["kpt_density"], 30.0)
         self.assertNotIn("kpt_grid", cfg)
+
+    def test_no_lraman_override(self):
+        cfg = _apply_cli_overrides({"raman": True}, self._args(no_lraman=True))
+        self.assertFalse(cfg["raman"])
 
 
 class TestPreflightScratchDir(unittest.TestCase):

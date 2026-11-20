@@ -14,7 +14,10 @@ from qe_pp import (  # noqa: E402
     check_pseudo,
     element_pp_map,
     parse_upf,
+    raman_xc_issues,
 )
+
+PBE = PSEUDO / "pbe"
 
 
 class TestParseUpf(unittest.TestCase):
@@ -83,6 +86,38 @@ class TestCheckPseudoElementMatch(unittest.TestCase):
         self.assertFalse(
             any(lvl == "FAIL" and key == "element_mismatch" for lvl, key, _ in msgs)
         )
+
+
+class TestRamanXc(unittest.TestCase):
+    def test_pbe_nc_classified_gga(self):
+        msgs = check_pseudo(PBE / "Li.pbe-fr-oncvpsp.UPF", expected_element="Li")
+        self.assertFalse(any(lvl == "FAIL" for lvl, _k, _t in msgs))
+        self.assertTrue(any(lvl == "PASS" and key == "xc" and "GGA" in text
+                            for lvl, key, text in msgs))
+
+    def test_pbe_manifest_metadata(self):
+        m = build_pseudopotential_manifest(["Li", "F"], PBE, None)
+        self.assertFalse(m["errors"])
+        self.assertEqual(m["xc_families"], ["GGA"])
+        self.assertFalse(m["raman_supported"])
+        self.assertTrue(any("PseudoDojo" in s for s in m["pseudo_source"]))
+
+    def test_pbe_blocked_for_raman(self):
+        m = build_pseudopotential_manifest(["Li", "F"], PBE, None)
+        issues = raman_xc_issues(m, raman_enabled=True)
+        self.assertTrue(any(lvl == "FAIL" and key == "raman_gga"
+                            for lvl, key, _t in issues))
+
+    def test_pbe_allowed_without_raman(self):
+        m = build_pseudopotential_manifest(["Li", "F"], PBE, None)
+        issues = raman_xc_issues(m, raman_enabled=False)
+        self.assertFalse(any(lvl == "FAIL" for lvl, _k, _t in issues))
+        self.assertTrue(any(lvl == "INFO" for lvl, _k, _t in issues))
+
+    def test_lda_supported_for_raman(self):
+        m = build_pseudopotential_manifest(["Li", "F"], PSEUDO, None)
+        issues = raman_xc_issues(m, raman_enabled=True)
+        self.assertFalse(any(lvl == "FAIL" for lvl, _k, _t in issues))
 
 
 class TestManifest(unittest.TestCase):

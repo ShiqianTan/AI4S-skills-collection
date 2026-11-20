@@ -22,7 +22,11 @@ pw.x (SCF) -> ph.x (epsil + trans + lraman, q=Γ) -> dynmat.x (IR / Raman / 去�
 
 - 仅适用于 **三维周期性、绝缘（有带隙）、非磁性、整数占据** 的晶体。
 - `lraman=.true.` **只支持模守恒（NC）赝势**，不支持 US-PP 和 PAW。
-- 只支持 **LDA（PZ）** 泛函 + `occupations='fixed'`。
+- **Raman 响应只支持 LDA**：QE `PHonon/PH/phq_setup.f90` 对 GGA 直接报
+  `third order derivatives not implemented with GGA`。PBE/PBEsol NC 可通过
+  赝势校验，但只能配合 `--no-lraman` 做声子/IR/介电；内置 PBE 位于
+  `pseudo/pbe/`，LDA HGH 位于 `pseudo/`（默认）。
+- 只支持 **LDA（PZ）** 拉曼 + `occupations='fixed'`；PBE 仅限 `--no-lraman`。
 - 不支持：非共线磁性、Hubbard U、meta-GGA/杂化泛函、TS-vdW。
 - 只算 **Γ 点** 一级非共振谐波拉曼；无温度/峰宽/绝对强度标定（除非显式开启 Stokes）。
 - 对中性闭壳层晶胞，生成的 SCF 输入会计算一个空带。`run` 与 `all --execute`

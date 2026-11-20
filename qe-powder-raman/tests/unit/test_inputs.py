@@ -13,11 +13,22 @@ from ase import Atoms  # noqa: E402
 from qe_inputs import (  # noqa: E402
     fmt_num,
     generate_inputs,
+    generate_ph,
     kpoint_grid,
     render,
     resolve_kpoint_grid,
     species_order,
 )
+
+
+class TestRamanSwitch(unittest.TestCase):
+    def test_lraman_default_on(self):
+        text = generate_ph({}, ["Li", "F"], "LiF")
+        self.assertIn("lraman    = .true.", text)
+
+    def test_lraman_can_be_disabled(self):
+        text = generate_ph({"raman": False}, ["Li", "F"], "LiF")
+        self.assertIn("lraman    = .false.", text)
 
 
 class TestFmtNum(unittest.TestCase):

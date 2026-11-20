@@ -5,11 +5,13 @@ solid-state powder-Raman workflow.
 
 Generated inputs implement the validated recipe:
 
-    pw.x scf (LDA + NC, occupations='fixed')
+    pw.x scf (LDA/PBE + NC, occupations='fixed')
       -> ph.x (epsil=.true. trans=.true. lraman=.true. asr=.true., q=Gamma)
       -> dynmat.x (asr='crystal') -> IR/Raman activities + depolarization factors
 
-Only norm-conserving LDA pseudopotentials are supported (lraman forbids US/PAW).
+Only norm-conserving pseudopotentials are supported (lraman forbids US/PAW).
+QE's lraman supports LDA only; for GGA/PBE NC set ``raman: false`` (or pass
+``--no-lraman``) to run phonon/IR without the Raman response.
 Optional non-analytic LO-TO runs are written as separate dynmat_lo*.in inputs
 using the `q` (3-vector) namelist variable (NOT q(3)).
 """
@@ -188,6 +190,7 @@ def generate_ph(cfg, species, prefix) -> str:
         "outdir": cfg.get("qe_outdir", "./tmp"),
         "amass": amass_block(species),
         "tr2_ph": fmt_num(cfg.get("tr2_ph", 1.0e-14)),
+        "lraman": fmt_num(cfg.get("raman", True)),
         "fildyn": prefix + ".dyn",
     })
 
@@ -294,6 +297,7 @@ def generate_inputs(atoms, cfg, outdir, pseudo_dir, prefix, lo_dirs=None,
         "kpoints": list(grid),
         "qe_outdir": cfg.get("qe_outdir", "./tmp"),
         "lo_dirs": [list(q) for q in lo_dirs],
+        "raman": bool(cfg.get("raman", True)),
         "files": written,
     }
     (outdir / "inputs_manifest.json").write_text(

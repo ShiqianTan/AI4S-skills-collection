@@ -39,7 +39,12 @@ from qe_common import (  # noqa: E402
     resolve_pseudo_dir,
     validate_config,
 )
-from qe_pp import check_pseudo, element_pp_map, build_pseudopotential_manifest  # noqa: E402
+from qe_pp import (  # noqa: E402
+    build_pseudopotential_manifest,
+    check_pseudo,
+    element_pp_map,
+    raman_xc_issues,
+)
 from qe_struct import (  # noqa: E402
     check_structure,
     format_check_result,
@@ -100,6 +105,9 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="also generate relax.in (vc-relax); run it with `run --relax`")
     pr.add_argument("--lo", nargs="*", type=float, default=None,
                     help="LO directions 'x y z [x y z ...]'")
+    pr.add_argument("--no-lraman", action="store_true",
+                    help="disable the Raman response (lraman=.false.; phonon/IR only, "
+                         "required for GGA/PBE pseudopotentials)")
     pr.add_argument("--kpt-density", type=float, default=None,
                     help="k-point density target (overrides config)")
     pr.add_argument("--kpt-grid", nargs=3, type=int, default=None, metavar=("NX", "NY", "NZ"),
@@ -149,6 +157,9 @@ def _build_parser() -> argparse.ArgumentParser:
     al.add_argument("--no-refine", action="store_true", help="skip spglib.refine_cell")
     al.add_argument("--relax", action="store_true",
                     help="include vc-relax: generate relax.in; with --execute run it and regenerate SCF")
+    al.add_argument("--no-lraman", action="store_true",
+                    help="disable the Raman response (lraman=.false.; phonon/IR only, "
+                         "required for GGA/PBE pseudopotentials)")
     al.add_argument("--kpt-density", type=float, default=None,
                     help="k-point density target (overrides config)")
     al.add_argument("--kpt-grid", nargs=3, type=int, default=None, metavar=("NX", "NY", "NZ"),
@@ -414,6 +425,8 @@ def _apply_cli_overrides(cfg: dict, args: argparse.Namespace) -> dict:
     grid = getattr(args, "kpt_grid", None)
     if grid:
         cfg["kpt_grid"] = [int(x) for x in grid]
+    if getattr(args, "no_lraman", False):
+        cfg["raman"] = False
     return cfg
 
 
@@ -475,6 +488,14 @@ def _run_prepare(args: argparse.Namespace) -> int:
         print("\nprepare: FAIL (pseudopotential problems)")
         return 1
 
+    xc_issues = raman_xc_issues(manifest, cfg.get("raman", True))
+    for level, key, text in xc_issues:
+        print("[%s] %-14s %s" % (level, key, text))
+    if any(level == "FAIL" for level, _key, _text in xc_issues):
+        print("\nprepare: FAIL (XC incompatible with the requested step; "
+              "use LDA pseudopotentials or --no-lraman)")
+        return 1
+
     print("\n--- inputs ---")
     summary = generate_inputs(
         refined, cfg, outdir, pseudo_dir, prefix,
@@ -505,6 +526,32 @@ def _run_run(args: argparse.Namespace) -> int:
         print("run: FAIL (no prepared inputs in %s; run `prepare` first)" % outdir,
               file=sys.stderr)
         return 1
+
+    import json as _json
+
+    raman_enabled = bool(cfg.get("raman", True))
+    eff_path = outdir / "effective_config.json"
+    if eff_path.exists():
+        try:
+            raman_enabled = bool(_json.loads(eff_path.read_text()).get(
+                "raman", raman_enabled))
+        except Exception:  # noqa: BLE001
+            pass
+    man_path = outdir / "pseudopotential_manifest.json"
+    if man_path.exists():
+        try:
+            man = _json.loads(man_path.read_text())
+        except Exception:  # noqa: BLE001
+            man = None
+        if man is not None:
+            fails = [m for m in raman_xc_issues(man, raman_enabled)
+                     if m[0] == "FAIL"]
+            for level, key, text in fails:
+                print("[%s] %-14s %s" % (level, key, text))
+            if fails:
+                print("\nrun: FAIL (XC incompatible with the requested step; "
+                      "re-run `prepare` with --no-lraman or use LDA pseudos)")
+                return 1
 
     bin_dir = resolve_bin_dir(args.bin_dir or cfg.get("bin_dir"))
     pseudo_dir = resolve_pseudo_dir(args.pseudo_dir or cfg.get("pseudo_dir"))

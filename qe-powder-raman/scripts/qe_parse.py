@@ -325,7 +325,11 @@ def parse_outdir(outdir: str | Path) -> dict:
     rec["modes"] = dyn["modes"]
     rec["stats"] = _stats(dyn["modes"])
     rec["raman_columns_present"] = dyn["has_raman"]
-    rec["lraman_tensor"] = "Raman tensor" in ph_txt
+    ph_in_path = outdir / "ph.in"
+    ph_in_txt = ph_in_path.read_text(errors="replace") if ph_in_path.exists() else ""
+    lraman_off = bool(re.search(r"lraman\s*=\s*\.false\.", ph_in_txt, re.I))
+    rec["lraman"] = not lraman_off
+    rec["lraman_tensor"] = (not lraman_off) and ("Raman tensor" in ph_txt)
 
     # completion + artifact checks (P0-04)
     problems: list[str] = []
@@ -360,7 +364,9 @@ def parse_outdir(outdir: str | Path) -> dict:
     elif "JOB DONE." not in dyn_txt:
         problems.append("dynmat.out missing 'JOB DONE.'")
 
-    if not rec["lraman_tensor"]:
+    if not rec["lraman"]:
+        warnings.append("lraman disabled (phonon/IR only; no Raman activity)")
+    elif not rec["lraman_tensor"]:
         if dyn["has_raman"]:
             problems.append("dynmat has Raman columns but ph.out lacks Raman tensor")
         else:
@@ -494,6 +500,7 @@ def print_summary(rec: dict) -> None:
              s.get("sym_ops"), s.get("scf_iter"), s.get("etot_ry")))
     print("  ph : converged=%s job_done=%s asr=%s"
           % (rec["ph_converged"], rec["ph_job_done"], rec["asr_metric"]))
+    print("  lraman: %s" % ("on" if rec.get("lraman", True) else "off (phonon/IR only)"))
     el = rec.get("electronic") or {}
     print("  elec: %s gap=%s eV (homo=%s lumo=%s)"
           % (el.get("classification"), el.get("gap_ev"),
