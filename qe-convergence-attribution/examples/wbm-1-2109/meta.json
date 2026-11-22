@@ -1,0 +1,21 @@
+{
+  "material_id": "wbm-1-2109",
+  "formula": "Al2Ga2Se4",
+  "n_sites": 8,
+  "vasp_bandgap_pbe_eV": 0.45,
+  "elements": [
+    "Al",
+    "Ga",
+    "Se"
+  ],
+  "kpts": [
+    5,
+    5,
+    5
+  ],
+  "k_shift": [
+    0,
+    0,
+    0
+  ]
+}

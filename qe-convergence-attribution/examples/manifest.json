@@ -1,0 +1,66 @@
+{
+  "systems": {
+    "wbm-1-1847": {
+      "material_id": "wbm-1-1847",
+      "formula": "Al2Cl2",
+      "n_sites": 4,
+      "vasp_bandgap_pbe_eV": 0.43,
+      "elements": [
+        "Al",
+        "Cl"
+      ],
+      "kpts": [
+        4,
+        7,
+        9
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ]
+    },
+    "wbm-1-2109": {
+      "material_id": "wbm-1-2109",
+      "formula": "Al2Ga2Se4",
+      "n_sites": 8,
+      "vasp_bandgap_pbe_eV": 0.45,
+      "elements": [
+        "Al",
+        "Ga",
+        "Se"
+      ],
+      "kpts": [
+        5,
+        5,
+        5
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ]
+    },
+    "wbm-1-2225": {
+      "material_id": "wbm-1-2225",
+      "formula": "Al2In2Te4",
+      "n_sites": 8,
+      "vasp_bandgap_pbe_eV": 0.21,
+      "elements": [
+        "Al",
+        "In",
+        "Te"
+      ],
+      "kpts": [
+        5,
+        5,
+        5
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

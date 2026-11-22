@@ -1,0 +1,21 @@
+{
+  "material_id": "wbm-1-2225",
+  "formula": "Al2In2Te4",
+  "n_sites": 8,
+  "vasp_bandgap_pbe_eV": 0.21,
+  "elements": [
+    "Al",
+    "In",
+    "Te"
+  ],
+  "kpts": [
+    5,
+    5,
+    5
+  ],
+  "k_shift": [
+    0,
+    0,
+    0
+  ]
+}

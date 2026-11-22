@@ -21,4 +21,5 @@ pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.y
 - [qe-salex-benchmark](./qe-salex-benchmark/README.md) — sAlex forces/stress/relative-energy validation (ASE stress convention)
 - [qe-matpes-benchmark](./qe-matpes-benchmark/README.md) — MatPES-PBE forces/stress/relative-energy validation with kbar conversion
 - [qe-wbm-basin](./qe-wbm-basin/README.md) — WBM IS2RE structure optimization, MP2020 formation energies, and basin-recovery diagnostics
+- [qe-convergence-attribution](./qe-convergence-attribution/README.md) — controlled band-gap and high-force k/ecut/smearing/pseudo attribution
 <!-- SKILL_LIST_END -->
