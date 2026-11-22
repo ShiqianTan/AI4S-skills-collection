@@ -1,0 +1,36 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'matpes_matpes-20240214_7592_11'
+  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 2
+  ntyp = 2
+  ecutwfc = 50.0
+  ecutrho = 360.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  F     18.9984 f_pbe_v1.4.uspp.F.UPF
+  Ag   107.8682 Ag_ONCV_PBE-1.0.oncvpsp.upf
+CELL_PARAMETERS angstrom
+      2.8449936046     0.0000000000     0.0000000000
+     -1.3455353742     2.5474493687     0.0000000000
+      0.1344271455    -0.4565468617     3.8106249513
+ATOMIC_POSITIONS crystal
+  Ag     0.2250138087     0.0839761148     0.8687317680
+  F      0.7252548923     0.6491397660     0.3962368429
+K_POINTS automatic
+  11 11 8 0 0 0

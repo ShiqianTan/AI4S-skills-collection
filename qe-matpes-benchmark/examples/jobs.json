@@ -1,0 +1,530 @@
+[
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_1",
+    "sid": "matpes-20240214_20812_1",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_20812/matpes-20240214_20812_1",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 480.0,
+    "kpts": [
+      9,
+      9,
+      9
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -8.28878624,
+    "vasp_energy_per_atom_eV": -4.14439312,
+    "vasp_forces": [
+      [
+        0.00572473,
+        -0.14921498,
+        -0.10693442
+      ],
+      [
+        -0.00572473,
+        0.14921498,
+        0.10693442
+      ]
+    ],
+    "vasp_stress": [
+      13.52221835,
+      -43.66731906,
+      -114.23153127,
+      -4.37505823,
+      0.04474673,
+      -0.1040667
+    ],
+    "vasp_max_force_eV_A": 0.1836650564770275,
+    "vasp_mean_force_eV_A": 0.1836650564770275,
+    "volume_A3": 47.9539645026538
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_5",
+    "sid": "matpes-20240214_20812_5",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_20812/matpes-20240214_20812_5",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 480.0,
+    "kpts": [
+      6,
+      10,
+      8
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -8.83063491,
+    "vasp_energy_per_atom_eV": -4.415317455,
+    "vasp_forces": [
+      [
+        0.33970082,
+        -0.47397775,
+        0.15630228
+      ],
+      [
+        -0.33970082,
+        0.47397775,
+        -0.15630228
+      ]
+    ],
+    "vasp_stress": [
+      -29.6604078,
+      199.1761563,
+      155.35989511,
+      -120.19501726,
+      69.99949309,
+      118.94579585
+    ],
+    "vasp_max_force_eV_A": 0.6037234112877629,
+    "vasp_mean_force_eV_A": 0.6037234112877629,
+    "volume_A3": 34.244246501309725
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_65",
+    "sid": "matpes-20240214_20812_65",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_20812/matpes-20240214_20812_65",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 480.0,
+    "kpts": [
+      3,
+      11,
+      9
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -8.90702138,
+    "vasp_energy_per_atom_eV": -4.45351069,
+    "vasp_forces": [
+      [
+        0.94296948,
+        0.22803797,
+        -1.15495086
+      ],
+      [
+        -0.94296948,
+        -0.22803797,
+        1.15495086
+      ]
+    ],
+    "vasp_stress": [
+      76.2326103,
+      34.57803828,
+      -147.74058687,
+      -26.4381717,
+      -38.76932922,
+      51.2931566
+    ],
+    "vasp_max_force_eV_A": 1.5083448693809818,
+    "vasp_mean_force_eV_A": 1.5083448693809818,
+    "volume_A3": 40.9305620575238
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_19",
+    "sid": "matpes-20240214_20812_19",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_20812/matpes-20240214_20812_19",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 480.0,
+    "kpts": [
+      7,
+      11,
+      10
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -8.92263815,
+    "vasp_energy_per_atom_eV": -4.461319075,
+    "vasp_forces": [
+      [
+        0.0085289,
+        2.3917452,
+        0.02005466
+      ],
+      [
+        -0.0085289,
+        -2.3917452,
+        -0.02005466
+      ]
+    ],
+    "vasp_stress": [
+      10.85685607,
+      291.2323827,
+      262.08352929,
+      1.31457035,
+      0.0142357,
+      2.29961012
+    ],
+    "vasp_max_force_eV_A": 2.391844483499286,
+    "vasp_mean_force_eV_A": 2.391844483499286,
+    "volume_A3": 37.26029682137933
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_17",
+    "sid": "matpes-20240214_2605_17",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_2605/matpes-20240214_2605_17",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      6,
+      9,
+      9
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 1.4339,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -11.27949734,
+    "vasp_energy_per_atom_eV": -5.63974867,
+    "vasp_forces": [
+      [
+        -0.02531968,
+        0.03177561,
+        -0.00081465
+      ],
+      [
+        0.02531968,
+        -0.03177561,
+        0.00081465
+      ]
+    ],
+    "vasp_stress": [
+      2.94326705,
+      -116.06571384,
+      -120.43934234,
+      1.11177634,
+      0.00332459,
+      0.20503801
+    ],
+    "vasp_max_force_eV_A": 0.040637903991187836,
+    "vasp_mean_force_eV_A": 0.040637903991187836,
+    "volume_A3": 64.1741285717851
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_18",
+    "sid": "matpes-20240214_2605_18",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_2605/matpes-20240214_2605_18",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      3,
+      10,
+      5
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 2.4222,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -12.20417294,
+    "vasp_energy_per_atom_eV": -6.10208647,
+    "vasp_forces": [
+      [
+        -0.42040654,
+        0.25464065,
+        0.34189773
+      ],
+      [
+        0.42040654,
+        -0.25464065,
+        -0.34189773
+      ]
+    ],
+    "vasp_stress": [
+      233.04636574,
+      -32.08095781,
+      -88.71407715,
+      42.17795157,
+      -34.79400075,
+      -108.80147372
+    ],
+    "vasp_max_force_eV_A": 0.5987299702590033,
+    "vasp_mean_force_eV_A": 0.5987299702590033,
+    "volume_A3": 31.336070688626567
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_2",
+    "sid": "matpes-20240214_2605_2",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_2605/matpes-20240214_2605_2",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      4,
+      8,
+      8
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 2.0108,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -11.53073134,
+    "vasp_energy_per_atom_eV": -5.76536567,
+    "vasp_forces": [
+      [
+        0.84200422,
+        1.01733475,
+        -0.24808959
+      ],
+      [
+        -0.84200422,
+        -1.01733475,
+        0.24808959
+      ]
+    ],
+    "vasp_stress": [
+      -4.23283422,
+      -6.29821503,
+      12.01887827,
+      -7.23290026,
+      -6.3351782,
+      -3.50950484
+    ],
+    "vasp_max_force_eV_A": 1.3436850615831595,
+    "vasp_mean_force_eV_A": 1.3436850615831595,
+    "volume_A3": 78.57258225949711
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_9",
+    "sid": "matpes-20240214_2605_9",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_2605/matpes-20240214_2605_9",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      5,
+      10,
+      10
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 3.3251999999999997,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -12.06788603,
+    "vasp_energy_per_atom_eV": -6.033943015,
+    "vasp_forces": [
+      [
+        -0.5615734,
+        1.08657013,
+        0.24455995
+      ],
+      [
+        0.5615734,
+        -1.08657013,
+        -0.24455995
+      ]
+    ],
+    "vasp_stress": [
+      29.45662586,
+      -28.1586995,
+      33.92187067,
+      -39.80182617,
+      -20.41230623,
+      9.20758097
+    ],
+    "vasp_max_force_eV_A": 1.2473206885720205,
+    "vasp_mean_force_eV_A": 1.2473206885720205,
+    "volume_A3": 30.244159799173406
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_9",
+    "sid": "matpes-20240214_7592_9",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_7592/matpes-20240214_7592_9",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 360.0,
+    "kpts": [
+      12,
+      10,
+      9
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -6.1657264,
+    "vasp_energy_per_atom_eV": -3.0828632,
+    "vasp_forces": [
+      [
+        -0.01078494,
+        0.04859194,
+        0.08272479
+      ],
+      [
+        0.01078494,
+        -0.04859194,
+        -0.08272479
+      ]
+    ],
+    "vasp_stress": [
+      124.40406673,
+      13.2308372,
+      16.11719331,
+      0.28653669,
+      -0.3176855,
+      -2.45365309
+    ],
+    "vasp_max_force_eV_A": 0.09654471732990522,
+    "vasp_mean_force_eV_A": 0.09654471732990522,
+    "volume_A3": 29.84361577397345
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_11",
+    "sid": "matpes-20240214_7592_11",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_7592/matpes-20240214_7592_11",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 360.0,
+    "kpts": [
+      11,
+      11,
+      8
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -6.20349737,
+    "vasp_energy_per_atom_eV": -3.101748685,
+    "vasp_forces": [
+      [
+        0.15295972,
+        0.15632063,
+        0.54282805
+      ],
+      [
+        -0.15295972,
+        -0.15632063,
+        -0.54282805
+      ]
+    ],
+    "vasp_stress": [
+      86.78158207,
+      66.47244957,
+      -41.68032025,
+      3.01187111,
+      9.23646769,
+      -3.96957615
+    ],
+    "vasp_max_force_eV_A": 0.5852308152967322,
+    "vasp_mean_force_eV_A": 0.5852308152967322,
+    "volume_A3": 27.617417307581977
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_13",
+    "sid": "matpes-20240214_7592_13",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_7592/matpes-20240214_7592_13",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 360.0,
+    "kpts": [
+      10,
+      6,
+      9
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -6.22624202,
+    "vasp_energy_per_atom_eV": -3.11312101,
+    "vasp_forces": [
+      [
+        -0.01002446,
+        0.2858993,
+        1.45640828
+      ],
+      [
+        0.01002446,
+        -0.2858993,
+        -1.45640828
+      ]
+    ],
+    "vasp_stress": [
+      -5.47182988,
+      -16.94639723,
+      51.3312602,
+      28.27906905,
+      -19.87689184,
+      0.40553902
+    ],
+    "vasp_max_force_eV_A": 1.4842385177562736,
+    "vasp_mean_force_eV_A": 1.4842385177562736,
+    "volume_A3": 33.25396792084853
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_4",
+    "sid": "matpes-20240214_7592_4",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-matpes-benchmark/examples/matpes-20240214_7592/matpes-20240214_7592_4",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 360.0,
+    "kpts": [
+      10,
+      10,
+      8
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -6.07049147,
+    "vasp_energy_per_atom_eV": -3.035245735,
+    "vasp_forces": [
+      [
+        -0.925825,
+        -0.38681585,
+        -1.77515159
+      ],
+      [
+        0.925825,
+        0.38681585,
+        1.77515159
+      ]
+    ],
+    "vasp_stress": [
+      39.05121885,
+      5.25186988,
+      53.25422312,
+      25.41275608,
+      67.82934575,
+      0.58275434
+    ],
+    "vasp_max_force_eV_A": 2.0391031361644636,
+    "vasp_mean_force_eV_A": 2.0391031361644636,
+    "volume_A3": 31.299409137885117
+  }
+]
