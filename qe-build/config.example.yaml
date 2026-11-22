@@ -1,0 +1,12 @@
+# Example configuration for qe-build.
+# Used by verify.py through the shared qe_bench_core.paths resolver.
+root: ..
+qe:
+  bin_dir: /path/to/qe-install-cpu/bin
+  gpu_bin_dir: /path/to/qe-install-gpu/bin
+  libxc_bin_dir: /path/to/qe-install-cpu-libxc/bin
+  mpirun: mpirun
+  nvhpc_root: ""      # e.g. /path/to/nvhpc-sdk/Linux_x86_64/25.7
+  conda_lib: ""       # e.g. /path/to/envs/qe/lib
+  mpi_np: 1
+  omp_num_threads: 4

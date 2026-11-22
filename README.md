@@ -14,4 +14,5 @@ each skill reads a single `config.yaml` for QE binaries, datasets and
 pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.yaml)).
 
 <!-- SKILL_LIST_START -->
+- [qe-build](./qe-build/README.md) — build and verify QE (CPU PBE, GPU OpenACC, CPU libxc/R2SCAN) with known fixes and Si smoke tests
 <!-- SKILL_LIST_END -->

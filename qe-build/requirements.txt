@@ -1,0 +1,3 @@
+# qe-build's verifier uses only the Python standard library.
+# The QE builds themselves use the conda packages documented in SKILL.md:
+#   openmpi openblas scalapack fftw hdf5 mpi4py gfortran_linux-64 gxx_linux-64

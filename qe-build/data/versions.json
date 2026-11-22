@@ -1,0 +1,38 @@
+{
+  "qe": {
+    "version": "7.6",
+    "git_describe": "qe-7.6-1-g61569eb48",
+    "source_commit": "61569eb48"
+  },
+  "system": {
+    "cpu": "2x AMD EPYC 9A75 (128 cores / 256 threads)",
+    "gpu": "8x NVIDIA RTX PRO 5000 72GB Blackwell (compute capability 12.0)",
+    "driver": "580.126.20 (CUDA 13.0)"
+  },
+  "toolchain": {
+    "gcc": "11.4.0",
+    "gfortran": "11.4.0",
+    "nvhpc": "25.7",
+    "cuda_bundled_with_nvhpc": "12.9",
+    "openmpi": "5.0.11",
+    "openblas": "0.3.34",
+    "fftw": "3.3.11",
+    "libxc": "7.1.2"
+  },
+  "smoke_test": {
+    "system": "Si diamond",
+    "ibrav": 2,
+    "celldm1_bohr": 10.2,
+    "ecutwfc_ry": 30,
+    "ecutrho_ry": 240,
+    "kpoints": [8, 8, 8],
+    "pseudo": "Si_r.upf",
+    "total_energy_ry": -16.92302587,
+    "scf_iterations": 6
+  },
+  "verified": {
+    "cpu_gpu_energy_identical": true,
+    "gpu_banner": "GPU acceleration is ACTIVE",
+    "r2scan_xc_banner": "Exchange-correlation = R2SCAN"
+  }
+}
