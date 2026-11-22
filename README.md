@@ -17,4 +17,5 @@ pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.y
 - [qe-build](./qe-build/README.md) — build and verify QE (CPU PBE, GPU OpenACC, CPU libxc/R2SCAN) with known fixes and Si smoke tests
 - [qe-mprelax-mapping](./qe-mprelax-mapping/README.md) — map the Materials Project MPRelaxSet to QE parameters and document deviations
 - [qe-mp20-benchmark](./qe-mp20-benchmark/README.md) — MP20 geometry/band-gap/formation-energy parity, MP2020 corrections, convergence checks
+- [qe-mptraj-benchmark](./qe-mptraj-benchmark/README.md) — MPtrj forces/stress/relative-energy parity and force-error-vs-distortion analysis
 <!-- SKILL_LIST_END -->

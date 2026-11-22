@@ -1,0 +1,42 @@
+{
+  "mp_id": "mp-2172",
+  "formula": "AlAs",
+  "traj_id": "mp-655289-0-0",
+  "nat": 2,
+  "vasp_uncorrected_total_energy_eV": -9.3740468,
+  "vasp_corrected_total_energy_eV": -9.3740468,
+  "vasp_energy_per_atom_eV": -4.6870234,
+  "vasp_forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "vasp_stress": [
+    [
+      0.07961138,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.07961138,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.07961138
+    ]
+  ],
+  "vasp_max_force_eV_A": 0.0,
+  "vasp_mean_force_eV_A": 0.0,
+  "volume_A3": 47.12568016968292,
+  "selection_rank": 2
+}

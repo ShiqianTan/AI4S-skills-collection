@@ -1,0 +1,42 @@
+{
+  "mp_id": "mp-22925",
+  "formula": "AgI",
+  "traj_id": "mp-1802061-0-0",
+  "nat": 2,
+  "vasp_uncorrected_total_energy_eV": -4.91859529,
+  "vasp_corrected_total_energy_eV": -5.29759529,
+  "vasp_energy_per_atom_eV": -2.648797645,
+  "vasp_forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.0,
+      -0.0,
+      -0.0
+    ]
+  ],
+  "vasp_stress": [
+    [
+      -1.02175255,
+      -0.0,
+      0.0
+    ],
+    [
+      -0.0,
+      -1.02175255,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.02175255
+    ]
+  ],
+  "vasp_max_force_eV_A": 0.0,
+  "vasp_mean_force_eV_A": 0.0,
+  "volume_A3": 73.21955895634991,
+  "selection_rank": 0
+}

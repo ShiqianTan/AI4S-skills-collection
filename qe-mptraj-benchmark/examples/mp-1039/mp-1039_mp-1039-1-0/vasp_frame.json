@@ -1,0 +1,52 @@
+{
+  "mp_id": "mp-1039",
+  "formula": "MgTe",
+  "traj_id": "mp-1039-1-0",
+  "nat": 4,
+  "vasp_uncorrected_total_energy_eV": -12.94873312,
+  "vasp_corrected_total_energy_eV": -13.79273312,
+  "vasp_energy_per_atom_eV": -3.44818328,
+  "vasp_forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      -0.21670064
+    ],
+    [
+      0.0,
+      0.0,
+      -0.21670064
+    ],
+    [
+      0.0,
+      0.0,
+      0.21670064
+    ],
+    [
+      0.0,
+      0.0,
+      0.21670064
+    ]
+  ],
+  "vasp_stress": [
+    [
+      13.31450816,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      13.31450816,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      25.32466699
+    ]
+  ],
+  "vasp_max_force_eV_A": 0.21670064,
+  "vasp_mean_force_eV_A": 0.21670064,
+  "volume_A3": 132.00200122068898,
+  "selection_rank": 1
+}

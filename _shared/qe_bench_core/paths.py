@@ -122,11 +122,12 @@ def _apply_env(cfg: dict[str, Any]) -> dict[str, Any]:
 def load_config(config_path: str | Path | None = None) -> dict[str, Any]:
     """Load and merge configuration from file, environment and defaults."""
     cfg = _deep_merge(DEFAULTS, {})
-    base = Path.cwd()
+    cwd = Path.cwd()
+    base = find_repo_root()
 
     candidate = config_path or os.environ.get("QE_BENCH_CONFIG")
-    if candidate is None and (base / "config.yaml").is_file():
-        candidate = base / "config.yaml"
+    if candidate is None and (cwd / "config.yaml").is_file():
+        candidate = cwd / "config.yaml"
     if candidate is not None:
         path = Path(candidate).expanduser()
         if not path.is_file():
