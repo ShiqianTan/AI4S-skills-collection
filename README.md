@@ -12,6 +12,8 @@ Methodology packaged from a Quantum ESPRESSO 7.6 vs VASP / Materials Project
 reproduction study. The result tables and error attribution are reproduced in
 each skill's `references/` directory.
 
+**Full report (PDF):** [reports/QE-vs-VASP-parity-report.pdf](./reports/QE-vs-VASP-parity-report.pdf)
+
 | Skill | What it does |
 |---|---|
 | [qe-build](./qe-build/README.md) | Build/verify QE (CPU PBE, GPU OpenACC, CPU libxc/R2SCAN) with known fixes and Si smoke tests |
