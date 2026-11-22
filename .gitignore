@@ -1,4 +1,14 @@
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 .DS_Store
+
+# Skill run artifacts (never commit computational scratch)
+runs/
+tmp/
+*.out
+*.err
+*.wfc*
+*.save/
+CRASH
+input_tmp.in

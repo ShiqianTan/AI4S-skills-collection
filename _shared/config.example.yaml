@@ -1,0 +1,38 @@
+# Shared configuration for the QE VASP-parity skills.
+#
+# Copy this file next to the script you run (as config.yaml), or point the
+# QE_BENCH_CONFIG environment variable at it.  Resolution priority:
+#   CLI --config > QE_BENCH_CONFIG > QE_* environment variables > this file > defaults
+#
+# Paths may be absolute or relative to `root`.
+
+root: .                      # repo root; relative paths below are resolved from here
+
+qe:
+  bin_dir: ""                # e.g. /path/to/qe-install-cpu/bin
+  gpu_bin_dir: ""            # e.g. /path/to/qe-install-gpu/bin
+  libxc_bin_dir: ""          # e.g. /path/to/qe-install-cpu-libxc/bin
+  mpirun: mpirun             # e.g. /path/to/nvhpc/comm_libs/openmpi4/bin/mpirun
+  nvhpc_root: ""             # optional NVHPC SDK root (GPU build)
+  conda_lib: ""              # optional conda lib dir for FFTW/OpenBLAS
+  mpi_np: 1
+  omp_num_threads: 8
+
+pseudo:
+  sssp_efficiency: "pseudo/sssp/upf"
+  sssp_precision: "pseudo/sssp/upf_precision"
+  sssp_efficiency_json: "pseudo/sssp/SSSP_1.3.0_PBE_efficiency.json"
+  sssp_precision_json: "pseudo/sssp/SSSP_1.3.0_PBE_precision.json"
+  pseudodojo: "pseudo/pseudodojo"
+
+datasets:
+  mp20: ""                   # MP20_dataset directory (train/val/test.csv)
+  mptraj: ""                 # MPTraj_2022.9_full.json
+  salex: ""                  # sAlex val/ LMDB directory
+  matpes: ""                 # MatPES data directory
+  wbm: ""                    # matbench-discovery WBM directory
+  wbm_is2re: ""              # WBM_IS2RE.aselmdb
+
+output:
+  work_dir: "runs"
+  results_dir: "runs/results"
