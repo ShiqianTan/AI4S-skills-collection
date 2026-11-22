@@ -1,0 +1,41 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'salex_agm003604844_1_27'
+  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 6
+  ntyp = 3
+  ecutwfc = 50.0
+  ecutrho = 280.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  S     32.0650 s_pbe_v1.4.uspp.F.UPF
+  Ag   107.8682 Ag_ONCV_PBE-1.0.oncvpsp.upf
+  Hg   200.5900 Hg_ONCV_PBE-1.0.oncvpsp.upf
+CELL_PARAMETERS angstrom
+      5.8652584400    -0.0000000000     0.0000000000
+     -0.0000000000     3.7680079200     0.0000000000
+     -0.0000000000    -1.8840039600     6.3327414500
+ATOMIC_POSITIONS crystal
+  Ag     0.0040589000     0.0289856200     0.0579712500
+  Ag     0.5040589000     0.9710143800     0.9420287500
+  Hg     0.1719908500     0.3531265900     0.7062531800
+  Hg     0.6719908500     0.6468734100     0.2937468200
+  S      0.3199492500     0.1495511400     0.2991022800
+  S      0.8199492500     0.8504488600     0.7008977200
+K_POINTS automatic
+  5 8 5 0 0 0

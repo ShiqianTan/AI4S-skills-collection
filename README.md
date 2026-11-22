@@ -18,4 +18,5 @@ pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.y
 - [qe-mprelax-mapping](./qe-mprelax-mapping/README.md) — map the Materials Project MPRelaxSet to QE parameters and document deviations
 - [qe-mp20-benchmark](./qe-mp20-benchmark/README.md) — MP20 geometry/band-gap/formation-energy parity, MP2020 corrections, convergence checks
 - [qe-mptraj-benchmark](./qe-mptraj-benchmark/README.md) — MPtrj forces/stress/relative-energy parity and force-error-vs-distortion analysis
+- [qe-salex-benchmark](./qe-salex-benchmark/README.md) — sAlex forces/stress/relative-energy validation (ASE stress convention)
 <!-- SKILL_LIST_END -->

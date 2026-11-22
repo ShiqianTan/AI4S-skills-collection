@@ -1,0 +1,18 @@
+# Example configuration for qe-salex-benchmark (shared qe_bench_core schema).
+root: ..
+qe:
+  bin_dir: /path/to/qe-install-cpu/bin
+  gpu_bin_dir: /path/to/qe-install-gpu/bin
+  mpirun: mpirun
+  nvhpc_root: ""
+  conda_lib: ""
+  mpi_np: 1
+  omp_num_threads: 8
+pseudo:
+  sssp_efficiency: pseudos/sssp/upf
+  sssp_efficiency_json: pseudos/sssp/SSSP_1.3.0_PBE_efficiency.json
+datasets:
+  salex: /path/to/sAlex/val      # directory of *.aselmdb files
+output:
+  work_dir: runs
+  results_dir: runs/results

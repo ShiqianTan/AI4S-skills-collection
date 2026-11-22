@@ -1,0 +1,850 @@
+[
+  {
+    "mp_id": "agm003604844",
+    "formula": "Ag2Hg2S2",
+    "traj_id": "agm003604844_0_0",
+    "sid": "agm003604844_0_0",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003604844/agm003604844_0_0",
+    "nat": 6,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      6,
+      8,
+      5
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -13.88057962,
+    "vasp_energy_per_atom_eV": -2.3134299366666666,
+    "vasp_forces": [
+      [
+        0.00087553,
+        -0.0,
+        0.00449102
+      ],
+      [
+        0.00087553,
+        0.0,
+        -0.00449102
+      ],
+      [
+        -0.00177558,
+        -0.0,
+        0.00013434
+      ],
+      [
+        -0.00177558,
+        0.0,
+        -0.00013434
+      ],
+      [
+        0.00090005,
+        0.0,
+        -0.00260278
+      ],
+      [
+        0.00090005,
+        -0.0,
+        0.00260278
+      ]
+    ],
+    "vasp_stress": [
+      8.858910319707994e-05,
+      8.697606006160492e-05,
+      0.0001271427552714418,
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "vasp_max_force_eV_A": 0.00457556700544315,
+    "vasp_mean_force_eV_A": 0.003036742890381545,
+    "volume_A3": 140.1819781436049
+  },
+  {
+    "mp_id": "agm003604844",
+    "formula": "Ag2Hg2S2",
+    "traj_id": "agm003604844_1_27",
+    "sid": "agm003604844_1_27",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003604844/agm003604844_1_27",
+    "nat": 6,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      5,
+      8,
+      5
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -13.72677306,
+    "vasp_energy_per_atom_eV": -2.28779551,
+    "vasp_forces": [
+      [
+        -0.180915,
+        -0.0,
+        0.02442175
+      ],
+      [
+        -0.180915,
+        0.0,
+        -0.02442175
+      ],
+      [
+        0.1597724,
+        -0.0,
+        0.12757075
+      ],
+      [
+        0.1597724,
+        0.0,
+        -0.12757075
+      ],
+      [
+        0.02114261,
+        -0.0,
+        0.40459583
+      ],
+      [
+        0.02114261,
+        0.0,
+        -0.40459583
+      ]
+    ],
+    "vasp_stress": [
+      0.006242884542283293,
+      -0.01050904598869553,
+      -0.001982847969915902,
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "vasp_max_force_eV_A": 0.4051478688219907,
+    "vasp_mean_force_eV_A": 0.264052655401439,
+    "volume_A3": 139.95574079046563
+  },
+  {
+    "mp_id": "agm003604844",
+    "formula": "Ag2Hg2S2",
+    "traj_id": "agm003604844_2_58",
+    "sid": "agm003604844_2_58",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003604844/agm003604844_2_58",
+    "nat": 6,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      5,
+      8,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -13.11170451,
+    "vasp_energy_per_atom_eV": -2.1852840849999997,
+    "vasp_forces": [
+      [
+        -0.73315088,
+        0.0,
+        -0.93065456
+      ],
+      [
+        -0.73315088,
+        -0.0,
+        0.93065456
+      ],
+      [
+        -0.0453778,
+        0.0,
+        -0.14418698
+      ],
+      [
+        -0.0453778,
+        -0.0,
+        0.14418698
+      ],
+      [
+        0.77852868,
+        -0.0,
+        1.26274115
+      ],
+      [
+        0.77852868,
+        0.0,
+        -1.26274115
+      ]
+    ],
+    "vasp_stress": [
+      -0.01569995615554547,
+      -0.006896788585319994,
+      -0.006151271209461903,
+      0.0,
+      -0.0,
+      -0.0
+    ],
+    "vasp_max_force_eV_A": 1.4834493983570405,
+    "vasp_mean_force_eV_A": 0.9397854935203084,
+    "volume_A3": 152.31240228148317
+  },
+  {
+    "mp_id": "agm003604844",
+    "formula": "Ag2Hg2S2",
+    "traj_id": "agm003604844_2_68",
+    "sid": "agm003604844_2_68",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003604844/agm003604844_2_68",
+    "nat": 6,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      5,
+      9,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -12.88190807,
+    "vasp_energy_per_atom_eV": -2.1469846783333333,
+    "vasp_forces": [
+      [
+        -1.13764213,
+        0.0,
+        -1.47286524
+      ],
+      [
+        -1.13764213,
+        -0.0,
+        1.47286524
+      ],
+      [
+        -0.07921341,
+        0.0,
+        -0.28605344
+      ],
+      [
+        -0.07921341,
+        -0.0,
+        0.28605344
+      ],
+      [
+        1.21685555,
+        -0.0,
+        1.97666172
+      ],
+      [
+        1.21685555,
+        0.0,
+        -1.97666172
+      ]
+    ],
+    "vasp_stress": [
+      -0.034595741462213704,
+      -0.014348645006766535,
+      -0.027213623219785283,
+      6.241509125883259e-12,
+      -0.0,
+      -0.0
+    ],
+    "vasp_max_force_eV_A": 2.32119128571498,
+    "vasp_mean_force_eV_A": 1.4930248752798585,
+    "volume_A3": 146.22798321531573
+  },
+  {
+    "mp_id": "agm003468142",
+    "formula": "Br5GeIn2",
+    "traj_id": "agm003468142_0_0",
+    "sid": "agm003468142_0_0",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468142/agm003468142_0_0",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      4,
+      4,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -22.72766044,
+    "vasp_energy_per_atom_eV": -2.840957555,
+    "vasp_forces": [
+      [
+        0.00051525,
+        -0.00045551,
+        0.00266993
+      ],
+      [
+        -0.00038534,
+        0.00060642,
+        0.00259163
+      ],
+      [
+        0.00203116,
+        0.00242173,
+        -0.00049486
+      ],
+      [
+        0.00129206,
+        -0.00168235,
+        -0.00164988
+      ],
+      [
+        -0.00230212,
+        -0.00246426,
+        -0.00149758
+      ],
+      [
+        0.00059641,
+        0.00070593,
+        -0.00195596
+      ],
+      [
+        -0.00139194,
+        0.00127528,
+        -0.00169128
+      ],
+      [
+        -0.00035549,
+        -0.00040725,
+        0.002028
+      ]
+    ],
+    "vasp_stress": [
+      3.378374100414286e-05,
+      3.753636098495241e-05,
+      8.502972658031686e-05,
+      -1.0071299125525224e-07,
+      1.5113190197413722e-07,
+      9.495363870934349e-07
+    ],
+    "vasp_max_force_eV_A": 0.00368986174516065,
+    "vasp_mean_force_eV_A": 0.0027274558235138606,
+    "volume_A3": 315.4997672627906
+  },
+  {
+    "mp_id": "agm003468142",
+    "formula": "Br5GeIn2",
+    "traj_id": "agm003468142_2_73",
+    "sid": "agm003468142_2_73",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468142/agm003468142_2_73",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      4,
+      4,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -22.53882059,
+    "vasp_energy_per_atom_eV": -2.81735257375,
+    "vasp_forces": [
+      [
+        3.271e-05,
+        4.406e-05,
+        -0.15092733
+      ],
+      [
+        6.069e-05,
+        5.237e-05,
+        -0.15091063
+      ],
+      [
+        0.00132527,
+        0.00148636,
+        -0.26300961
+      ],
+      [
+        0.15138428,
+        -0.15122776,
+        0.10836191
+      ],
+      [
+        -0.15133845,
+        -0.15131652,
+        0.10884098
+      ],
+      [
+        0.14989725,
+        0.14988806,
+        0.10823756
+      ],
+      [
+        -0.15116985,
+        0.15130743,
+        0.1083127
+      ],
+      [
+        -0.0001919,
+        -0.000234,
+        0.13109441
+      ]
+    ],
+    "vasp_stress": [
+      0.0052675615849306,
+      0.005269420774461472,
+      0.007595354539578613,
+      -1.7570740725166374e-05,
+      -1.9500306392187747e-05,
+      -3.2399268174366818e-06
+    ],
+    "vasp_max_force_eV_A": 0.2630171487925732,
+    "vasp_mean_force_eV_A": 0.20670742618215046,
+    "volume_A3": 304.31130094328125
+  },
+  {
+    "mp_id": "agm003468142",
+    "formula": "Br5GeIn2",
+    "traj_id": "agm003468142_2_75",
+    "sid": "agm003468142_2_75",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468142/agm003468142_2_75",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      4,
+      4,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -22.41335007,
+    "vasp_energy_per_atom_eV": -2.80166875875,
+    "vasp_forces": [
+      [
+        4.924e-05,
+        -1.299e-05,
+        -0.15685547
+      ],
+      [
+        8.04e-06,
+        7.809e-05,
+        -0.15683539
+      ],
+      [
+        0.00082557,
+        0.0009373,
+        1.34164594
+      ],
+      [
+        0.08358256,
+        -0.08306733,
+        0.10370865
+      ],
+      [
+        -0.08285649,
+        -0.08285058,
+        0.1046578
+      ],
+      [
+        0.08191667,
+        0.08192513,
+        0.10325912
+      ],
+      [
+        -0.08298479,
+        0.0835083,
+        0.10368723
+      ],
+      [
+        -0.0005408,
+        -0.00051792,
+        -1.44326787
+      ]
+    ],
+    "vasp_stress": [
+      0.004587146270010034,
+      0.004589625341261253,
+      -0.0006892184392558576,
+      -8.579712636885333e-06,
+      -1.3867491081542564e-05,
+      -4.53387591960548e-06
+    ],
+    "vasp_max_force_eV_A": 1.44326806424867,
+    "vasp_mean_force_eV_A": 0.4655950919423924,
+    "volume_A3": 310.97519213191646
+  },
+  {
+    "mp_id": "agm003468142",
+    "formula": "Br5GeIn2",
+    "traj_id": "agm003468142_2_77",
+    "sid": "agm003468142_2_77",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468142/agm003468142_2_77",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      4,
+      4,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -22.11882782,
+    "vasp_energy_per_atom_eV": -2.7648534775,
+    "vasp_forces": [
+      [
+        0.00014009,
+        7.031e-05,
+        -0.15011112
+      ],
+      [
+        9.102e-05,
+        0.00016588,
+        -0.15009354
+      ],
+      [
+        -0.00097591,
+        -0.00088754,
+        0.7776678
+      ],
+      [
+        -0.59792006,
+        0.59865822,
+        0.20452584
+      ],
+      [
+        0.60012188,
+        0.60014102,
+        0.20559183
+      ],
+      [
+        -0.59930569,
+        -0.59928326,
+        0.20403959
+      ],
+      [
+        0.59870462,
+        -0.59802366,
+        0.20448631
+      ],
+      [
+        -0.00085595,
+        -0.00084097,
+        -1.29610671
+      ]
+    ],
+    "vasp_stress": [
+      -0.010237045658430819,
+      -0.010237462535066846,
+      0.0034982533181650084,
+      -6.393873725909758e-06,
+      -6.304617024655064e-06,
+      -1.2722885688983335e-05
+    ],
+    "vasp_max_force_eV_A": 1.2961072654637684,
+    "vasp_mean_force_eV_A": 0.7325043999498471,
+    "volume_A3": 313.36618658804946
+  },
+  {
+    "mp_id": "agm003468655",
+    "formula": "Bi2InO5",
+    "traj_id": "agm003468655_0_0",
+    "sid": "agm003468655_0_0",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468655/agm003468655_0_0",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      5,
+      5,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -43.70933576,
+    "vasp_energy_per_atom_eV": -5.46366697,
+    "vasp_forces": [
+      [
+        -0.00025125,
+        0.00121957,
+        -0.00114374
+      ],
+      [
+        -0.00212095,
+        -0.00035084,
+        0.00089479
+      ],
+      [
+        0.00349391,
+        -0.00073238,
+        -0.00320551
+      ],
+      [
+        -0.00032136,
+        0.0017786,
+        0.00035188
+      ],
+      [
+        -0.00031677,
+        -0.0013845,
+        0.00049268
+      ],
+      [
+        -0.00238044,
+        0.00138332,
+        0.00138392
+      ],
+      [
+        0.0009163,
+        -0.00013606,
+        -0.00089425
+      ],
+      [
+        0.00098056,
+        -0.0017777,
+        0.00212023
+      ]
+    ],
+    "vasp_stress": [
+      3.905717958158337e-05,
+      5.008082689406324e-05,
+      -5.755361724973687e-05,
+      0.00013289852207035776,
+      -2.780344527668694e-05,
+      1.2867772961077027e-05
+    ],
+    "vasp_max_force_eV_A": 0.004797820537765038,
+    "vasp_mean_force_eV_A": 0.0024332806649577047,
+    "volume_A3": 181.53412910392058
+  },
+  {
+    "mp_id": "agm003468655",
+    "formula": "Bi2InO5",
+    "traj_id": "agm003468655_2_127",
+    "sid": "agm003468655_2_127",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468655/agm003468655_2_127",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      5,
+      5,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -43.54175761,
+    "vasp_energy_per_atom_eV": -5.44271970125,
+    "vasp_forces": [
+      [
+        -0.04046015,
+        -0.69207261,
+        -0.16722342
+      ],
+      [
+        0.18295456,
+        0.50417421,
+        0.30123709
+      ],
+      [
+        0.08092528,
+        -0.1808967,
+        -0.03806831
+      ],
+      [
+        -0.28139149,
+        0.17688027,
+        0.23199582
+      ],
+      [
+        0.01421692,
+        0.17073586,
+        -0.31021961
+      ],
+      [
+        0.10882041,
+        0.19431818,
+        0.03606854
+      ],
+      [
+        0.0497412,
+        0.09158805,
+        0.22851904
+      ],
+      [
+        -0.11480674,
+        -0.26472726,
+        -0.28230916
+      ]
+    ],
+    "vasp_stress": [
+      0.0019712092406035937,
+      0.00611051240724733,
+      0.0005968377128874405,
+      -0.0015953461945560803,
+      -0.0031282720393818893,
+      -0.0018632106324890897
+    ],
+    "vasp_max_force_eV_A": 0.7131375697905216,
+    "vasp_mean_force_eV_A": 0.39628213448776745,
+    "volume_A3": 181.4928318308307
+  },
+  {
+    "mp_id": "agm003468655",
+    "formula": "Bi2InO5",
+    "traj_id": "agm003468655_2_131",
+    "sid": "agm003468655_2_131",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468655/agm003468655_2_131",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      6,
+      5,
+      4
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -43.28106321,
+    "vasp_energy_per_atom_eV": -5.41013290125,
+    "vasp_forces": [
+      [
+        0.17428701,
+        0.32164119,
+        0.8474775
+      ],
+      [
+        -0.27265407,
+        -0.0588995,
+        -0.14765092
+      ],
+      [
+        0.01906912,
+        -0.80334165,
+        -1.19896547
+      ],
+      [
+        0.2118525,
+        0.18554748,
+        0.15653729
+      ],
+      [
+        -0.19581727,
+        -0.26289381,
+        -0.02546372
+      ],
+      [
+        0.33682391,
+        -0.11223639,
+        -0.05870111
+      ],
+      [
+        0.00759199,
+        0.10567834,
+        0.0574927
+      ],
+      [
+        -0.2811532,
+        0.62450434,
+        0.36927374
+      ]
+    ],
+    "vasp_stress": [
+      -0.00916382911808371,
+      -0.00099841976173717,
+      0.006891524328002477,
+      -0.002064174746445033,
+      0.004213848496696276,
+      0.0024120527910776513
+    ],
+    "vasp_max_force_eV_A": 1.4433432149750862,
+    "vasp_mean_force_eV_A": 0.5739367735664759,
+    "volume_A3": 176.79965518709633
+  },
+  {
+    "mp_id": "agm003468655",
+    "formula": "Bi2InO5",
+    "traj_id": "agm003468655_2_187",
+    "sid": "agm003468655_2_187",
+    "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/AI4S-skills-collection/qe-salex-benchmark/examples/agm003468655/agm003468655_2_187",
+    "nat": 8,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      6,
+      6,
+      6
+    ],
+    "occupations": "smearing",
+    "mp_bandgap_eV": null,
+    "stress_unit": "eV_A3",
+    "stress_sign": 1,
+    "vasp_uncorrected_total_energy_eV": -39.07679124,
+    "vasp_energy_per_atom_eV": -4.884598905,
+    "vasp_forces": [
+      [
+        -0.00237212,
+        -0.00220138,
+        1.88601571
+      ],
+      [
+        0.00670582,
+        -0.00343088,
+        -1.80597815
+      ],
+      [
+        -0.00334954,
+        0.00656307,
+        -1.53674277
+      ],
+      [
+        0.7070105,
+        -0.62411929,
+        0.85479166
+      ],
+      [
+        -0.74682813,
+        -0.65878748,
+        0.84030546
+      ],
+      [
+        0.75190273,
+        0.66293446,
+        0.83777815
+      ],
+      [
+        -0.71022441,
+        0.62131531,
+        0.85445028
+      ],
+      [
+        -0.00284485,
+        -0.00227381,
+        -1.93062034
+      ]
+    ],
+    "vasp_stress": [
+      -0.048415123309730926,
+      -0.018066275742774838,
+      -0.013605172985932014,
+      -7.93694985615908e-05,
+      -6.0229296038420884e-05,
+      0.0009632701632042189
+    ],
+    "vasp_max_force_eV_A": 1.9306237750025648,
+    "vasp_mean_force_eV_A": 1.5393310413218715,
+    "volume_A3": 115.26025440248505
+  }
+]

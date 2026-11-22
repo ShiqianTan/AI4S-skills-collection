@@ -1,0 +1,33 @@
+data_image0
+_chemical_formula_structural       In2GeBr5
+_chemical_formula_sum              "In2 Ge1 Br5"
+_cell_length_a       7.608777877519485
+_cell_length_b       7.6087295207889944
+_cell_length_c       7.525213949884074
+_cell_angle_alpha    120.40104578992111
+_cell_angle_beta     120.39925476823501
+_cell_angle_gamma    89.99327179578802
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  In  In1       1.0  0.24300548999999996  0.74299115  0.48607462999999995  1.0000
+  In  In2       1.0  0.74299308  0.24300609000000004  0.48607705000000007  1.0000
+  Ge  Ge1       1.0  0.98758658  0.98758464  0.97515748  1.0000
+  Br  Br1       1.0  0.76527224  0.25903526  0.024257529999999996  1.0000
+  Br  Br2       1.0  0.25902684  0.25902641000000004  0.024305959999999998  1.0000
+  Br  Br3       1.0  0.7652997100000001  0.7652975900000001  0.02418783  1.0000
+  Br  Br4       1.0  0.25902617  0.7652661599999999  0.02424573  1.0000
+  Br  Br5       1.0  0.7547949  0.7547967000000001  0.50969979  1.0000
