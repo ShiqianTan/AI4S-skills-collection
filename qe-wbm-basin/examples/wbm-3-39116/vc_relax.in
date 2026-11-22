@@ -1,0 +1,52 @@
+&CONTROL
+  calculation = 'vc-relax'
+  prefix = 'wbm_wbm-3-39116_relax'
+  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+  nstep = 99
+  forc_conv_thr = 5.000e-04
+  etot_conv_thr = 1.000e-05
+/
+&SYSTEM
+  ibrav = 0
+  nat = 8
+  ntyp = 2
+  ecutwfc = 38.2
+  ecutrho = 305.8
+  occupations = 'smearing'
+  smearing = 'gaussian'
+  degauss = 0.003674932217565499
+/
+&ELECTRONS
+  conv_thr = 2.9e-05
+  mixing_beta = 0.7
+  electron_maxstep = 100
+/
+&IONS
+  ion_dynamics = 'bfgs'
+/
+&CELL
+  cell_dynamics = 'bfgs'
+  press_conv_thr = 0.5
+/
+ATOMIC_SPECIES
+  Mg    24.3050 Mg.pbe-n-kjpaw_psl.0.3.0.UPF
+  I    126.9045 I.pbe-n-kjpaw_psl.0.2.UPF
+CELL_PARAMETERS angstrom
+      6.9991477449     0.0000000000     3.4898669445
+      2.6295271451     6.4864209111     3.4898669095
+      0.0000000000     0.0000000000     8.7635490700
+ATOMIC_POSITIONS crystal
+  Mg     0.1665690006     0.1665689993     0.5002929997
+  Mg     0.8334309995     0.8334310006     0.4997069999
+  I      0.9366520002     0.5792139998     0.2615430000
+  I      0.4207860000     0.7774089994     0.7384570000
+  I      0.7774089994     0.0633479997     0.7384570008
+  I      0.0633479999     0.4207860001     0.7384569995
+  I      0.2225910006     0.9366520001     0.2615429999
+  I      0.5792140000     0.2225910005     0.2615429996
+K_POINTS automatic
+  3 3 3 0 0 0

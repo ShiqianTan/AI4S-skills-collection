@@ -1,0 +1,134 @@
+{
+  "config": "MPRelaxSet_c4998d92",
+  "systems": {
+    "wbm-3-63782": {
+      "material_id": "wbm-3-63782",
+      "formula": "Pt1Rb1S2",
+      "n_sites": 4,
+      "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/wbm/wbm-3-63782",
+      "vasp_final_energy_eV": -17.81620357,
+      "vasp_e_form_mp2020_eV_atom": -0.874451,
+      "vasp_e_above_hull_eV_atom": 0.109,
+      "vasp_bandgap_pbe_eV": 0.0,
+      "vasp_volume_A3": 106.22,
+      "vasp_wyckoff": "ABC2_oI8_71_a_b_f:Pt-Rb-S",
+      "initial_volume_A3": 85.84454528176335,
+      "potcar_symbols": [
+        "PAW_PBE S 17Jan2003",
+        "PAW_PBE Rb_sv 06Sep2000",
+        "PAW_PBE Pt 05Jan2001"
+      ],
+      "ecutwfc": 38.2,
+      "ecutrho": 305.8,
+      "kpts": [
+        7,
+        7,
+        3
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ],
+      "conv_thr": 1.4699728870261997e-05,
+      "degauss": 0.003674932217565499,
+      "config": "MPRelaxSet_c4998d92"
+    },
+    "wbm-3-39116": {
+      "material_id": "wbm-3-39116",
+      "formula": "I6Mg2",
+      "n_sites": 8,
+      "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/wbm/wbm-3-39116",
+      "vasp_final_energy_eV": -17.64571404,
+      "vasp_e_form_mp2020_eV_atom": -0.984839,
+      "vasp_e_above_hull_eV_atom": 0.132,
+      "vasp_bandgap_pbe_eV": 0.0,
+      "vasp_volume_A3": 331.54,
+      "vasp_wyckoff": "A3B_aP8_2_3i_i:I-Mg",
+      "initial_volume_A3": 397.8600299548834,
+      "potcar_symbols": [
+        "PAW_PBE I 08Apr2002",
+        "PAW_PBE Mg_pv 06Sep2000"
+      ],
+      "ecutwfc": 38.2,
+      "ecutrho": 305.8,
+      "kpts": [
+        3,
+        3,
+        3
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ],
+      "conv_thr": 2.9399457740523993e-05,
+      "degauss": 0.003674932217565499,
+      "config": "MPRelaxSet_c4998d92"
+    },
+    "wbm-1-53069": {
+      "material_id": "wbm-1-53069",
+      "formula": "Rb4Se4",
+      "n_sites": 8,
+      "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/wbm/wbm-1-53069",
+      "vasp_final_energy_eV": -22.85647586,
+      "vasp_e_form_mp2020_eV_atom": -0.854859,
+      "vasp_e_above_hull_eV_atom": 0.271,
+      "vasp_bandgap_pbe_eV": 0.0,
+      "vasp_volume_A3": 256.44,
+      "vasp_wyckoff": "AB_tP2_123_a_d:Rb-Se",
+      "initial_volume_A3": 243.78364833292977,
+      "potcar_symbols": [
+        "PAW_PBE Se 06Sep2000",
+        "PAW_PBE Rb_sv 06Sep2000"
+      ],
+      "ecutwfc": 38.2,
+      "ecutrho": 305.8,
+      "kpts": [
+        4,
+        4,
+        4
+      ],
+      "k_shift": [
+        1,
+        1,
+        1
+      ],
+      "conv_thr": 2.9399457740523993e-05,
+      "degauss": 0.003674932217565499,
+      "config": "MPRelaxSet_c4998d92"
+    },
+    "wbm-1-2639": {
+      "material_id": "wbm-1-2639",
+      "formula": "Al2S4",
+      "n_sites": 6,
+      "dir": "/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/wbm/wbm-1-2639",
+      "vasp_final_energy_eV": -27.62219297,
+      "vasp_e_form_mp2020_eV_atom": -0.932899,
+      "vasp_e_above_hull_eV_atom": 0.199,
+      "vasp_bandgap_pbe_eV": 0.0,
+      "vasp_volume_A3": 106.84,
+      "vasp_wyckoff": "AB2_oP6_58_a_g:Al-S",
+      "initial_volume_A3": 81.42107417882187,
+      "potcar_symbols": [
+        "PAW_PBE S 17Jan2003",
+        "PAW_PBE Al 04Jan2001"
+      ],
+      "ecutwfc": 38.2,
+      "ecutrho": 305.8,
+      "kpts": [
+        7,
+        5,
+        4
+      ],
+      "k_shift": [
+        0,
+        0,
+        0
+      ],
+      "conv_thr": 2.2049593305392997e-05,
+      "degauss": 0.003674932217565499,
+      "config": "MPRelaxSet_c4998d92"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'wbm_wbm-1-53069_vaspfinal'
+  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 8
+  ntyp = 2
+  ecutwfc = 38.2
+  ecutrho = 305.8
+  occupations = 'smearing'
+  smearing = 'gaussian'
+  degauss = 0.003674932217565499
+/
+&ELECTRONS
+  conv_thr = 2.9e-05
+  mixing_beta = 0.7
+  electron_maxstep = 100
+/
+ATOMIC_SPECIES
+  Se    78.9600 Se_pbe_v1.uspp.F.UPF
+  Rb    85.4678 Rb_ONCV_PBE-1.0.oncvpsp.upf
+CELL_PARAMETERS angstrom
+      6.9213959300     1.4899390200     0.0000000000
+     -1.8115615600     6.8442591000     0.0000000000
+     -2.5549171900    -4.1670990600     5.1215901700
+ATOMIC_POSITIONS crystal
+  Se     0.2499987500     0.2500012300     0.5000000000
+  Se     0.7501394900     0.2501394900     0.0002789900
+  Se     0.2498605100     0.7498605100     0.9997210100
+  Se     0.7500012500     0.7499987700     0.5000000000
+  Rb     0.7500000900     0.7500000900     0.0000001700
+  Rb     0.2499999100     0.2499999100     0.9999998300
+  Rb     0.2500463800     0.7500460800     0.5000000000
+  Rb     0.7499536200     0.2499539200     0.5000000000
+K_POINTS automatic
+  3 3 3 0 0 0

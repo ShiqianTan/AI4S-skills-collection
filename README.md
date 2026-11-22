@@ -20,4 +20,5 @@ pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.y
 - [qe-mptraj-benchmark](./qe-mptraj-benchmark/README.md) — MPtrj forces/stress/relative-energy parity and force-error-vs-distortion analysis
 - [qe-salex-benchmark](./qe-salex-benchmark/README.md) — sAlex forces/stress/relative-energy validation (ASE stress convention)
 - [qe-matpes-benchmark](./qe-matpes-benchmark/README.md) — MatPES-PBE forces/stress/relative-energy validation with kbar conversion
+- [qe-wbm-basin](./qe-wbm-basin/README.md) — WBM IS2RE structure optimization, MP2020 formation energies, and basin-recovery diagnostics
 <!-- SKILL_LIST_END -->

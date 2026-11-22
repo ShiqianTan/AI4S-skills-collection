@@ -1,0 +1,50 @@
+&CONTROL
+  calculation = 'vc-relax'
+  prefix = 'wbm_wbm-1-2639_relax'
+  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+  nstep = 99
+  forc_conv_thr = 5.000e-04
+  etot_conv_thr = 1.000e-05
+/
+&SYSTEM
+  ibrav = 0
+  nat = 6
+  ntyp = 2
+  ecutwfc = 38.2
+  ecutrho = 305.8
+  occupations = 'smearing'
+  smearing = 'gaussian'
+  degauss = 0.003674932217565499
+/
+&ELECTRONS
+  conv_thr = 2.2e-05
+  mixing_beta = 0.7
+  electron_maxstep = 100
+/
+&IONS
+  ion_dynamics = 'bfgs'
+/
+&CELL
+  cell_dynamics = 'bfgs'
+  press_conv_thr = 0.5
+/
+ATOMIC_SPECIES
+  Al    26.9815 Al.pbe-n-kjpaw_psl.1.0.0.UPF
+  S     32.0650 s_pbe_v1.4.uspp.F.UPF
+CELL_PARAMETERS angstrom
+      3.3903087400     0.0000000000     0.0000000000
+      0.0000000000     4.4383162400     0.0000000000
+      0.0000000000     0.0000000000     5.4110224400
+ATOMIC_POSITIONS crystal
+  Al     0.5000000000     0.5000000000     0.5000000000
+  Al     0.0000000000     0.0000000000     0.0000000000
+  S      0.5000000000     0.2939990008     0.8753299996
+  S      0.5000000000     0.7060009992     0.1246700004
+  S      0.0000000000     0.2060009992     0.3753299996
+  S      1.0000000000     0.7939990008     0.6246700004
+K_POINTS automatic
+  7 5 4 0 0 0
