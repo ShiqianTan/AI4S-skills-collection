@@ -30,6 +30,14 @@ def last_energy_ev(outfile: Path) -> float | None:
     return vals[-1] * RY_TO_EV if vals else None
 
 
+
+def _ensure_pseudo_dir(inp: Path, pseudo_dir) -> None:
+    text = inp.read_text()
+    new = re.sub(r"pseudo_dir\s*=\s*'[^']*'", f"pseudo_dir = '{pseudo_dir}'", text)
+    if new != text:
+        inp.write_text(new)
+
+
 def process(mid: str, meta: dict, gpu, ctx: dict) -> dict:
     from ase.io import read
     from pymatgen.analysis.structure_matcher import StructureMatcher
@@ -38,9 +46,14 @@ def process(mid: str, meta: dict, gpu, ctx: dict) -> dict:
     from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
     d = Path(meta["dir"])
+    if not d.is_absolute():
+        d = (ctx["wbm"] / d).resolve()
     vc_out, sf_out = d / "vc_relax.out", d / "scf_vasp_final.out"
     res = {"material_id": mid, **meta, "gpu": gpu}
+    res["dir"] = str(d)
     if not runner.is_done(vc_out):
+        _ensure_pseudo_dir(d / "vc_relax.in", ctx["pseudo_dir"])
+        _ensure_pseudo_dir(d / "scf_vasp_final.in", ctx["pseudo_dir"])
         runner.prepare_tmp(d)
         run = runner.run_pw(d / "vc_relax.in", vc_out, pw=ctx["pw"],
                             mpirun=ctx["mpirun"], np=ctx["np"], env=ctx["env"],
@@ -119,7 +132,8 @@ def main() -> None:
     wbm = Path(args.wbm_dir) if args.wbm_dir else p.work / "wbm"
     kind = "gpu" if args.gpu_mode == "gpu" else "cpu"
     ctx = {"pw": p.pw(kind), "mpirun": p.mpirun(), "np": args.np,
-           "env": p.env(), "timeout": 6 * 3600}
+           "env": p.env(), "timeout": 6 * 3600, "wbm": wbm,
+           "pseudo_dir": p.pseudo_dir("sssp_efficiency")}
     manifest = json.loads((wbm / "manifest.json").read_text())["systems"]
     devices = [int(x) for x in args.devices.split(",")]
     gpu_values = devices if args.gpu_mode == "gpu" else [None]

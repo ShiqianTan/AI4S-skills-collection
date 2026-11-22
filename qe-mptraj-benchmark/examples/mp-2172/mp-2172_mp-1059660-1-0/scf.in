@@ -1,0 +1,36 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'mptraj_mp-2172_mp-1059660-1-0'
+  pseudo_dir = 'pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 2
+  ntyp = 2
+  ecutwfc = 35.0
+  ecutrho = 280.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  Al    26.9815 Al.pbe-n-kjpaw_psl.1.0.0.UPF
+  As    74.9216 As.pbe-n-rrkjus_psl.0.2.UPF
+CELL_PARAMETERS angstrom
+      3.2653376132     0.0000000000     1.8852435500
+      1.0884458711     3.0785898256     1.8852435500
+      0.0000000000     0.0000000000     3.7704871000
+ATOMIC_POSITIONS crystal
+  Al     0.0000000000     0.0000000000     0.0000000000
+  As     0.7500000000     0.7500000000     0.7500000000
+K_POINTS automatic
+  8 8 8 0 0 0

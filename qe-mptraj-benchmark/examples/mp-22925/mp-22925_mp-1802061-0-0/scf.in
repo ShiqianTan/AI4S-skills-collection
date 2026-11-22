@@ -1,0 +1,36 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'mptraj_mp-22925_mp-1802061-0-0'
+  pseudo_dir = 'pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 2
+  ntyp = 2
+  ecutwfc = 50.0
+  ecutrho = 280.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  Ag   107.8682 Ag_ONCV_PBE-1.0.oncvpsp.upf
+  I    126.9045 I.pbe-n-kjpaw_psl.0.2.UPF
+CELL_PARAMETERS angstrom
+      4.0667237036     0.0000000000     2.3479240250
+      1.3555745679     3.8341438774     2.3479240250
+      0.0000000000     0.0000000000     4.6958480500
+ATOMIC_POSITIONS crystal
+  Ag     0.0000000000     0.0000000000     0.0000000000
+  I      0.7500000000     0.7500000000     0.7500000000
+K_POINTS automatic
+  7 7 7 0 0 0

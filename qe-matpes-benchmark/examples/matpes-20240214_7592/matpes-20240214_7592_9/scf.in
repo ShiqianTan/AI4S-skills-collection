@@ -1,7 +1,7 @@
 &CONTROL
   calculation = 'scf'
   prefix = 'matpes_matpes-20240214_7592_9'
-  pseudo_dir = '/home/tione/notebook/home/tanshiqian/bench/bench_generative/quantum_espresso/repro/pseudos/sssp/upf'
+  pseudo_dir = 'pseudos/sssp/upf'
   outdir = './tmp'
   verbosity = 'high'
   tprnfor = .true.

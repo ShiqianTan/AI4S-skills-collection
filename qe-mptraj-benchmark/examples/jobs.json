@@ -1,0 +1,746 @@
+[
+  {
+    "mp_id": "mp-2172",
+    "formula": "AlAs",
+    "traj_id": "mp-1784180-0-0",
+    "sid": "mp-2172_mp-1784180-0-0",
+    "dir": "mp-2172/mp-2172_mp-1784180-0-0",
+    "nat": 2,
+    "ecutwfc": 35.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      8,
+      8,
+      8
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -9.37497856,
+    "vasp_energy_per_atom_eV": -4.68748928,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.0,
+        -0.0,
+        -0.0
+      ]
+    ],
+    "vasp_stress": [
+      [
+        -0.0734348,
+        -0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.0734348,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -0.0734348
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.0,
+    "vasp_mean_force_eV_A": 0.0,
+    "volume_A3": 47.12568016968292
+  },
+  {
+    "mp_id": "mp-2172",
+    "formula": "AlAs",
+    "traj_id": "mp-1059660-1-0",
+    "sid": "mp-2172_mp-1059660-1-0",
+    "dir": "mp-2172/mp-2172_mp-1059660-1-0",
+    "nat": 2,
+    "ecutwfc": 35.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      8,
+      8,
+      8
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -8.8131646,
+    "vasp_energy_per_atom_eV": -4.4065823,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.0,
+        -0.0,
+        -0.0
+      ]
+    ],
+    "vasp_stress": [
+      [
+        232.70614181,
+        0.0,
+        -0.0
+      ],
+      [
+        0.0,
+        232.70614181,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        232.70614181
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.0,
+    "vasp_mean_force_eV_A": 0.0,
+    "volume_A3": 37.90333130326607
+  },
+  {
+    "mp_id": "mp-2172",
+    "formula": "AlAs",
+    "traj_id": "mp-655289-0-0",
+    "sid": "mp-2172_mp-655289-0-0",
+    "dir": "mp-2172/mp-2172_mp-655289-0-0",
+    "nat": 2,
+    "ecutwfc": 35.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      8,
+      8,
+      8
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -9.3740468,
+    "vasp_energy_per_atom_eV": -4.6870234,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "vasp_stress": [
+      [
+        0.07961138,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.07961138,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.07961138
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.0,
+    "vasp_mean_force_eV_A": 0.0,
+    "volume_A3": 47.12568016968292
+  },
+  {
+    "mp_id": "mp-22925",
+    "formula": "AgI",
+    "traj_id": "mp-1802061-0-0",
+    "sid": "mp-22925_mp-1802061-0-0",
+    "dir": "mp-22925/mp-22925_mp-1802061-0-0",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      7,
+      7,
+      7
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -4.91859529,
+    "vasp_energy_per_atom_eV": -2.648797645,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.0,
+        -0.0,
+        -0.0
+      ]
+    ],
+    "vasp_stress": [
+      [
+        -1.02175255,
+        -0.0,
+        0.0
+      ],
+      [
+        -0.0,
+        -1.02175255,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.02175255
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.0,
+    "vasp_mean_force_eV_A": 0.0,
+    "volume_A3": 73.21955895634991
+  },
+  {
+    "mp_id": "mp-22925",
+    "formula": "AgI",
+    "traj_id": "mp-673167-1-0",
+    "sid": "mp-22925_mp-673167-1-0",
+    "dir": "mp-22925/mp-22925_mp-673167-1-0",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      7,
+      7,
+      7
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -4.77350647,
+    "vasp_energy_per_atom_eV": -2.5762532350000003,
+    "vasp_forces": [
+      [
+        -0.28701992,
+        0.0,
+        -0.20295369
+      ],
+      [
+        0.28701992,
+        0.0,
+        0.20295369
+      ]
+    ],
+    "vasp_stress": [
+      [
+        18.20138106,
+        -10.24807535,
+        -0.11835539
+      ],
+      [
+        -10.24807535,
+        18.36876102,
+        14.49296427
+      ],
+      [
+        -0.11835539,
+        14.49296427,
+        18.28506405
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.35152615089267897,
+    "vasp_mean_force_eV_A": 0.35152615089267897,
+    "volume_A3": 66.13060751926601
+  },
+  {
+    "mp_id": "mp-22925",
+    "formula": "AgI",
+    "traj_id": "mp-673167-1-9",
+    "sid": "mp-22925_mp-673167-1-9",
+    "dir": "mp-22925/mp-22925_mp-673167-1-9",
+    "nat": 2,
+    "ecutwfc": 50.0,
+    "ecutrho": 280.0,
+    "kpts": [
+      7,
+      7,
+      7
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -4.89075999,
+    "vasp_energy_per_atom_eV": -2.6348799950000004,
+    "vasp_forces": [
+      [
+        0.11869594,
+        0.0,
+        0.08393069
+      ],
+      [
+        -0.11869594,
+        0.0,
+        -0.08393069
+      ]
+    ],
+    "vasp_stress": [
+      [
+        -7.53124538,
+        3.47056706,
+        1.00301836
+      ],
+      [
+        3.47056706,
+        -8.94972704,
+        -4.90812105
+      ],
+      [
+        1.00301836,
+        -4.90812105,
+        -8.24048317
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.145372235644774,
+    "vasp_mean_force_eV_A": 0.145372235644774,
+    "volume_A3": 76.14303995946335
+  },
+  {
+    "mp_id": "mp-1039",
+    "formula": "MgTe",
+    "traj_id": "mp-662998-0-0",
+    "sid": "mp-1039_mp-662998-0-0",
+    "dir": "mp-1039/mp-1039_mp-662998-0-0",
+    "nat": 4,
+    "ecutwfc": 30.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      7,
+      7,
+      4
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -12.99048786,
+    "vasp_energy_per_atom_eV": -3.458621965,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        -0.00112748
+      ],
+      [
+        0.0,
+        0.0,
+        -0.00112748
+      ],
+      [
+        0.0,
+        0.0,
+        0.00112748
+      ],
+      [
+        0.0,
+        0.0,
+        0.00112748
+      ]
+    ],
+    "vasp_stress": [
+      [
+        0.02064332,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.02064333,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -0.00165111
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.00112748,
+    "vasp_mean_force_eV_A": 0.00112748,
+    "volume_A3": 138.26178168678
+  },
+  {
+    "mp_id": "mp-1039",
+    "formula": "MgTe",
+    "traj_id": "mp-1039-1-0",
+    "sid": "mp-1039_mp-1039-1-0",
+    "dir": "mp-1039/mp-1039_mp-1039-1-0",
+    "nat": 4,
+    "ecutwfc": 30.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      7,
+      7,
+      4
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -12.94873312,
+    "vasp_energy_per_atom_eV": -3.44818328,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        -0.21670064
+      ],
+      [
+        0.0,
+        0.0,
+        -0.21670064
+      ],
+      [
+        0.0,
+        0.0,
+        0.21670064
+      ],
+      [
+        0.0,
+        0.0,
+        0.21670064
+      ]
+    ],
+    "vasp_stress": [
+      [
+        13.31450816,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        13.31450816,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        25.32466699
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.21670064,
+    "vasp_mean_force_eV_A": 0.21670064,
+    "volume_A3": 132.00200122068898
+  },
+  {
+    "mp_id": "mp-1039",
+    "formula": "MgTe",
+    "traj_id": "mp-1039-1-3",
+    "sid": "mp-1039_mp-1039-1-3",
+    "dir": "mp-1039/mp-1039_mp-1039-1-3",
+    "nat": 4,
+    "ecutwfc": 30.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      7,
+      7,
+      4
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -12.98875636,
+    "vasp_energy_per_atom_eV": -3.45818909,
+    "vasp_forces": [
+      [
+        0.0,
+        0.0,
+        -0.0319258
+      ],
+      [
+        0.0,
+        0.0,
+        -0.0319258
+      ],
+      [
+        0.0,
+        0.0,
+        0.0319258
+      ],
+      [
+        0.0,
+        0.0,
+        0.0319258
+      ]
+    ],
+    "vasp_stress": [
+      [
+        0.21005381,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.21005381,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.5932699
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.0319258,
+    "vasp_mean_force_eV_A": 0.0319258,
+    "volume_A3": 138.29745129220507
+  },
+  {
+    "mp_id": "mp-22870",
+    "formula": "InBr",
+    "traj_id": "mp-1440348-0-0",
+    "sid": "mp-22870_mp-1440348-0-0",
+    "dir": "mp-22870/mp-22870_mp-1440348-0-0",
+    "nat": 4,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      5,
+      5,
+      7
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -11.46348511,
+    "vasp_energy_per_atom_eV": -3.1328712775,
+    "vasp_forces": [
+      [
+        -0.0,
+        0.04718086,
+        -0.0
+      ],
+      [
+        -0.0,
+        -0.04718086,
+        0.0
+      ],
+      [
+        0.0,
+        -0.00822494,
+        0.0
+      ],
+      [
+        0.0,
+        0.00822494,
+        -0.0
+      ]
+    ],
+    "vasp_stress": [
+      [
+        0.01171521,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.80386985,
+        -0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.26632825
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.04718086,
+    "vasp_mean_force_eV_A": 0.0277029,
+    "volume_A3": 136.51298519443338
+  },
+  {
+    "mp_id": "mp-22870",
+    "formula": "InBr",
+    "traj_id": "mp-22870-1-0",
+    "sid": "mp-22870_mp-22870-1-0",
+    "dir": "mp-22870/mp-22870_mp-22870-1-0",
+    "nat": 4,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      7,
+      7,
+      5
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -11.33502023,
+    "vasp_energy_per_atom_eV": -3.1007550575,
+    "vasp_forces": [
+      [
+        -0.00249185,
+        0.0,
+        -0.00671239
+      ],
+      [
+        0.00249185,
+        0.0,
+        0.00671239
+      ],
+      [
+        6.88e-05,
+        0.0,
+        0.00018533
+      ],
+      [
+        -6.88e-05,
+        0.0,
+        -0.00018533
+      ]
+    ],
+    "vasp_stress": [
+      [
+        29.42574331,
+        0.0,
+        -0.27211465
+      ],
+      [
+        0.0,
+        30.06969572,
+        0.0
+      ],
+      [
+        -0.27211465,
+        0.0,
+        28.79375608
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.007159992732859441,
+    "vasp_mean_force_eV_A": 0.003678840497388519,
+    "volume_A3": 119.31795895889171
+  },
+  {
+    "mp_id": "mp-22870",
+    "formula": "InBr",
+    "traj_id": "mp-22870-1-1",
+    "sid": "mp-22870_mp-22870-1-1",
+    "dir": "mp-22870/mp-22870_mp-22870-1-1",
+    "nat": 4,
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      7,
+      7,
+      5
+    ],
+    "k_shift": [
+      0,
+      0,
+      0
+    ],
+    "occupations": "smearing",
+    "config": "sssp",
+    "mp_bandgap_eV": null,
+    "vasp_uncorrected_total_energy_eV": -11.43428372,
+    "vasp_energy_per_atom_eV": -3.12557093,
+    "vasp_forces": [
+      [
+        -0.01182097,
+        0.0,
+        -0.03184258
+      ],
+      [
+        0.01182097,
+        0.0,
+        0.03184258
+      ],
+      [
+        0.05655277,
+        0.0,
+        0.15233818
+      ],
+      [
+        -0.05655277,
+        0.0,
+        -0.15233818
+      ]
+    ],
+    "vasp_stress": [
+      [
+        7.16405741,
+        0.0,
+        0.02779964
+      ],
+      [
+        0.0,
+        8.43380095,
+        0.0
+      ],
+      [
+        0.02779964,
+        0.0,
+        7.22862216
+      ]
+    ],
+    "vasp_max_force_eV_A": 0.1624965749804755,
+    "vasp_mean_force_eV_A": 0.09823125861425858,
+    "volume_A3": 129.0321579787316
+  }
+]

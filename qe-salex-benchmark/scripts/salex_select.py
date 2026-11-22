@@ -117,7 +117,7 @@ def main() -> None:
                                 pseudo_dir=pseudo_dir, occupations="smearing")
             jobs.append({
                 "mp_id": group, "formula": item["formula"], "traj_id": sid, "sid": sid,
-                "dir": str(d), "nat": len(atoms), "ecutwfc": ecutwfc, "ecutrho": ecutrho,
+                "dir": str(d.relative_to(out)), "nat": len(atoms), "ecutwfc": ecutwfc, "ecutrho": ecutrho,
                 "kpts": list(kpts), "occupations": "smearing", "mp_bandgap_eV": None,
                 "stress_unit": "eV_A3", "stress_sign": 1,
                 "vasp_uncorrected_total_energy_eV": item["energy"],

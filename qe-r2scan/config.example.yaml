@@ -1,0 +1,17 @@
+# Example configuration for qe-r2scan (shared qe_bench_core schema).
+root: ..
+qe:
+  bin_dir: /path/to/qe-install-cpu/bin
+  gpu_bin_dir: /path/to/qe-install-gpu/bin
+  libxc_bin_dir: /path/to/qe-install-cpu-libxc/bin
+  mpirun: mpirun
+  conda_lib: ""        # conda lib dir for the CPU libxc run
+  mpi_np: 4
+  omp_num_threads: 4
+pseudo:
+  pseudodojo: pseudos/pseudodojo
+datasets:
+  matpes: /path/to/matpes     # directory containing MatPES-R2SCAN-2025.1.json
+output:
+  work_dir: runs
+  results_dir: runs/results

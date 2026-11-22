@@ -1,0 +1,38 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'mptraj_mp-22870_mp-22870-1-1'
+  pseudo_dir = 'pseudos/sssp/upf'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 4
+  ntyp = 2
+  ecutwfc = 50.0
+  ecutrho = 400.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  Br    79.9040 br_pbe_v1.4.uspp.F.UPF
+  In   114.8180 In.pbe-dn-rrkjus_psl.0.2.2.UPF
+CELL_PARAMETERS angstrom
+      4.2777399982     0.0000000000    -1.5891925500
+      0.0000000000     4.6037696100     0.0000000000
+      0.0000000000     0.0000000000     6.5519412500
+ATOMIC_POSITIONS crystal
+  In     0.6022008000     0.2500000000     0.2044015900
+  In     0.3977992000     0.7500000000     0.7955984100
+  Br     0.8528711600     0.2500000000     0.7057423100
+  Br     0.1471288400     0.7500000000     0.2942576900
+K_POINTS automatic
+  7 7 5 0 0 0

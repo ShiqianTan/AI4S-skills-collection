@@ -17,15 +17,29 @@ from qe_bench_core import runner  # noqa: E402
 from qe_bench_core.parse import KBAR_TO_EV_A3, voigt_to_matrix  # noqa: E402
 
 
+
+def _ensure_pseudo_dir(inp: Path, pseudo_dir) -> None:
+    import re
+
+    text = inp.read_text()
+    new = re.sub(r"pseudo_dir\s*=\s*'[^']*'", f"pseudo_dir = '{pseudo_dir}'", text)
+    if new != text:
+        inp.write_text(new)
+
+
 def run_scf(job: dict, gpu, force: bool, ctx: dict) -> dict:
     d = Path(job["dir"])
+    if not d.is_absolute():
+        d = (Path(ctx.get("base_dir", ".")) / d).resolve()
     out = d / "scf.out"
     res = dict(job)
+    res["dir"] = str(d)
     res["gpu"] = gpu
     if not force and runner.is_done(out):
         res["scf_exit"] = 0
         res["scf_wall_s"] = None
     else:
+        _ensure_pseudo_dir(d / "scf.in", ctx.get("pseudo_dir"))
         runner.prepare_tmp(d)
         run = runner.run_pw(d / "scf.in", out,
                             pw=ctx["pw"], mpirun=ctx["mpirun"], np=ctx["np"],
@@ -157,7 +171,8 @@ def main() -> None:
     mptraj = Path(args.mptraj_dir) if args.mptraj_dir else p.work / "mptraj_20"
     kind = "gpu" if args.gpu_mode == "gpu" else "cpu"
     ctx = {"pw": p.pw(kind), "mpirun": p.mpirun(), "np": args.np,
-           "env": p.env(), "timeout": 6 * 3600}
+           "env": p.env(), "timeout": 6 * 3600,
+           "pseudo_dir": p.pseudo_dir("sssp_efficiency"), "base_dir": mptraj}
     jobs = json.loads((mptraj / "jobs.json").read_text())
     devices = [int(x) for x in args.devices.split(",")]
     gpu_values = devices if args.gpu_mode == "gpu" else [None]

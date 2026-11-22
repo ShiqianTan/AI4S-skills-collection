@@ -1,0 +1,32 @@
+{
+  "group": "matpes-20240214_7592",
+  "formula": "AgF",
+  "matpes_id": "matpes-20240214_7592_4",
+  "nat": 2,
+  "matpes_r2scan_total_energy_eV": -26.31017703,
+  "matpes_r2scan_energy_per_atom_eV": -13.155088515,
+  "matpes_r2scan_forces_eV_A": [
+    [
+      -0.95711316,
+      -0.39841772,
+      -1.79828834
+    ],
+    [
+      0.95711316,
+      0.39841772,
+      1.79828834
+    ]
+  ],
+  "matpes_r2scan_stress": [
+    7.935788,
+    -25.89756317,
+    9.24658322,
+    26.00373469,
+    69.44424021,
+    -0.30427252
+  ],
+  "matpes_r2scan_max_force_eV_A": 2.075727157994311,
+  "matpes_r2scan_mean_force_eV_A": 2.075727157994311,
+  "matpes_r2scan_bandgap_eV": 0.08110000000000017,
+  "volume_A3": 31.299409137885117
+}

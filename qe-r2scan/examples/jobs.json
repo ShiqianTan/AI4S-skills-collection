@@ -1,0 +1,542 @@
+[
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_1",
+    "sid": "matpes-20240214_20812_1",
+    "dir": "matpes-20240214_20812/matpes-20240214_20812_1",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      7,
+      7,
+      7
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -29.14354819,
+    "vasp_energy_per_atom_eV": -14.571774095,
+    "vasp_forces": [
+      [
+        0.00860548,
+        -0.39355498,
+        -0.10765961
+      ],
+      [
+        -0.00860548,
+        0.39355498,
+        0.10765961
+      ]
+    ],
+    "vasp_stress": [
+      13.33997907,
+      -65.04030528,
+      -160.72947388,
+      -4.51974259,
+      0.04529164,
+      -0.04754903
+    ],
+    "vasp_max_force_eV_A": 0.4081055846152842,
+    "vasp_mean_force_eV_A": 0.4081055846152842,
+    "volume_A3": 47.9539645026538
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_5",
+    "sid": "matpes-20240214_20812_5",
+    "dir": "matpes-20240214_20812/matpes-20240214_20812_5",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      5,
+      8,
+      6
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -29.90978715,
+    "vasp_energy_per_atom_eV": -14.954893575,
+    "vasp_forces": [
+      [
+        0.59379174,
+        -0.56056085,
+        -0.02055343
+      ],
+      [
+        -0.59379174,
+        0.56056085,
+        0.02055343
+      ]
+    ],
+    "vasp_stress": [
+      -64.46818605,
+      179.85370911,
+      126.21755521,
+      -126.83087495,
+      71.79022219,
+      122.53593429
+    ],
+    "vasp_max_force_eV_A": 0.816847317758781,
+    "vasp_mean_force_eV_A": 0.816847317758781,
+    "volume_A3": 34.244246501309725
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_65",
+    "sid": "matpes-20240214_20812_65",
+    "dir": "matpes-20240214_20812/matpes-20240214_20812_65",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      3,
+      8,
+      7
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -29.94270153,
+    "vasp_energy_per_atom_eV": -14.971350765,
+    "vasp_forces": [
+      [
+        1.02439347,
+        0.12457081,
+        -1.17688292
+      ],
+      [
+        -1.02439347,
+        -0.12457081,
+        1.17688292
+      ]
+    ],
+    "vasp_stress": [
+      56.33935316,
+      24.05619676,
+      -204.74353871,
+      -22.34617915,
+      -38.78067501,
+      46.21901584
+    ],
+    "vasp_max_force_eV_A": 1.565232658575211,
+    "vasp_mean_force_eV_A": 1.565232658575211,
+    "volume_A3": 40.9305620575238
+  },
+  {
+    "mp_id": "matpes-20240214_20812",
+    "formula": "InN",
+    "traj_id": "matpes-20240214_20812_19",
+    "sid": "matpes-20240214_20812_19",
+    "dir": "matpes-20240214_20812/matpes-20240214_20812_19",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      6,
+      9,
+      8
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -30.10873172,
+    "vasp_energy_per_atom_eV": -15.05436586,
+    "vasp_forces": [
+      [
+        0.0040578,
+        2.46263075,
+        0.0212416
+      ],
+      [
+        -0.0040578,
+        -2.46263075,
+        -0.0212416
+      ]
+    ],
+    "vasp_stress": [
+      4.18207124,
+      264.08146345,
+      229.59750869,
+      1.29172496,
+      0.01481917,
+      2.28009062
+    ],
+    "vasp_max_force_eV_A": 2.46272570176968,
+    "vasp_mean_force_eV_A": 2.46272570176968,
+    "volume_A3": 37.26029682137933
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_17",
+    "sid": "matpes-20240214_2605_17",
+    "dir": "matpes-20240214_2605/matpes-20240214_2605_17",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      5,
+      7,
+      7
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 1.7386,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -17.63939764,
+    "vasp_energy_per_atom_eV": -8.81969882,
+    "vasp_forces": [
+      [
+        -0.02718721,
+        0.10211218,
+        0.00196642
+      ],
+      [
+        0.02718721,
+        -0.10211218,
+        -0.00196642
+      ]
+    ],
+    "vasp_stress": [
+      1.31609232,
+      -127.40687664,
+      -130.77750622,
+      1.19715189,
+      0.00379688,
+      0.23766787
+    ],
+    "vasp_max_force_eV_A": 0.10568778784492038,
+    "vasp_mean_force_eV_A": 0.10568778784492038,
+    "volume_A3": 64.1741285717851
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_18",
+    "sid": "matpes-20240214_2605_18",
+    "dir": "matpes-20240214_2605/matpes-20240214_2605_18",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      3,
+      8,
+      4
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 2.9802999999999997,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -18.77044721,
+    "vasp_energy_per_atom_eV": -9.385223605,
+    "vasp_forces": [
+      [
+        -0.45912522,
+        0.27244273,
+        0.34915596
+      ],
+      [
+        0.45912522,
+        -0.27244273,
+        -0.34915596
+      ]
+    ],
+    "vasp_stress": [
+      229.62027199,
+      -50.84509787,
+      -112.13612482,
+      44.45219121,
+      -36.67165152,
+      -117.83794822
+    ],
+    "vasp_max_force_eV_A": 0.6379113521277254,
+    "vasp_mean_force_eV_A": 0.6379113521277254,
+    "volume_A3": 31.336070688626567
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_2",
+    "sid": "matpes-20240214_2605_2",
+    "dir": "matpes-20240214_2605/matpes-20240214_2605_2",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      3,
+      7,
+      6
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 2.4035,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -17.87862406,
+    "vasp_energy_per_atom_eV": -8.93931203,
+    "vasp_forces": [
+      [
+        0.89593728,
+        1.061703,
+        -0.27857205
+      ],
+      [
+        -0.89593728,
+        -1.061703,
+        0.27857205
+      ]
+    ],
+    "vasp_stress": [
+      -5.17534874,
+      -9.64473211,
+      9.40782302,
+      -8.97559251,
+      -6.34731658,
+      -4.52367411
+    ],
+    "vasp_max_force_eV_A": 1.4168695271421434,
+    "vasp_mean_force_eV_A": 1.4168695271421434,
+    "volume_A3": 78.57258225949711
+  },
+  {
+    "mp_id": "matpes-20240214_2605",
+    "formula": "CaO",
+    "traj_id": "matpes-20240214_2605_9",
+    "sid": "matpes-20240214_2605_9",
+    "dir": "matpes-20240214_2605/matpes-20240214_2605_9",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      4,
+      8,
+      8
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 3.8785,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -18.63893102,
+    "vasp_energy_per_atom_eV": -9.31946551,
+    "vasp_forces": [
+      [
+        -0.60019593,
+        1.1611235,
+        0.26859503
+      ],
+      [
+        0.60019593,
+        -1.1611235,
+        -0.26859503
+      ]
+    ],
+    "vasp_stress": [
+      14.21702407,
+      -50.56186817,
+      17.43466845,
+      -40.89810793,
+      -26.11476696,
+      5.97130635
+    ],
+    "vasp_max_force_eV_A": 1.3343860861015884,
+    "vasp_mean_force_eV_A": 1.3343860861015884,
+    "volume_A3": 30.244159799173406
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_9",
+    "sid": "matpes-20240214_7592_9",
+    "dir": "matpes-20240214_7592/matpes-20240214_7592_9",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      9,
+      8,
+      7
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -26.45675065,
+    "vasp_energy_per_atom_eV": -13.228375325,
+    "vasp_forces": [
+      [
+        -0.01457307,
+        0.04971332,
+        0.0817758
+      ],
+      [
+        0.01457307,
+        -0.04971332,
+        -0.0817758
+      ]
+    ],
+    "vasp_stress": [
+      93.73002412,
+      -24.99810008,
+      -26.556475,
+      0.34554904,
+      -0.3297341,
+      -2.51621094
+    ],
+    "vasp_max_force_eV_A": 0.09680428719993397,
+    "vasp_mean_force_eV_A": 0.09680428719993397,
+    "volume_A3": 29.84361577397345
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_11",
+    "sid": "matpes-20240214_7592_11",
+    "dir": "matpes-20240214_7592/matpes-20240214_7592_11",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      9,
+      9,
+      7
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.0,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -26.51699431,
+    "vasp_energy_per_atom_eV": -13.258497155,
+    "vasp_forces": [
+      [
+        0.16679764,
+        0.15931227,
+        0.53966121
+      ],
+      [
+        -0.16679764,
+        -0.15931227,
+        -0.53966121
+      ]
+    ],
+    "vasp_stress": [
+      51.57723611,
+      30.47584567,
+      -102.71426941,
+      2.00439026,
+      9.29008337,
+      -5.43516627
+    ],
+    "vasp_max_force_eV_A": 0.586886763916845,
+    "vasp_mean_force_eV_A": 0.586886763916845,
+    "volume_A3": 27.617417307581977
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_13",
+    "sid": "matpes-20240214_7592_13",
+    "dir": "matpes-20240214_7592/matpes-20240214_7592_13",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      8,
+      5,
+      8
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.3449000000000002,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -26.44973088,
+    "vasp_energy_per_atom_eV": -13.22486544,
+    "vasp_forces": [
+      [
+        0.00034475,
+        0.30843013,
+        1.49801134
+      ],
+      [
+        -0.00034475,
+        -0.30843013,
+        -1.49801134
+      ]
+    ],
+    "vasp_stress": [
+      -35.13379136,
+      -52.89315466,
+      15.42808646,
+      26.58685294,
+      -20.88460703,
+      -0.05135196
+    ],
+    "vasp_max_force_eV_A": 1.529433633314298,
+    "vasp_mean_force_eV_A": 1.529433633314298,
+    "volume_A3": 33.25396792084853
+  },
+  {
+    "mp_id": "matpes-20240214_7592",
+    "formula": "AgF",
+    "traj_id": "matpes-20240214_7592_4",
+    "sid": "matpes-20240214_7592_4",
+    "dir": "matpes-20240214_7592/matpes-20240214_7592_4",
+    "nat": 2,
+    "ecutwfc": 60.0,
+    "ecutrho": 240.0,
+    "kpts": [
+      8,
+      8,
+      6
+    ],
+    "occupations": "smearing",
+    "functional": "r2scan",
+    "mp_bandgap_eV": 0.08110000000000017,
+    "stress_unit": "kbar",
+    "stress_sign": -1,
+    "vasp_uncorrected_total_energy_eV": -26.31017703,
+    "vasp_energy_per_atom_eV": -13.155088515,
+    "vasp_forces": [
+      [
+        -0.95711316,
+        -0.39841772,
+        -1.79828834
+      ],
+      [
+        0.95711316,
+        0.39841772,
+        1.79828834
+      ]
+    ],
+    "vasp_stress": [
+      7.935788,
+      -25.89756317,
+      9.24658322,
+      26.00373469,
+      69.44424021,
+      -0.30427252
+    ],
+    "vasp_max_force_eV_A": 2.075727157994311,
+    "vasp_mean_force_eV_A": 2.075727157994311,
+    "volume_A3": 31.299409137885117
+  }
+]

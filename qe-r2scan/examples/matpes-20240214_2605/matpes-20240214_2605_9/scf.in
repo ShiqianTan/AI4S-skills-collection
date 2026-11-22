@@ -1,0 +1,37 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'matpes_r2scan_matpes-20240214_2605_9'
+  pseudo_dir = 'pseudos/pseudodojo'
+  outdir = './tmp'
+  verbosity = 'high'
+  tprnfor = .true.
+  tstress = .true.
+/
+&SYSTEM
+  ibrav = 0
+  nat = 2
+  ntyp = 2
+  ecutwfc = 60.0
+  ecutrho = 240.0
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.02
+  input_dft = 'r2scan'
+/
+&ELECTRONS
+  conv_thr = 1.0e-08
+  mixing_beta = 0.7
+  electron_maxstep = 300
+/
+ATOMIC_SPECIES
+  O     15.9994 O.upf
+  Ca    40.0780 Ca.upf
+CELL_PARAMETERS angstrom
+      6.2361243859     0.0000000000     0.0000000000
+      2.6288474153     1.6577811533     0.0000000000
+      0.7683261585    -0.9109994530     2.9254963259
+ATOMIC_POSITIONS crystal
+  Ca     0.7187416404     0.3769608820     0.9369452888
+  O      0.3661316022     0.5324026744     0.5680301101
+K_POINTS automatic
+  4 8 8 0 0 0

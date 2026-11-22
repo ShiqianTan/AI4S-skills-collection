@@ -1,0 +1,32 @@
+{
+  "group": "matpes-20240214_20812",
+  "formula": "InN",
+  "matpes_id": "matpes-20240214_20812_1",
+  "nat": 2,
+  "matpes_r2scan_total_energy_eV": -29.14354819,
+  "matpes_r2scan_energy_per_atom_eV": -14.571774095,
+  "matpes_r2scan_forces_eV_A": [
+    [
+      0.00860548,
+      -0.39355498,
+      -0.10765961
+    ],
+    [
+      -0.00860548,
+      0.39355498,
+      0.10765961
+    ]
+  ],
+  "matpes_r2scan_stress": [
+    13.33997907,
+    -65.04030528,
+    -160.72947388,
+    -4.51974259,
+    0.04529164,
+    -0.04754903
+  ],
+  "matpes_r2scan_max_force_eV_A": 0.4081055846152842,
+  "matpes_r2scan_mean_force_eV_A": 0.4081055846152842,
+  "matpes_r2scan_bandgap_eV": 0.0,
+  "volume_A3": 47.9539645026538
+}

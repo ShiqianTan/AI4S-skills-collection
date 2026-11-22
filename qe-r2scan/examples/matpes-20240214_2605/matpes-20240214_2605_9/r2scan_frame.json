@@ -1,0 +1,32 @@
+{
+  "group": "matpes-20240214_2605",
+  "formula": "CaO",
+  "matpes_id": "matpes-20240214_2605_9",
+  "nat": 2,
+  "matpes_r2scan_total_energy_eV": -18.63893102,
+  "matpes_r2scan_energy_per_atom_eV": -9.31946551,
+  "matpes_r2scan_forces_eV_A": [
+    [
+      -0.60019593,
+      1.1611235,
+      0.26859503
+    ],
+    [
+      0.60019593,
+      -1.1611235,
+      -0.26859503
+    ]
+  ],
+  "matpes_r2scan_stress": [
+    14.21702407,
+    -50.56186817,
+    17.43466845,
+    -40.89810793,
+    -26.11476696,
+    5.97130635
+  ],
+  "matpes_r2scan_max_force_eV_A": 1.3343860861015884,
+  "matpes_r2scan_mean_force_eV_A": 1.3343860861015884,
+  "matpes_r2scan_bandgap_eV": 3.8785,
+  "volume_A3": 30.244159799173406
+}

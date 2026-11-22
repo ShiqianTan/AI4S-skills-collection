@@ -63,7 +63,7 @@ def main() -> None:
             )
             jobs.append({
                 "mp_id": mp_id, "formula": meta["formula"],
-                "traj_id": frame["traj_id"], "sid": sid, "dir": str(fdir),
+                "traj_id": frame["traj_id"], "sid": sid, "dir": str(fdir.relative_to(mptraj)),
                 "nat": frame["nat"], "ecutwfc": ecutwfc, "ecutrho": ecutrho,
                 "kpts": list(kpts), "k_shift": list(k_shift),
                 "occupations": occ, "config": args.mode,

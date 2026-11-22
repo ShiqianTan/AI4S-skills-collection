@@ -128,7 +128,7 @@ def main() -> None:
         )
         manifest["systems"][mid] = {
             "material_id": mid, "formula": formula, "n_sites": int(row.n_sites),
-            "dir": str(d), "vasp_final_energy_eV": v["energy"],
+            "dir": str(d.relative_to(out)), "vasp_final_energy_eV": v["energy"],
             "vasp_e_form_mp2020_eV_atom": float(row.e_form_per_atom_mp2020_corrected),
             "vasp_e_above_hull_eV_atom": float(row.e_above_hull_wbm),
             "vasp_bandgap_pbe_eV": float(row.bandgap_pbe),
