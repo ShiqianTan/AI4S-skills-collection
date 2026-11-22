@@ -1,0 +1,902 @@
+{
+  "systems": {
+    "mp-2172": {
+      "formula": "AlAs",
+      "nat": 2,
+      "elements": [
+        "Al",
+        "As"
+      ],
+      "metal": false,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        8,
+        8,
+        8
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 14,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.4851421624999998,
+      "mp_band_gap": 1.6871,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 216,
+      "cif_volume": 47.12568019517117
+    },
+    "mp-2176": {
+      "formula": "ZnTe",
+      "nat": 2,
+      "elements": [
+        "Te",
+        "Zn"
+      ],
+      "metal": false,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 23,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.6841570300000002,
+      "mp_band_gap": 1.0782000000000005,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 216,
+      "cif_volume": 59.14560357080271
+    },
+    "mp-22925": {
+      "formula": "AgI",
+      "nat": 2,
+      "elements": [
+        "Ag",
+        "I"
+      ],
+      "metal": false,
+      "ecutwfc": 50.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        5,
+        5,
+        5
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        9,
+        9,
+        9
+      ],
+      "nbnd": 23,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.4705133358333335,
+      "mp_band_gap": 1.7236,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 216,
+      "cif_volume": 73.21955892834248
+    },
+    "mp-2624": {
+      "formula": "AlSb",
+      "nat": 2,
+      "elements": [
+        "Al",
+        "Sb"
+      ],
+      "metal": false,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 19,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.2554967800000001,
+      "mp_band_gap": 1.2605000000000004,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 216,
+      "cif_volume": 60.56061026972899
+    },
+    "mp-1039": {
+      "formula": "MgTe",
+      "nat": 4,
+      "elements": [
+        "Mg",
+        "Te"
+      ],
+      "metal": false,
+      "ecutwfc": 30.0,
+      "ecutrho": 240.0,
+      "k_relax": [
+        5,
+        5,
+        3
+      ],
+      "k_scf": [
+        7,
+        7,
+        4
+      ],
+      "k_nscf": [
+        9,
+        9,
+        6
+      ],
+      "nbnd": 18,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -1.0866360074999997,
+      "mp_band_gap": 2.362,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 186,
+      "cif_volume": 138.2617816339944
+    },
+    "mp-2201": {
+      "formula": "PbSe",
+      "nat": 2,
+      "elements": [
+        "Pb",
+        "Se"
+      ],
+      "metal": false,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 20,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.7966406761718745,
+      "mp_band_gap": 0.9081,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 60.25371065832043
+    },
+    "mp-1057015": {
+      "formula": "PbS",
+      "nat": 2,
+      "elements": [
+        "Pb",
+        "S"
+      ],
+      "metal": false,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 20,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.7831656715625002,
+      "mp_band_gap": 1.0371999999999997,
+      "mp_e_above_hull": 0.0013585549999994,
+      "mp_spacegroup": 160,
+      "cif_volume": 54.364968285940826
+    },
+    "mp-13032": {
+      "formula": "MgS",
+      "nat": 2,
+      "elements": [
+        "Mg",
+        "S"
+      ],
+      "metal": false,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        8,
+        8,
+        8
+      ],
+      "k_nscf": [
+        10,
+        10,
+        10
+      ],
+      "nbnd": 14,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -1.6617498565625,
+      "mp_band_gap": 3.5792,
+      "mp_e_above_hull": 0.0157437700000002,
+      "mp_spacegroup": 216,
+      "cif_volume": 46.25274651877689
+    },
+    "mp-1115": {
+      "formula": "PtSe2",
+      "nat": 3,
+      "elements": [
+        "Pt",
+        "Se"
+      ],
+      "metal": false,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        7,
+        7,
+        4
+      ],
+      "k_scf": [
+        8,
+        8,
+        5
+      ],
+      "k_nscf": [
+        11,
+        11,
+        7
+      ],
+      "nbnd": 24,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.7020171048958327,
+      "mp_band_gap": 0.6743000000000001,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 164,
+      "cif_volume": 74.94632541697075
+    },
+    "mp-12779": {
+      "formula": "CdTe",
+      "nat": 4,
+      "elements": [
+        "Cd",
+        "Te"
+      ],
+      "metal": false,
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "k_relax": [
+        5,
+        5,
+        3
+      ],
+      "k_scf": [
+        7,
+        7,
+        4
+      ],
+      "k_nscf": [
+        9,
+        9,
+        5
+      ],
+      "nbnd": 28,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.6633544924999999,
+      "mp_band_gap": 0.6185999999999998,
+      "mp_e_above_hull": 0.0059436274999997,
+      "mp_spacegroup": 186,
+      "cif_volume": 145.82265102894945
+    },
+    "mp-1342": {
+      "formula": "BaO",
+      "nat": 2,
+      "elements": [
+        "Ba",
+        "O"
+      ],
+      "metal": false,
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        8,
+        8,
+        8
+      ],
+      "k_nscf": [
+        11,
+        11,
+        11
+      ],
+      "nbnd": 18,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -2.8236447624999994,
+      "mp_band_gap": 2.2561,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 44.25500287877016
+    },
+    "mp-2472": {
+      "formula": "SrO",
+      "nat": 2,
+      "elements": [
+        "O",
+        "Sr"
+      ],
+      "metal": false,
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "k_relax": [
+        7,
+        7,
+        7
+      ],
+      "k_scf": [
+        9,
+        9,
+        9
+      ],
+      "k_nscf": [
+        11,
+        11,
+        11
+      ],
+      "nbnd": 18,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -3.077090665833333,
+      "mp_band_gap": 3.4487,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 35.27691013314283
+    },
+    "mp-971": {
+      "formula": "K2O",
+      "nat": 3,
+      "elements": [
+        "K",
+        "O"
+      ],
+      "metal": false,
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "k_relax": [
+        5,
+        5,
+        5
+      ],
+      "k_scf": [
+        7,
+        7,
+        7
+      ],
+      "k_nscf": [
+        9,
+        9,
+        9
+      ],
+      "nbnd": 22,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -1.247857583666666,
+      "mp_band_gap": 1.722,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 68.2689355790558
+    },
+    "mp-3748": {
+      "formula": "AlCuO2",
+      "nat": 4,
+      "elements": [
+        "Al",
+        "Cu",
+        "O"
+      ],
+      "metal": false,
+      "ecutwfc": 90.0,
+      "ecutrho": 720.0,
+      "k_relax": [
+        4,
+        4,
+        4
+      ],
+      "k_scf": [
+        5,
+        5,
+        5
+      ],
+      "k_nscf": [
+        7,
+        7,
+        7
+      ],
+      "nbnd": 23,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -2.4172544249999994,
+      "mp_band_gap": 1.8709,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 166,
+      "cif_volume": 40.86709862469975
+    },
+    "mp-830": {
+      "formula": "GaN",
+      "nat": 2,
+      "elements": [
+        "Ga",
+        "N"
+      ],
+      "metal": false,
+      "ecutwfc": 70.0,
+      "ecutrho": 560.0,
+      "k_relax": [
+        8,
+        8,
+        8
+      ],
+      "k_scf": [
+        10,
+        10,
+        10
+      ],
+      "k_nscf": [
+        13,
+        13,
+        13
+      ],
+      "nbnd": 19,
+      "occupations": "fixed",
+      "nscf_diagonalization": "cg",
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -0.6515246562500003,
+      "mp_band_gap": 1.9046000000000003,
+      "mp_e_above_hull": 0.0052922124999996,
+      "mp_spacegroup": 216,
+      "cif_volume": 23.480469534402474
+    },
+    "mp-22205": {
+      "formula": "InN",
+      "nat": 4,
+      "elements": [
+        "In",
+        "N"
+      ],
+      "metal": false,
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "k_relax": [
+        7,
+        7,
+        4
+      ],
+      "k_scf": [
+        9,
+        9,
+        5
+      ],
+      "k_nscf": [
+        12,
+        12,
+        7
+      ],
+      "nbnd": 28,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -0.0788462399999998,
+      "mp_band_gap": 0.4777000000000004,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 186,
+      "cif_volume": 64.414927150781
+    },
+    "mp-2828": {
+      "formula": "HfN",
+      "nat": 2,
+      "elements": [
+        "Hf",
+        "N"
+      ],
+      "metal": true,
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "k_relax": [
+        8,
+        8,
+        8
+      ],
+      "k_scf": [
+        10,
+        10,
+        10
+      ],
+      "k_nscf": [
+        13,
+        13,
+        13
+      ],
+      "nbnd": 18,
+      "occupations": "smearing",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -1.9285340925000007,
+      "mp_band_gap": 0.0,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 23.359277624598217
+    },
+    "mp-22922": {
+      "formula": "AgCl",
+      "nat": 2,
+      "elements": [
+        "Ag",
+        "Cl"
+      ],
+      "metal": false,
+      "ecutwfc": 50.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "k_scf": [
+        8,
+        8,
+        8
+      ],
+      "k_nscf": [
+        11,
+        11,
+        11
+      ],
+      "nbnd": 23,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": false,
+      "mp_formation_energy_per_atom": -0.7338783983333332,
+      "mp_band_gap": 1.2003,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 44.43286343094258
+    },
+    "mp-22903": {
+      "formula": "RbI",
+      "nat": 2,
+      "elements": [
+        "I",
+        "Rb"
+      ],
+      "metal": false,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        5,
+        5,
+        5
+      ],
+      "k_scf": [
+        6,
+        6,
+        6
+      ],
+      "k_nscf": [
+        8,
+        8,
+        8
+      ],
+      "nbnd": 18,
+      "occupations": "fixed",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -1.6958277512500002,
+      "mp_band_gap": 3.9541,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 225,
+      "cif_volume": 104.95708615948097
+    },
+    "mp-763": {
+      "formula": "MgB2",
+      "nat": 3,
+      "elements": [
+        "B",
+        "Mg"
+      ],
+      "metal": true,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        8,
+        8,
+        7
+      ],
+      "k_scf": [
+        10,
+        10,
+        9
+      ],
+      "k_nscf": [
+        14,
+        14,
+        12
+      ],
+      "nbnd": 14,
+      "occupations": "smearing",
+      "nscf_diagonalization": null,
+      "formation_energy_available": true,
+      "mp_formation_energy_per_atom": -0.1303397627777774,
+      "mp_band_gap": 0.0,
+      "mp_e_above_hull": 0.0,
+      "mp_spacegroup": 191,
+      "cif_volume": 28.91728360169806
+    }
+  },
+  "references": {
+    "Al": {
+      "mp_id": "mp-134",
+      "nat": 1,
+      "ecutwfc": 30.0,
+      "ecutrho": 240.0,
+      "k_relax": [
+        11,
+        11,
+        11
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 16.471721354672756
+    },
+    "As": {
+      "mp_id": "mp-11",
+      "nat": 2,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        8,
+        8,
+        8
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 44.9074925207038
+    },
+    "Zn": {
+      "mp_id": "mp-79",
+      "nat": 2,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        12,
+        12,
+        6
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 31.114928046479488
+    },
+    "Te": {
+      "mp_id": "mp-19",
+      "nat": 3,
+      "ecutwfc": 30.0,
+      "ecutrho": 240.0,
+      "k_relax": [
+        7,
+        7,
+        5
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 105.09444522948556
+    },
+    "Ag": {
+      "mp_id": "mp-989737",
+      "nat": 3,
+      "ecutwfc": 50.0,
+      "ecutrho": 200.0,
+      "k_relax": [
+        4,
+        4,
+        4
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 54.15477709559828
+    },
+    "I": {
+      "mp_id": "mp-23153",
+      "nat": 4,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        6,
+        6,
+        3
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 206.86737703696926
+    },
+    "Sb": {
+      "mp_id": "mp-104",
+      "nat": 2,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        7,
+        7,
+        7
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 64.26678704046004
+    },
+    "Mg": {
+      "mp_id": "mp-1056702",
+      "nat": 1,
+      "ecutwfc": 30.0,
+      "ecutrho": 240.0,
+      "k_relax": [
+        10,
+        10,
+        10
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 22.86640581254507
+    },
+    "Pb": {
+      "mp_id": "mp-20483",
+      "nat": 1,
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "k_relax": [
+        9,
+        9,
+        9
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 32.20712108095878
+    },
+    "Se": {
+      "mp_id": "mp-14",
+      "nat": 3,
+      "ecutwfc": 30.0,
+      "ecutrho": 240.0,
+      "k_relax": [
+        7,
+        7,
+        6
+      ],
+      "mp_formation_energy_per_atom": 0.0071003043229165,
+      "cif_volume": 89.3290270562457
+    },
+    "Pt": {
+      "mp_id": "mp-126",
+      "nat": 1,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        11,
+        11,
+        11
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 15.722855694008526
+    },
+    "Cd": {
+      "mp_id": "mp-1096861",
+      "nat": 1,
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "k_relax": [
+        10,
+        10,
+        10
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 23.254851350453393
+    },
+    "B": {
+      "mp_id": "mp-160",
+      "nat": 12,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        6,
+        6,
+        6
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 86.99120857450306
+    },
+    "Rb": {
+      "mp_id": "mp-1179656",
+      "nat": 8,
+      "ecutwfc": 30.0,
+      "ecutrho": 120.0,
+      "k_relax": [
+        2,
+        2,
+        4
+      ],
+      "mp_formation_energy_per_atom": 0.0,
+      "cif_volume": 722.1109728572595
+    },
+    "S": {
+      "mp_id": "mp-557376",
+      "nat": 20,
+      "ecutwfc": 35.0,
+      "ecutrho": 280.0,
+      "k_relax": [
+        4,
+        4,
+        3
+      ],
+      "mp_formation_energy_per_atom": 0.0317863733750002,
+      "cif_volume": 641.7463068561594
+    }
+  }
+}

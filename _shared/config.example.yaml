@@ -19,11 +19,11 @@ qe:
   omp_num_threads: 8
 
 pseudo:
-  sssp_efficiency: "pseudo/sssp/upf"
-  sssp_precision: "pseudo/sssp/upf_precision"
-  sssp_efficiency_json: "pseudo/sssp/SSSP_1.3.0_PBE_efficiency.json"
-  sssp_precision_json: "pseudo/sssp/SSSP_1.3.0_PBE_precision.json"
-  pseudodojo: "pseudo/pseudodojo"
+  sssp_efficiency: "pseudos/sssp/upf"
+  sssp_precision: "pseudos/sssp/upf_precision"
+  sssp_efficiency_json: "pseudos/sssp/SSSP_1.3.0_PBE_efficiency.json"
+  sssp_precision_json: "pseudos/sssp/SSSP_1.3.0_PBE_precision.json"
+  pseudodojo: "pseudos/pseudodojo"
 
 datasets:
   mp20: ""                   # MP20_dataset directory (train/val/test.csv)

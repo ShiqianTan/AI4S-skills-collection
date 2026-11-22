@@ -18,6 +18,7 @@ __all__ = [
     "parse",
     "metrics",
     "mp2020",
+    "mprelax",
     "plotting",
     "pseudos",
 ]

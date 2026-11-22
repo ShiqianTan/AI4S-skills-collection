@@ -12,3 +12,7 @@ tmp/
 *.save/
 CRASH
 input_tmp.in
+
+# Extracted pseudopotentials (tarballs + manifests are committed)
+pseudos/sssp/upf/
+pseudos/sssp/upf_precision/
