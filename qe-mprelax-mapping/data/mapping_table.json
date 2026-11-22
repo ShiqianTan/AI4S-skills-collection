@@ -1,0 +1,36 @@
+{
+  "source": "pymatgen MPRelaxSet commit c4998d92",
+  "yaml": "data/MPRelaxSet_c4998d92.yaml",
+  "constants": {
+    "ENCUT_eV": 520.0,
+    "EDIFF_PER_ATOM_eV": 5e-05,
+    "SIGMA_eV": 0.05,
+    "NELM": 100,
+    "NSW": 99,
+    "IBRION": 2,
+    "ISIF": 3,
+    "KPOINTS_reciprocal_density": 64,
+    "RY_TO_EV": 13.605693122994
+  },
+  "mapping": {
+    "ENCUT": ["ecutwfc", "ecutrho"],
+    "EDIFF_PER_ATOM": ["conv_thr"],
+    "SIGMA": ["degauss"],
+    "KPOINTS": ["k_grid", "k_shift"],
+    "NELM": ["electron_maxstep"],
+    "NSW/IBRION/ISIF": ["vc-relax", "ion_dynamics=bfgs", "cell_dynamics=bfgs", "nstep=99"],
+    "ALGO=Fast": ["Davidson (CG for difficult systems)"]
+  },
+  "deviations": {
+    "ISMEAR=-5": "Gaussian smearing 0.05 eV; QE tetrahedra is unsafe for forces",
+    "ISPIN=2": "nspin=1 for non-magnetic benchmark systems; enable nspin=2 for magnetic",
+    "LDAU=true": "not enabled; no Co/Cr/Fe/Mn/Mo/Ni/V/W in F/O environments in the selection"
+  },
+  "formal_rules": {
+    "ecutwfc": "max(520/13.605693122994, max_element SSSP cutoff_wfc)",
+    "ecutrho": "max(8*ecutwfc, max_element SSSP cutoff_rho)",
+    "conv_thr": "max(1e-8, 5e-5 * natoms / 13.605693122994)",
+    "degauss": "0.05 / 13.605693122994",
+    "kpoints": "MPRelaxSet(structure).kpoints grid; gamma -> shift (0,0,0), else (1,1,1)"
+  }
+}

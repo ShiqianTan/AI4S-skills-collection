@@ -15,4 +15,5 @@ pseudopotentials (see [`_shared/config.example.yaml`](./_shared/config.example.y
 
 <!-- SKILL_LIST_START -->
 - [qe-build](./qe-build/README.md) — build and verify QE (CPU PBE, GPU OpenACC, CPU libxc/R2SCAN) with known fixes and Si smoke tests
+- [qe-mprelax-mapping](./qe-mprelax-mapping/README.md) — map the Materials Project MPRelaxSet to QE parameters and document deviations
 <!-- SKILL_LIST_END -->

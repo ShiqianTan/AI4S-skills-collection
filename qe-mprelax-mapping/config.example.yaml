@@ -1,0 +1,5 @@
+# Example configuration for qe-mprelax-mapping.
+root: ..
+pseudo:
+  sssp_efficiency_json: /path/to/SSSP_1.3.0_PBE_efficiency.json
+  sssp_efficiency: /path/to/sssp/upf
